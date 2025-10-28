@@ -1,18 +1,26 @@
-// middleware/auth.ts
-export default defineNuxtRouteMiddleware(async (to, from) => {
-  const { loggedIn, session } = useUserSession()
+export default defineNuxtRouteMiddleware(async (to) => {
+  const { loggedIn } = useUserSession()
 
-  // Nếu chưa đăng nhập, đá về trang auth
+  const publicPages = ['/login', '/register']
+
   if (!loggedIn.value) {
-    // Cho phép truy cập trang auth
-    if (to.path === '/login' || to.path === '/register') {
-      return
+    if (!publicPages.includes(to.path)) {
+      return navigateTo({
+        path: '/login',
+        query: {
+          redirect: to.fullPath
+        }
+      })
     }
-    return navigateTo('/login')
+
+    return
   }
 
-  // Nếu đã đăng nhập, không cho truy cập trang auth nữa
-  if (to.path === '/login' || to.path === '/register') {
-    return navigateTo('/dashboard')
+  if (loggedIn.value) {
+    if (publicPages.includes(to.path)) {
+      return navigateTo('/')
+    }
+
+    return
   }
 })

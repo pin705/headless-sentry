@@ -14,21 +14,21 @@ export default defineNuxtConfig({
 
   ssr: false,
 
-    css: ['~/assets/css/tailwind.css'],
-
   devtools: {
     enabled: false
   },
 
-    cron: {
-    runOnInit: false,
-    timeZone: 'Asia/Ho_Chi_Minh',
-    jobsDir: 'cron',
-  },
+  css: ['~/assets/css/tailwind.css'],
 
   compatibilityDate: '2025-01-15',
   vite: {
     plugins: [tailwindcss()]
+  },
+
+  cron: {
+    runOnInit: false,
+    timeZone: 'Asia/Ho_Chi_Minh',
+    jobsDir: 'cron'
   },
 
   eslint: {
