@@ -1,48 +1,72 @@
 <template>
-  <div class="p-4 sm:p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">API Giám sát</h1>
-      <div class="flex items-center gap-4">
-        <UButton
-          :icon="pending ? 'i-heroicons-arrow-path-solid' : 'i-heroicons-arrow-path'"
-          :loading="pending"
-          variant="ghost"
-          color="gray"
-          @click="refresh()"
-          aria-label="Làm mới"
-        />
-        <UButton to="/dashboard/new" icon="i-heroicons-plus-solid" label="Thêm mới" />
-      </div>
-    </div>
-
-    <UCard>
-      <UTable
-        :data="monitors"
-        :columns="columns"
-        :loading="pending"
-        :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'Chưa có API nào được giám sát.' }"
-      >
-      </UTable>
-    </UCard>
-
-    <UModal v-model:open="isDeleteModalOpen">
-       <template #header>
-          <h3 class="text-lg font-semibold">Xác nhận Xóa</h3>
+  <UDashboardPanel id="customers">
+    <template #header>
+      <UDashboardNavbar title="API Giám sát">
+        <template #leading>
+          <UDashboardSidebarCollapse />
         </template>
 
-     <template #body>
-
-        <p>Bạn có chắc chắn muốn xóa API giám sát <strong>{{ monitorToDelete?.name }}</strong> không? Hành động này không thể hoàn tác.</p>
-
-     </template>
-        <template #footer>
-          <div class="flex justify-end gap-3">
-            <UButton color="neutral" variant="ghost" @click="isDeleteModalOpen = false">Hủy</UButton>
-            <UButton color="error" :loading="deleteLoading" @click="confirmDelete">Xóa</UButton>
+        <template #right>
+          <div class="flex items-center gap-4">
+            <UButton
+              :icon="pending ? 'i-heroicons-arrow-path-solid' : 'i-heroicons-arrow-path'"
+              :loading="pending"
+              variant="ghost"
+              color="gray"
+              aria-label="Làm mới"
+              @click="refresh()"
+            />
+            <UButton
+              to="/api-monitoring/new"
+              icon="i-heroicons-plus-solid"
+              label="Thêm mới"
+            />
           </div>
         </template>
-    </UModal>
-  </div>
+      </UDashboardNavbar>
+    </template>
+
+    <template #body>
+      <UCard>
+        <UTable
+          :data="monitors"
+          :columns="columns"
+          :loading="pending"
+          :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'Chưa có API nào được giám sát.' }"
+        />
+      </UCard>
+
+      <UModal v-model:open="isDeleteModalOpen">
+        <template #header>
+          <h3 class="text-lg font-semibold">
+            Xác nhận Xóa
+          </h3>
+        </template>
+
+        <template #body>
+          <p>Bạn có chắc chắn muốn xóa API giám sát <strong>{{ monitorToDelete?.name }}</strong> không? Hành động này không thể hoàn tác.</p>
+        </template>
+        <template #footer>
+          <div class="flex justify-end gap-3">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              @click="isDeleteModalOpen = false"
+            >
+              Hủy
+            </UButton>
+            <UButton
+              color="error"
+              :loading="deleteLoading"
+              @click="confirmDelete"
+            >
+              Xóa
+            </UButton>
+          </div>
+        </template>
+      </UModal>
+    </template>
+  </UDashboardPanel>
 </template>
 
 <script setup lang="ts">
@@ -83,11 +107,11 @@ const monitorToDelete = ref<any>(null)
 // Gọi API lấy danh sách monitors (đã bao gồm status)
 const { data: monitors, pending, error, refresh } = await useFetch('/api/monitors', {
   lazy: true,
-  default: () => [],
+  default: () => []
 })
 
 if (error.value) {
-  console.error("Lỗi tải monitors:", error.value);
+  console.error('Lỗi tải monitors:', error.value)
   toast.add({ title: 'Lỗi', description: 'Không thể tải danh sách giám sát.', color: 'red' })
 }
 
