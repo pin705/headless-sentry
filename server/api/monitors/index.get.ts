@@ -57,7 +57,8 @@ export default defineEventHandler(async (event) => {
           latestCheckedAt: '$latestResult.timestamp',
           latestStatusCode: '$latestResult.statusCode',
 
-          ssl: 1
+          ssl: 1,
+          httpConfig: 1
         }
       }
     ])

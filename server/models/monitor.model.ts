@@ -13,10 +13,29 @@ export const Monitor = defineMongooseModel('Monitor', {
   frequency: { type: Number, default: 60, enum: frequencies }, // Tần suất (giây)
   status: { type: String, default: 'ACTIVE', enum: ['ACTIVE', 'PAUSED'] },
 
-  // Nâng cao: Lưu trữ headers, body...
   httpConfig: {
-    headers: { type: Map, of: String },
-    body: { type: String } // Lưu JSON string
+    // Chuyển từ Map sang mảng object (dễ quản lý bằng form)
+    headers: [{
+      key: { type: String, required: true },
+      value: { type: String, required: true }
+    }],
+    body: { type: String, default: null }, // Vẫn là string (để lưu JSON, raw text...)
+    bodyType: {
+      type: String,
+      default: 'none',
+      enum: ['none', 'json', 'raw'] // raw = text/plain
+    }
+  },
+
+  alertConfig: {
+    latencyThreshold: { type: Number, default: null }, // vd: 1500 (ms)
+    responseBodyCheck: { type: String, default: null }, // vd: "error": true
+    errorRateThreshold: { type: Number, default: null }, // vd: 5 (%)
+    channels: [{
+      url: { type: String, required: true } // Webhook URL
+    }],
+    // (Mới) Dùng để chống spam
+    lastAlertedAt: { type: Date, default: null }
   },
 
   ssl: {

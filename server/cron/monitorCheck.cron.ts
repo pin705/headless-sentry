@@ -16,52 +16,59 @@ export default defineCronHandler(
     const checkPromises = monitorsToRun.map((monitor) => {
       const startTime = Date.now()
 
-      return $fetch.raw(monitor.endpoint, {
+      // (MỚI) Xây dựng options cho $fetch
+      const fetchOptions: any = {
         method: monitor.method as any,
-        timeout: 15000, // 15 giây timeout
-        ignoreResponseError: true // Rất quan trọng!
-      })
+        timeout: 15000,
+        ignoreResponseError: true,
+        headers: {}
+      }
+
+      // 1. (MỚI) Xử lý Headers
+      if (monitor.httpConfig?.headers?.length > 0) {
+        // Chuyển mảng [{key, value}] thành object {key: value}
+        fetchOptions.headers = Object.fromEntries(
+          monitor.httpConfig.headers.map(h => [h.key, h.value])
+        )
+      }
+
+      // 2. (MỚI) Xử lý Body
+      if (monitor.httpConfig?.body && monitor.httpConfig?.bodyType !== 'none') {
+        fetchOptions.body = monitor.httpConfig.body
+
+        // Tự động thêm Content-Type nếu là JSON và chưa được set
+        if (
+          monitor.httpConfig.bodyType === 'json'
+          && !Object.keys(fetchOptions.headers).some(k => k.toLowerCase() === 'content-type')
+        ) {
+          fetchOptions.headers['Content-Type'] = 'application/json'
+        }
+      }
+
+      // Bắt đầu gọi $fetch
+      return $fetch.raw(monitor.endpoint, fetchOptions)
         .then((response) => {
-        // (MỚI) Logic bắt nội dung lỗi
+        // (Logic bắt lỗi response body giữ nguyên)
           let errorMessage: string | null = null
-          if (!response.ok) { // Nếu status là 4xx, 5xx
-            if (response._data) {
-              try {
-              // Cố gắng stringify nếu là JSON, nếu không thì convert sang String
-                errorMessage = typeof response._data === 'object'
-                  ? JSON.stringify(response._data)
-                  : String(response._data)
-              } catch {
-                errorMessage = 'Không thể đọc nội dung lỗi (Response Body)'
-              }
-            } else {
-              errorMessage = response.statusText || 'Lỗi HTTP không xác định'
-            }
+          if (!response.ok) {
+            try {
+              errorMessage = typeof response._data === 'object'
+                ? JSON.stringify(response._data)
+                : String(response._data)
+            } catch { errorMessage = 'Không thể đọc nội dung lỗi' }
           }
 
           return {
             status: 'fulfilled',
-            value: {
-              monitor,
-              latency: Date.now() - startTime,
-              statusCode: response.status,
-              isUp: response.ok,
-              errorMessage: errorMessage ? errorMessage.substring(0, 500) : null // Cắt ngắn lỗi
-            }
+            value: { monitor, latency: Date.now() - startTime, statusCode: response.status, isUp: response.ok, errorMessage: errorMessage ? errorMessage.substring(0, 500) : null }
           }
         })
         .catch((error) => {
-        // (MỚI) Logic bắt lỗi network (DNS, Timeout, Connection Refused...)
+        // (Logic bắt lỗi network giữ nguyên)
           console.error(`Lỗi network khi fetch ${monitor.endpoint}:`, error.message)
           return {
             status: 'rejected',
-            value: {
-              monitor,
-              latency: Date.now() - startTime,
-              statusCode: error.response?.status || 599, // 599 = Lỗi network/timeout
-              isUp: false,
-              errorMessage: error.message.substring(0, 500) // Ghi lại tin nhắn lỗi
-            }
+            value: { monitor, latency: Date.now() - startTime, statusCode: error.response?.status || 599, isUp: false, errorMessage: error.message.substring(0, 500) }
           }
         })
     })

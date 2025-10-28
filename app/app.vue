@@ -17,16 +17,17 @@ useHead({
   }
 })
 
-const title = 'Nuxt Dashboard Template'
-const description = 'A professional dashboard template built with Nuxt UI, featuring multiple pages, data visualization, and comprehensive management capabilities for creating powerful admin interfaces.'
+const title = 'Headless Sentry - Giám sát Uptime & API'
+const description = 'Một công cụ chuyên nghiệp để theo dõi thời gian thực Uptime, Độ trễ (Latency), và trạng thái SSL của các dịch vụ API, website Headless của bạn.'
 
 useSeoMeta({
   title,
   description,
   ogTitle: title,
   ogDescription: description,
-  ogImage: 'https://ui.nuxt.com/assets/templates/nuxt/dashboard-light.png',
-  twitterImage: 'https://ui.nuxt.com/assets/templates/nuxt/dashboard-light.png',
+  // (Tùy chọn) Bạn có thể tạo một ảnh 'og-image.png' mới cho dự án
+  ogImage: '/og-image.png',
+  twitterImage: '/og-image.png',
   twitterCard: 'summary_large_image'
 })
 </script>

@@ -1,9 +1,10 @@
-// server/api/monitors/index.post.ts (hoặc [id].put.ts)
+// server/api/monitors/[id].put.ts
 import { z } from 'zod'
 
+// Tái sử dụng validation schema từ file POST
 const httpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as const
+const frequencies = [60, 300, 600, 1800, 3600] as const
 
-// (MỚI) Zod Schema Nâng cao
 const bodySchema = z.object({
   name: z.string().min(1, 'Tên không được để trống'),
   endpoint: z.string().url('URL không hợp lệ'),
@@ -30,31 +31,36 @@ const bodySchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
+  const monitorId = getRouterParam(event, 'id')
+
   if (!session.user?.userId) {
     throw createError({ statusCode: 401, message: 'Yêu cầu đăng nhập' })
   }
+  if (!monitorId) {
+    throw createError({ statusCode: 400, message: 'Thiếu Monitor ID' })
+  }
 
   try {
+    // Validate body
     const body = await readValidatedBody(event, bodySchema.parse)
 
-    // (MỚI) Dữ liệu tạo monitor đã bao gồm httpConfig
-    const newMonitor = await Monitor.create({
-      userId: session.user.userId,
-      name: body.name,
-      endpoint: body.endpoint,
-      method: body.method,
-      frequency: body.frequency,
-      status: 'ACTIVE',
-      httpConfig: body.httpConfig,
-      alertConfig: body.alertConfig
-    })
+    // Tìm và cập nhật monitor
+    const updatedMonitor = await Monitor.findOneAndUpdate(
+      { _id: monitorId, userId: session.user.userId }, // Điều kiện tìm
+      { $set: body }, // Dữ liệu cập nhật
+      { new: true } // Trả về document đã cập nhật
+    )
 
-    return newMonitor.toObject()
+    if (!updatedMonitor) {
+      throw createError({ statusCode: 404, message: 'Không tìm thấy' })
+    }
+
+    return updatedMonitor.toObject()
   } catch (error: any) {
-    if (error.issues) {
+    if (error.issues) { // Lỗi Zod
       throw createError({ statusCode: 400, message: error.issues[0].message })
     }
-    console.error('Lỗi tạo monitor:', error)
+    console.error('Lỗi cập nhật monitor:', error)
     throw createError({ statusCode: 500, message: 'Lỗi máy chủ' })
   }
 })

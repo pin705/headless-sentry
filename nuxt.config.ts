@@ -11,7 +11,7 @@ export default defineNuxtConfig({
     'nuxt-cron'
   ],
 
-  ssr: false,
+  // ssr: false,
 
   devtools: {
     enabled: false

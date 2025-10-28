@@ -77,7 +77,7 @@ onMounted(async () => {
       :ui="{ footer: 'lg:border-t lg:border-default' }"
     >
       <template #header="{ collapsed }">
-        <TeamsMenu :collapsed="collapsed" />
+        <!-- <TeamsMenu :collapsed="collapsed" /> -->
       </template>
 
       <template #default="{ collapsed }">
@@ -112,6 +112,6 @@ onMounted(async () => {
 
     <slot />
 
-    <NotificationsSlideover />
+    <!-- <NotificationsSlideover /> -->
   </UDashboardGroup>
 </template>

@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
-// (MỚI) Thêm imports cho I18n
-import * as locales from '@nuxt/ui/locale'
 
 defineProps<{
   collapsed?: boolean
 }>()
 
+const { user } = useUserSession()
 const colorMode = useColorMode()
 const appConfig = useAppConfig()
 // (MỚI) Thêm logic I18n
@@ -15,33 +14,21 @@ const locale = ref('vi')
 const colors = ['neutral', 'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 
-const user = ref({
-  name: 'Benjamin Canac',
-  avatar: {
-    src: 'https://github.com/benjamincanac.png',
-    alt: 'Benjamin Canac'
-  }
-})
-
+// const user = ref({
+//   name: 'Benjamin Canac',
+//   avatar: {
+//     src: 'https://github.com/benjamincanac.png',
+//     alt: 'Benjamin Canac'
+//   }
+// })
+console.log('user', user.value)
 const items = computed<DropdownMenuItem[][]>(() => ([[{
   type: 'label',
-  label: user.value.name,
-  avatar: user.value.avatar
-}], [
-  // (MỚI) Thêm slot cho bộ chọn ngôn ngữ
-  {
-    slot: 'locale'
+  label: user.value?.email,
+  avatar: {
+    src: user.value?.avatar || 'https://www.gravatar.com/avatar/?d=mp',
+    alt: 'User Avatar'
   }
-], [{
-  label: 'Profile',
-  icon: 'i-lucide-user'
-}, {
-  label: 'Billing',
-  icon: 'i-lucide-credit-card'
-}, {
-  label: 'Settings',
-  icon: 'i-lucide-settings',
-  to: '/settings'
 }], [{
   label: 'Theme',
   icon: 'i-lucide-palette',
@@ -125,7 +112,7 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
     <UButton
       v-bind="{
         ...user,
-        label: collapsed ? undefined : user?.name,
+        label: collapsed ? undefined : user?.email,
         trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down'
       }"
       color="neutral"
@@ -148,13 +135,13 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
       />
     </template>
 
-    <template #locale>
+    <!-- <template #locale>
       <div class="p-2">
         <ULocaleSelect
           v-model="locale"
           :locales="Object.values(locales)"
         />
       </div>
-    </template>
+    </template> -->
   </UDropdownMenu>
 </template>
