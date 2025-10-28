@@ -1,0 +1,14 @@
+@import "tailwindcss";
+/* @import url('https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap'); */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  background: #121212;
+  font-family: "mono";
+  user-select: none;
+  /* text-transform: capitalize; */
+  /* font-weight: 600; */
+}
