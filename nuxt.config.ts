@@ -7,7 +7,9 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
     '@vueuse/nuxt',
     '@vite-pwa/nuxt',
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@nuxt/ui',
+    'nuxt-cron'
   ],
 
   ssr: false,
@@ -16,6 +18,12 @@ export default defineNuxtConfig({
 
   devtools: {
     enabled: false
+  },
+
+    cron: {
+    runOnInit: false,
+    timeZone: 'Asia/Ho_Chi_Minh',
+    jobsDir: 'cron',
   },
 
   compatibilityDate: '2025-01-15',

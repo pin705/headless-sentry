@@ -1,0 +1,27 @@
+// server/models/result.model.ts
+import { defineMongooseModel } from '#nuxt/mongoose'
+import type { Schema } from 'mongoose'
+
+// Lưu ý quan trọng: Collection này nên được tạo dưới dạng Time Series trên MongoDB
+// Bạn cần chạy lệnh này trên mongo shell:
+// db.createCollection("results", { timeseries: { timeField: "timestamp", metaField: "meta", granularity: "minutes" } })
+
+export const Result = defineMongooseModel('Result', {
+  timestamp: { type: Date, required: true }, // Dấu thời gian kiểm tra
+  meta: {
+    monitorId: { type: 'ObjectId' as unknown as Schema.Types.ObjectId, ref: 'Monitor', required: true },
+    userId: { type: 'ObjectId' as unknown as Schema.Types.ObjectId, ref: 'User', required: true },
+    location: { type: String, default: 'default' } // MVP chỉ cần 1 location
+  },
+  latency: { type: Number, required: true }, // Thời gian phản hồi (ms)
+  statusCode: { type: Number, required: true }, // Mã trạng thái HTTP
+  isUp: { type: Boolean, required: true } // True nếu statusCode < 400
+}, {
+  // Options cho Time Series Collection
+  timeseries: {
+    timeField: 'timestamp',
+    metaField: 'meta',
+    granularity: 'minutes' // Tối ưu lưu trữ theo phút
+  },
+  expireAfterSeconds: 60 * 60 * 24 * 7 // Tự động xoá data cũ sau 7 ngày (tùy chọn)
+})

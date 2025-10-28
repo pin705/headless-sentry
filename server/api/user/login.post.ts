@@ -1,10 +1,3 @@
-import { z } from 'zod'
-
-const bodySchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6)
-})
-
 export default defineEventHandler(async (event) => {
   const { email, password } = await readBody(event)
 
@@ -19,15 +12,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const character = await Character.findOne({ userId: user._id })
-
   // 3. 🔐 Thiết lập phiên đăng nhập
   await setUserSession(event, {
     user: {
       email,
-      userId: user._id
+      userId: user._id,
+      ...user
     },
-    character,
     loggedInAt: Date.now()
   })
 
