@@ -2,44 +2,45 @@
   <UDashboardPanel id="status-page-settings">
     <template #header>
       <UDashboardNavbar title="Cấu hình Trang Trạng thái">
-        <template #leading>
+        <!-- <template #leading>
           <UDashboardSidebarCollapse />
-        </template>
+        </template> -->
       </UDashboardNavbar>
     </template>
 
     <template #body>
-      <h3 class="font-semibold">
-        Cài đặt Chung
-      </h3>
+      <UCard>
+        <h3 class="font-semibold">
+          Cài đặt Chung
+        </h3>
 
-      <UForm
-        :state="state"
-        :schema="schema"
-        class="space-y-4"
-        @submit="saveConfig"
-      >
-        <UFormField
-          label="Bật Trang Trạng thái Công khai"
-          name="isEnabled"
+        <UForm
+          :state="state"
+          :schema="schema"
+          class="space-y-4"
+          @submit="saveConfig"
         >
-          <USwitch v-model="state.isEnabled" />
-        </UFormField>
-
-        <template v-if="state.isEnabled">
           <UFormField
-            label="Đường dẫn Công khai (Slug)"
-            name="slug"
-            required
+            label="Bật Trang Trạng thái Công khai"
+            name="isEnabled"
           >
-            <UInput
-              v-model="state.slug"
-              placeholder="vi-du-cong-ty"
-            />
-            <template #help>
-              Chỉ chứa chữ thường, số và dấu gạch ngang.
-            </template>
+            <USwitch v-model="state.isEnabled" />
           </UFormField>
+
+          <template v-if="state.isEnabled">
+            <UFormField
+              label="Đường dẫn Công khai (Slug)"
+              name="slug"
+              required
+            >
+              <UInput
+                v-model="state.slug"
+                placeholder="vi-du-cong-ty"
+              />
+              <template #help>
+                Chỉ chứa chữ thường, số và dấu gạch ngang.
+              </template>
+            </UFormField>
 
           <!-- <UFormField
             label="Tên miền Tùy chỉnh (Tùy chọn)"
@@ -56,57 +57,60 @@
               Ví dụ: status.mycompany.com. Bạn cần cấu hình DNS CNAME trỏ về <code class="text-xs bg-gray-100 dark:bg-gray-800 p-1 rounded">public.headless-sentry.com</code>.
             </template> __
           </UFormField> -->
-        </template>
+          </template>
 
-        <UFormField
-          label="Tiêu đề Trang"
-          name="title"
-          required
-        >
-          <UInput v-model="state.title" />
-        </UFormField>
+          <UFormField
+            label="Tiêu đề Trang"
+            name="title"
+            required
+          >
+            <UInput v-model="state.title" />
+          </UFormField>
 
-        <UFormField
-          label="URL Logo (Tùy chọn)"
-          name="logoUrl"
-        >
-          <UInput
-            v-model="state.logoUrl"
-            type="url"
-            placeholder="https://..."
-          />
-        </UFormField>
+          <UFormField
+            label="URL Logo (Tùy chọn)"
+            name="logoUrl"
+          >
+            <UInput
+              v-model="state.logoUrl"
+              type="url"
+              placeholder="https://..."
+            />
+          </UFormField>
 
-        <div class="flex justify-end">
+          <div class="flex justify-end">
+            <UButton
+              type="submit"
+              :loading="saving"
+              label="Lưu Cấu hình"
+              color="primary"
+            />
+          </div>
+        </UForm>
+      </UCard>
+
+      <UCard>
+        <h3 class="font-semibold">
+          Chọn Dịch vụ Hiển thị
+        </h3>
+        <p class="text-sm text-gray-500 mb-4">
+          Đánh dấu vào các dịch vụ bạn muốn hiển thị trên trang trạng thái công khai.
+        </p>
+        <UTable
+          v-model="selectedMonitors"
+          :data="monitors"
+          :columns="monitorColumns"
+          :loading="pendingMonitors"
+          by="_id"
+        />
+        <div class="flex justify-end mt-4">
           <UButton
-            type="submit"
-            :loading="saving"
-            label="Lưu Cấu hình"
-            color="primary"
+            :loading="savingSelection"
+            label="Lưu Lựa chọn"
+            @click="saveMonitorSelection"
           />
         </div>
-      </UForm>
-
-      <h3 class="font-semibold">
-        Chọn Dịch vụ Hiển thị
-      </h3>
-      <p class="text-sm text-gray-500 mb-4">
-        Đánh dấu vào các dịch vụ bạn muốn hiển thị trên trang trạng thái công khai.
-      </p>
-      <UTable
-        v-model="selectedMonitors"
-        :data="monitors"
-        :columns="monitorColumns"
-        :loading="pendingMonitors"
-        by="_id"
-      />
-      <div class="flex justify-end mt-4">
-        <UButton
-          :loading="savingSelection"
-          label="Lưu Lựa chọn"
-          @click="saveMonitorSelection"
-        />
-      </div>
+      </UCard>
     </template>
   </UDashboardPanel>
 </template>
@@ -126,7 +130,7 @@ const schema = z.object({
   isEnabled: z.boolean().default(false),
   slug: z.string().min(3).regex(/^[a-z0-9-]+$/).nullable().optional(),
   title: z.string().min(1).default('Trạng thái Dịch vụ'),
-  logoUrl: z.string().url().nullable().optional(),
+  logoUrl: z.string().url().nullable().optional()
   // customDomain: z.string()
   //   .regex(domainRegex, { message: 'Tên miền không hợp lệ' })
   //   .nullable().optional()

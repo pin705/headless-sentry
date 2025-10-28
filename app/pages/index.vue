@@ -2,9 +2,9 @@
   <UDashboardPanel id="home">
     <template #header>
       <UDashboardNavbar title="Tổng quan">
-        <template #leading>
+        <!-- <template #leading>
           <UDashboardSidebarCollapse />
-        </template>
+        </template> -->
 
         <template #right>
           <UButton

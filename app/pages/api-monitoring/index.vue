@@ -2,9 +2,9 @@
   <UDashboardPanel id="api-monitoring">
     <template #header>
       <UDashboardNavbar title="Giám sát Dịch vụ">
-        <template #leading>
+        <!-- <template #leading>
           <UDashboardSidebarCollapse />
-        </template>
+        </template> -->
         <template #right>
           <div class="flex items-center gap-4">
             <UButton

@@ -8,14 +8,14 @@ const open = ref(false)
 
 const links = [[{
   label: 'Tổng quan', // <-- Đổi từ 'Home'
-  icon: 'i-lucide-layout-dashboard', // <-- Đổi icon cho hợp lý
+  // icon: 'i-lucide-layout-dashboard', // <-- Đổi icon cho hợp lý
   to: '/',
   onSelect: () => {
     open.value = false
   }
 }, {
   label: 'Giám sát', // <-- Đổi từ 'API Giám sát'
-  icon: 'i-lucide-server',
+  // icon: 'i-lucide-server',
   to: '/api-monitoring',
   // badge: '4', // (Tạm ẩn badge cứng)
   onSelect: () => {
@@ -24,7 +24,7 @@ const links = [[{
 },
 { // (MỚI) Thêm mục Settings
   label: 'Cài đặt',
-  icon: 'i-lucide-settings', // Icon
+  // icon: 'i-lucide-settings', // Icon
   to: '/settings/status-page', // Đường dẫn
   onSelect: () => {
     open.value = false
@@ -75,55 +75,17 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UDashboardGroup unit="rem">
-    <UDashboardSidebar
-      id="default"
-      v-model:open="open"
-      collapsible
-      resizable
-      class="bg-elevated/25"
-      :ui="{ footer: 'lg:border-t lg:border-default' }"
-    >
-      <template #header="{ collapsed }">
-        <div class="p-2">
-          <strong class="text-lg font-bold text-primary">
-            Headless Sentry
-          </strong>
-        </div>
-      </template>
+  <div>
+    <div class="mb-4">
+      <UDashboardToolbar>
+      <UNavigationMenu
+        :items="links"
+        highlight
+        class="flex-1"
+      />
+    </UDashboardToolbar>
+    </div>
 
-      <template #default="{ collapsed }">
-        <!-- <UDashboardSearchButton
-          :collapsed="collapsed"
-          class="bg-transparent ring-default"
-        /> -->
-
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[0]"
-          orientation="vertical"
-          tooltip
-          popover
-        />
-
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[1]"
-          orientation="vertical"
-          tooltip
-          class="mt-auto"
-        />
-      </template>
-
-      <template #footer="{ collapsed }">
-        <UserMenu :collapsed="collapsed" />
-      </template>
-    </UDashboardSidebar>
-
-    <UDashboardSearch :groups="groups" />
-
-    <slot />
-
-    <!-- <NotificationsSlideover /> -->
-  </UDashboardGroup>
+      <slot />
+  </div>
 </template>
