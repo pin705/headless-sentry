@@ -312,7 +312,6 @@ const queryParams = computed(() => {
     statusCode: selectedStatusCode.value === 'all' ? undefined : selectedStatusCode.value
   }
 
-  console.log('range.value', new Date(range.value.start)?.toISOString(), new Date(range.value.end)?.toISOString())
   // (Mới) Thêm ngày tùy chỉnh nếu range là 'custom'
   if (selectedRange.value === 'custom') {
     params.startDate = new Date(range.value.start)?.toISOString()
@@ -366,31 +365,24 @@ const formatDateTick = (value: number | Date) => {
 const historyColumns = [
   { accessorKey: 'status', header: 'Trạng thái',
     cell: ({ row }: any) => {
-      // (Tuân thủ Rule 3, 7)
       const isUp = row.original.isUp
       const errorMessage = row.original.errorMessage
       const color = isUp ? 'success' : 'error'
       const label = isUp ? 'UP' : 'DOWN'
 
-      // 1. Luôn tạo UBadge
       const badge = h(UBadge, { color: color, variant: 'soft' }, () => label)
 
-      // 2. (MỚI) Nếu BỊ LỖI (DOWN) và CÓ TIN NHẮN LỖI
       if (!isUp && errorMessage) {
-        // (MỚI) Tạo một icon thông báo lỗi
         const icon = h(UIcon, {
           name: 'i-heroicons-exclamation-circle-solid',
-          // (Tuân thủ Rule 7)
           class: 'text-error-500 dark:text-error-400 cursor-help'
         })
 
-        // (MỚI) Tạo Tooltip bọc icon
         const tooltip = h(UTooltip, {
           text: errorMessage, // Nội dung lỗi
           popper: { placement: 'top', arrow: true }
         }, () => icon) // Chỉ bọc icon
 
-        // (MỚI) Trả về một 'div' chứa cả badge và icon-tooltip
         return h('div', { class: 'flex items-center gap-1' }, [
           badge,
           tooltip
