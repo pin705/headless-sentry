@@ -400,7 +400,20 @@ const historyColumns = [
     cell: ({ row }: any) => h('span', { class: 'font-mono' }, `${row.original.latency} ms`)
   },
   { accessorKey: 'timestamp', header: 'Thời gian',
-    cell: ({ row }: any) => h('span', { class: 'text-sm' }, formatTimeAgo(new Date(row.original.timestamp)))
-  }
+    cell: ({ row }: any) => {
+      // (MỚI) Bọc trong NuxtLink
+      // (Tuân thủ Rule 3)
+      const resultId = row.original._id
+      const monitorId = route.params.id // Lấy monitorId từ route hiện tại
+      const linkTo = `/api-monitoring/${monitorId}/results/${resultId}`
+      const timeAgo = formatTimeAgo(new Date(row.original.timestamp))
+
+      // Dùng component NuxtLink để điều hướng
+      return h(resolveComponent('NuxtLink'), {
+        to: linkTo,
+        class: 'text-sm text-primary-500 dark:text-primary-400 hover:underline cursor-pointer' // Style như link
+      }, () => timeAgo) // Nội dung link là thời gian
+    }
+  },
 ]
 </script>

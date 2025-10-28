@@ -1,6 +1,7 @@
 // server/api/dashboard/stats.get.ts
 import mongoose from 'mongoose'
-import { subDays } from 'date-fns'
+// (MỚI) Thêm các hàm date-fns cần thiết
+import { subHours, subDays, startOfHour, endOfHour } from 'date-fns'
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
@@ -10,84 +11,106 @@ export default defineEventHandler(async (event) => {
 
   const userId = new mongoose.Types.ObjectId(session.user.userId)
   const now = new Date()
-  const date24hAgo = subDays(now, 1) // Lấy mốc 24 giờ trước
+  const date24hAgo = subHours(now, 24) // Mốc 24 giờ trước
 
   try {
-    // === 1. Lấy trạng thái MỚI NHẤT của TẤT CẢ monitors ===
-    // (Tái sử dụng logic từ API /api/monitors/index.get.ts)
+    // === 1. Lấy trạng thái MỚI NHẤT của TẤT CẢ monitors (Giữ nguyên) ===
     const latestStatesPromise = Monitor.aggregate([
       { $match: { userId: userId } },
       { $lookup: {
-        from: 'results',
-        let: { monitorId: '$_id' },
+        from: 'results', let: { monitorId: '$_id' },
         pipeline: [
           { $match: { $expr: { $eq: ['$meta.monitorId', '$$monitorId'] } } },
-          { $sort: { timestamp: -1 } },
-          { $limit: 1 }
-        ],
-        as: 'latestResult'
+          { $sort: { timestamp: -1 } }, { $limit: 1 }
+        ], as: 'latestResult'
       } },
       { $unwind: { path: '$latestResult', preserveNullAndEmptyArrays: true } },
-      { $project: {
-        status: 1, // ACTIVE or PAUSED
-        isUp: '$latestResult.isUp' // true, false, or null
-      } }
+      { $project: { status: 1, isUp: '$latestResult.isUp' } }
     ])
 
-    // === 2. Lấy % Uptime và Latency trung bình trong 24h qua ===
+    // === 2. Lấy % Uptime và Latency trung bình trong 24h qua (Giữ nguyên) ===
     const stats24hPromise = Result.aggregate([
-      { $match: {
-        // Chỉ lấy kết quả của user này VÀ trong 24h qua
-        'meta.userId': userId,
-        'timestamp': { $gte: date24hAgo }
-      } },
+      { $match: { 'meta.userId': userId, 'timestamp': { $gte: date24hAgo } } },
       { $group: {
-        _id: null,
-        totalChecks: { $sum: 1 },
-        totalUp: { $sum: { $cond: ['$isUp', 1, 0] } },
-        avgLatency: { $avg: '$latency' }
+        _id: null, totalChecks: { $sum: 1 }, totalUp: { $sum: { $cond: ['$isUp', 1, 0] } }, avgLatency: { $avg: '$latency' }
       } }
     ])
 
-    // Chạy song song
-    const [latestStates, stats24hArr] = await Promise.all([
-      latestStatesPromise,
-      stats24hPromise
+    // === (MỚI) 3. Lấy dữ liệu Biểu đồ Latency (Trung bình mỗi giờ trong 24h) ===
+    const latencyChartPromise = Result.aggregate([
+      { $match: { 'meta.userId': userId, 'timestamp': { $gte: date24hAgo } } },
+      { $group: {
+        // Nhóm theo giờ
+        _id: { $dateTrunc: { date: '$timestamp', unit: 'hour' } },
+        avgLatency: { $avg: '$latency' }
+      } },
+      { $sort: { _id: 1 } }, // Sắp xếp theo giờ tăng dần
+      { $project: { _id: 0, hour: '$_id', avgLatency: { $round: ['$avgLatency', 0] } } } // Làm tròn latency
     ])
 
-    // === 3. Xử lý dữ liệu ===
+    // === (MỚI) 4. Lấy 5 Lỗi Gần Nhất ===
+    const recentErrorsPromise = Result.find({
+      'meta.userId': userId,
+      'isUp': false, // Chỉ lấy các lần kiểm tra thất bại
+      'timestamp': { $gte: date24hAgo } // Chỉ trong 24h
+    })
+      .sort({ timestamp: -1 }) // Mới nhất trước
+      .limit(5)
+      .populate({ // Lấy tên Monitor
+        path: 'meta.monitorId',
+        select: 'name endpoint', // Chỉ lấy tên và endpoint
+        model: Monitor // Chỉ định model
+      })
+      .select('timestamp statusCode errorMessage meta.monitorId') // Chọn các trường cần thiết
+      .lean()
 
-    // Xử lý Stats 24h
+    // === (MỚI) 5. Lấy 5 Cảnh báo Gần Nhất (Ước tính) ===
+    // Tìm các monitor có lastAlertedAt trong 24h qua
+    const recentAlertsPromise = Monitor.find({
+      'userId': userId,
+      'alertConfig.lastAlertedAt': { $gte: date24hAgo }
+    })
+      .sort({ 'alertConfig.lastAlertedAt': -1 }) // Mới nhất trước
+      .limit(5)
+      .select('name endpoint alertConfig.lastAlertedAt') // Chọn các trường cần thiết
+      .lean()
+
+    // Chạy song song tất cả
+    const [
+      latestStates,
+      stats24hArr,
+      latencyChartData,
+      recentErrors,
+      recentAlerts
+    ] = await Promise.all([
+      latestStatesPromise,
+      stats24hPromise,
+      latencyChartPromise,
+      recentErrorsPromise,
+      recentAlertsPromise
+    ])
+
+    // === Xử lý dữ liệu (Giữ nguyên phần đầu) ===
     const stats24h = stats24hArr[0] || { totalChecks: 0, totalUp: 0, avgLatency: 0 }
-    const uptimePercent24h = (stats24h.totalChecks > 0)
-      ? (stats24h.totalUp / stats24h.totalChecks) * 100
-      : 100 // Mặc định là 100% nếu không có dữ liệu
-
-    // Xử lý Trạng thái mới nhất
-    let totalMonitors = 0
-    let totalUp = 0
-    let totalDown = 0
-    let totalPaused = 0
-
-    latestStates.forEach((monitor) => {
+    const uptimePercent24h = (stats24h.totalChecks > 0) ? (stats24h.totalUp / stats24h.totalChecks) * 100 : 100
+    let totalMonitors = 0, totalUp = 0, totalDown = 0, totalPaused = 0
+    latestStates.forEach((m) => {
       totalMonitors++
-      if (monitor.status === 'PAUSED') {
-        totalPaused++
-      } else if (monitor.isUp === true) {
-        totalUp++
-      } else {
-        // Bao gồm null (chưa chạy) và false (down)
-        totalDown++
-      }
+      if (m.status === 'PAUSED') totalPaused++
+      else if (m.isUp === true) totalUp++
+      else totalDown++
     })
 
     return {
-      totalMonitors,
-      totalUp,
-      totalDown,
-      totalPaused,
+      // Dữ liệu cũ
+      totalMonitors, totalUp, totalDown, totalPaused,
       uptimePercent24h: parseFloat(uptimePercent24h.toFixed(2)),
-      avgLatency24h: Math.round(stats24h.avgLatency)
+      avgLatency24h: Math.round(stats24h.avgLatency),
+
+      // (MỚI) Dữ liệu mới
+      latencyChartData, // Dữ liệu cho biểu đồ latency
+      recentErrors, // Danh sách lỗi
+      recentAlerts // Danh sách cảnh báo (ước tính)
     }
   } catch (error: any) {
     console.error('Lỗi lấy stats dashboard:', error)

@@ -1,56 +1,93 @@
 <template>
   <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-    <div class="flex items-center justify-center p-4 bg-white dark:bg-gray-900">
+    <div class="relative hidden lg:flex flex-col items-center justify-center p-12 bg-gray-900 text-white overflow-hidden">
+      <div class="relative z-10 w-full max-w-md">
+        <h1
+          class="text-5xl font-bold tracking-tighter text-primary"
+        >
+          Headless Sentry
+        </h1>
+        <p
+          class="mt-4 text-lg text-gray-300"
+        >
+          Giám sát Uptime, Hiệu năng API & SSL cho các dịch vụ Web hiện đại.
+        </p>
+
+        <div
+          class="mt-10 space-y-6 border-l-2 border-primary pl-6"
+        >
+          <div class="space-y-1">
+            <h3 class="font-semibold">
+              Giám sát Thời gian thực
+            </h3>
+            <p class="text-sm text-gray-400">
+              Theo dõi Uptime, Latency và phát hiện lỗi ngay khi chúng xảy ra.
+            </p>
+          </div>
+          <div class="space-y-1">
+            <h3 class="font-semibold">
+              Cảnh báo Thông minh
+            </h3>
+            <p class="text-sm text-gray-400">
+              Nhận thông báo qua Slack, Telegram..., Webhook khi có sự cố hoặc hiệu năng giảm sút.
+            </p>
+          </div>
+          <div class="space-y-1">
+            <h3 class="font-semibold">
+              Kiểm tra SSL Tự động
+            </h3>
+            <p class="text-sm text-gray-400">
+              Cảnh báo sớm khi chứng chỉ SSL sắp hết hạn hoặc gặp vấn đề.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-center p-4 bg-white dark:bg-gray-950">
       <UCard
         class="w-full max-w-sm"
-        :ui="{ ring: 'ring-0', shadow: 'shadow-none' }"
+        :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }"
       >
         <template #header>
           <h1
-            v-motion-slide-bottom
             class="text-3xl font-bold"
           >
-            Bắt đầu Hành trình
+            Bắt đầu Giám sát
           </h1>
           <p
-            v-motion-slide-bottom
-            :delay="100"
             class="text-sm text-gray-500 dark:text-gray-400 mt-1"
           >
-            Tạo tài khoản và giải phóng trí tưởng tượng của bạn.
+            Tạo tài khoản để theo dõi hiệu năng dịch vụ của bạn.
           </p>
         </template>
 
         <div
-          v-motion-slide-bottom
-          :delay="200"
           class="space-y-3"
         >
           <UButton
             block
             icon="i-simple-icons-google"
-             color="neutral"
+            label="Tiếp tục với Google"
+            color="neutral"
+            variant="outline"
             @click="() => {
               toast.add({ title: 'Chức năng đang phát triển...', color: 'info' })
             }"
-          >
-            Tiếp tục với Google
-          </UButton>
+          />
           <UButton
             block
             icon="i-simple-icons-github"
-             color="neutral"
+            label="Tiếp tục với Github"
+            color="neutral"
+            variant="outline"
             @click="() => {
               toast.add({ title: 'Chức năng đang phát triển...', color: 'info' })
             }"
-          >
-            Tiếp tục với Github
-          </UButton>
+          />
         </div>
 
         <USeparator
-          v-motion-slide-bottom
-          :delay="300"
           label="HOẶC ĐĂNG KÝ BẰNG EMAIL"
           class="my-6"
         />
@@ -62,10 +99,9 @@
           @submit="submit"
         >
           <UFormField
-            v-motion-slide-bottom
-            :delay="500"
             label="Email"
             name="email"
+            required
           >
             <UInput
               v-model="state.email"
@@ -75,56 +111,49 @@
             />
           </UFormField>
           <UFormField
-            v-motion-slide-bottom
-            :delay="600"
             label="Mật khẩu"
             name="password"
+            required
           >
             <UInput
               v-model="state.password"
               type="password"
-              placeholder="********"
+              placeholder="Ít nhất 6 ký tự"
               icon="i-heroicons-lock-closed"
               class="w-full"
             />
           </UFormField>
           <UFormField
-            v-motion-slide-bottom
-            :delay="700"
             label="Xác nhận mật khẩu"
             name="passwordConfirm"
+            required
           >
             <UInput
               v-model="state.passwordConfirm"
               type="password"
-              placeholder="********"
+              placeholder="Nhập lại mật khẩu"
               icon="i-heroicons-lock-closed"
               class="w-full"
             />
           </UFormField>
           <UButton
-            v-motion-slide-bottom
-            :delay="800"
             type="submit"
+            label="Tạo tài khoản"
             block
             :loading="isLoading"
-             color="neutral"
-          >
-            Tạo tài khoản
-          </UButton>
+            color="primary"
+          />
         </UForm>
 
         <template #footer>
           <div
-            v-motion-slide-bottom
-            :delay="900"
             class="text-center"
           >
-            <p class="text-sm text-gray-500">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
               Đã có tài khoản?
               <NuxtLink
                 to="/login"
-                class="text-primary font-medium"
+                class="text-primary font-medium hover:underline"
               >Đăng nhập ngay</NuxtLink>
             </p>
           </div>

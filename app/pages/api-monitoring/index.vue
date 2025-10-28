@@ -104,29 +104,60 @@ function onFormSaved() {
   refresh() // Tải lại bảng
 }
 
-// (Hàm tạo icon SSL giữ nguyên)
+// (MỚI) Hàm helper tạo icon SSL (Trigger bằng Click)
 function createSslIcon(row: any) {
+  // (Tuân thủ Rule 3)
   const ssl = row.original.ssl
+
+  // 1. Kiểm tra không có dữ liệu
   if (!ssl || ssl.daysRemaining === null) {
-    const icon = h(UIcon, { name: 'i-heroicons-shield-exclamation', class: 'text-neutral-400 dark:text-neutral-500' })
-    return h(UTooltip, { text: 'Chưa kiểm tra SSL' }, () => icon)
+    const icon = h(UIcon, {
+      name: 'i-heroicons-shield-exclamation',
+      // (Tuân thủ Rule 7)
+      class: 'text-neutral-400 dark:text-neutral-500 cursor-pointer' // Thêm cursor-pointer
+    })
+    return h(UTooltip, {
+      text: 'Chưa kiểm tra SSL (thường chạy 1 lần/ngày)',
+      // (MỚI) Thêm trigger click
+      popper: { placement: 'top', arrow: true, show: 'click', hide: 'click' }
+    }, () => icon)
   }
-  let iconName: string, colorClass: string, tooltipText: string
+
+  let iconName: string
+  let colorClass: string // (Tuân thủ Rule 7)
+  let tooltipText: string
+
+  // 2. Xử lý Lỗi
   if (!ssl.isValid || ssl.daysRemaining < 0) {
     iconName = 'i-heroicons-shield-exclamation-solid'
-    colorClass = 'text-error-500'
-    tooltipText = ssl.errorMessage ? `Lỗi: ${ssl.errorMessage}` : `SSL đã hết hạn!`
-  } else if (ssl.daysRemaining < 14) {
-    iconName = 'i-heroicons-shield-exclamation-solid'
-    colorClass = 'text-warning-500'
-    tooltipText = `SSL sắp hết hạn (còn ${ssl.daysRemaining} ngày).`
-  } else {
-    iconName = 'i-heroicons-shield-check-solid'
-    colorClass = 'text-success-500'
-    tooltipText = `SSL hợp lệ (còn ${ssl.daysRemaining} ngày).`
+    colorClass = 'text-error-500' // (Rule 7)
+    tooltipText = ssl.errorMessage
+      ? `Lỗi: ${ssl.errorMessage}`
+      : `SSL đã hết hạn ${Math.abs(ssl.daysRemaining)} ngày trước!`
   }
-  const icon = h(UIcon, { name: iconName, class: colorClass })
-  return h(UTooltip, { text: tooltipText, popper: { placement: 'top', arrow: true } }, () => icon)
+  // 3. Xử lý Cảnh báo
+  else if (ssl.daysRemaining < 14) {
+    iconName = 'i-heroicons-shield-exclamation-solid'
+    colorClass = 'text-warning-500' // (Rule 7)
+    tooltipText = `SSL sẽ hết hạn sau ${ssl.daysRemaining} ngày (vào ${new Date(ssl.expiresAt).toLocaleDateString('vi-VN')}).`
+  }
+  // 4. Xử lý Tốt
+  else {
+    iconName = 'i-heroicons-shield-check-solid'
+    colorClass = 'text-success-500' // (Rule 7)
+    tooltipText = `SSL hợp lệ. Còn ${ssl.daysRemaining} ngày (hết hạn ${new Date(ssl.expiresAt).toLocaleDateString('vi-VN')}).`
+  }
+
+  // 5. Tạo vnode
+  const icon = h(UIcon, {
+    name: iconName,
+    class: `${colorClass} cursor-pointer` // Thêm cursor-pointer
+  })
+  return h(UTooltip, {
+    text: tooltipText,
+    // (MỚI) Thêm trigger click
+    popper: { placement: 'top', arrow: true, show: 'click', hide: 'click' }
+  }, () => icon)
 }
 
 // (Tuân thủ Rule 5)
@@ -140,7 +171,7 @@ const historyColumns = [
   {
     accessorKey: 'name',
     header: 'Dịch vụ',
-    cell: ({ row }: any) => {mini
+    cell: ({ row }: any) => {
       const monitor = row.original
       const sslIcon = createSslIcon(row)
       const nameText = h('span', { class: 'font-medium text-base' }, monitor.name)

@@ -5,7 +5,7 @@ defineProps<{
   collapsed?: boolean
 }>()
 
-const { user } = useUserSession()
+const { user, clear } = useUserSession()
 const colorMode = useColorMode()
 const appConfig = useAppConfig()
 // (MỚI) Thêm logic I18n
@@ -100,7 +100,19 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
       e.preventDefault()
     }
   }]
-}]]))
+}], [ // Add a new section for Logout
+  {
+    label: 'Đăng xuất', // Logout label
+    icon: 'i-lucide-log-out',
+    // Define the click action
+    onSelect: async () => {
+      console.log('Logging out...')
+      await clear()
+      // Optionally redirect, though middleware might handle this
+      await navigateTo('/login')
+    }
+  }
+]]))
 </script>
 
 <template>

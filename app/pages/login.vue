@@ -1,58 +1,77 @@
 <template>
   <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-    <div class="flex items-center justify-center p-4 bg-white dark:bg-gray-900">
+    <div class="relative hidden lg:flex flex-col items-center justify-center p-12 bg-gray-900 text-white overflow-hidden">
+      <div class="relative z-10 w-full max-w-md">
+        <h1 class="text-5xl font-bold tracking-tighter text-primary">
+          Headless Sentry
+        </h1>
+        <p class="mt-4 text-lg text-gray-300">
+          Giám sát Uptime, Hiệu năng API & SSL cho các dịch vụ Web hiện đại.
+        </p>
+
+        <div class="mt-10 space-y-6 border-l-2 border-primary pl-6">
+          <div class="space-y-1">
+            <h3 class="font-semibold">
+              Giám sát Thời gian thực
+            </h3>
+            <p class="text-sm text-gray-400">
+              Theo dõi Uptime, Latency và phát hiện lỗi ngay khi chúng xảy ra.
+            </p>
+          </div>
+          <div class="space-y-1">
+            <h3 class="font-semibold">
+              Cảnh báo Thông minh
+            </h3>
+            <p class="text-sm text-gray-400">
+              Nhận thông báo qua Slack, Telegram..., Webhook khi có sự cố hoặc hiệu năng giảm sút.
+            </p>
+          </div>
+          <div class="space-y-1">
+            <h3 class="font-semibold">
+              Kiểm tra SSL Tự động
+            </h3>
+            <p class="text-sm text-gray-400">
+              Cảnh báo sớm khi chứng chỉ SSL sắp hết hạn hoặc gặp vấn đề.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-center p-4 bg-white dark:bg-gray-950">
       <UCard
         class="w-full max-w-sm"
+        :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }"
       >
         <template #header>
-          <h1
-
-            class="text-3xl font-bold"
-          >
+          <h1 class="text-3xl font-bold">
             Chào mừng trở lại!
           </h1>
-          <p
-
-            :delay="100"
-            class="text-sm text-gray-500 dark:text-gray-400 mt-1"
-          >
-            Đăng nhập để tiếp tục hành trình sáng tác.
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Đăng nhập để tiếp tục giám sát dịch vụ của bạn.
           </p>
         </template>
 
-        <div
-
-          :delay="200"
-          class="space-y-3"
-        >
+        <div class="space-y-3">
           <UButton
             block
             icon="i-simple-icons-google"
+            label="Đăng nhập với Google"
             color="neutral"
-            @click="() => {
-              toast.add({ title: 'Chức năng đang phát triển...', color: 'info' })
-            }"
-          >
-            Đăng nhập với Google
-          </UButton>
+            variant="outline"
+            @click="() => toast.add({ title: 'Chức năng đang phát triển...', color: 'info' })"
+          />
           <UButton
             block
             icon="i-simple-icons-github"
+            label="Đăng nhập với Github"
             color="neutral"
-            @click="() => {
-              toast.add({ title: 'Chức năng đang phát triển...', color: 'info' })
-            }"
-          >
-            Đăng nhập với Github
-          </UButton>
+            variant="outline"
+            @click="() => toast.add({ title: 'Chức năng đang phát triển...', color: 'info' })"
+          />
         </div>
 
-        <USeparator
-
-          :delay="300"
-          label="HOẶC"
-          class="my-6"
-        />
+        <USeparator label="HOẶC" class="my-6" />
 
         <UForm
           :state="state"
@@ -60,12 +79,7 @@
           class="space-y-4"
           @submit="submit"
         >
-          <UFormField
-
-            :delay="400"
-            label="Email"
-            name="email"
-          >
+          <UFormField label="Email" name="email" required>
             <UInput
               v-model="state.email"
               placeholder="you@example.com"
@@ -73,12 +87,7 @@
               class="w-full"
             />
           </UFormField>
-          <UFormField
-
-            :delay="500"
-            label="Mật khẩu"
-            name="password"
-          >
+          <UFormField label="Mật khẩu" name="password" required>
             <UInput
               v-model="state.password"
               type="password"
@@ -86,30 +95,24 @@
               icon="i-heroicons-lock-closed"
               class="w-full"
             />
+             <template #hint>
+              <NuxtLink to="/quen-mat-khau" class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary">Quên mật khẩu?</NuxtLink>
+            </template>
           </UFormField>
           <UButton
-            :delay="600"
             type="submit"
+            label="Đăng nhập"
             block
             :loading="isLoading"
-            color="neutral"
-          >
-            Đăng nhập
-          </UButton>
+            color="primary"
+          />
         </UForm>
 
         <template #footer>
-          <div
-
-            :delay="700"
-            class="text-center"
-          >
-            <p class="text-sm text-gray-500">
+          <div class="text-center">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
               Chưa có tài khoản?
-              <NuxtLink
-                to="/register"
-                class="text-primary font-medium"
-              >Đăng ký ngay</NuxtLink>
+              <NuxtLink to="/register" class="text-primary font-medium hover:underline">Đăng ký ngay</NuxtLink>
             </p>
           </div>
         </template>
@@ -160,7 +163,7 @@ async function submit(event: FormSubmitEvent<Schema>) {
     toast.add({ title: 'Đăng nhập thành công!', color: 'success' })
 
     // Chuyển hướng về trang chủ sau khi đăng nhập thành công
-    await navigateTo('/dashboard')
+    await navigateTo('/')
   } catch (error) {
     toast.add({
       title: 'Lỗi!',

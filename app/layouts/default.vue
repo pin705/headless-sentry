@@ -77,14 +77,18 @@ onMounted(async () => {
       :ui="{ footer: 'lg:border-t lg:border-default' }"
     >
       <template #header="{ collapsed }">
-        <!-- <TeamsMenu :collapsed="collapsed" /> -->
+        <div class="p-2">
+          <strong class="text-lg font-bold text-primary">
+            Headless Sentry
+          </strong>
+        </div>
       </template>
 
       <template #default="{ collapsed }">
-        <UDashboardSearchButton
+        <!-- <UDashboardSearchButton
           :collapsed="collapsed"
           class="bg-transparent ring-default"
-        />
+        /> -->
 
         <UNavigationMenu
           :collapsed="collapsed"
