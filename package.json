@@ -25,11 +25,14 @@
     "@vite-pwa/nuxt": "^1.0.4",
     "@vueuse/core": "^13.9.0",
     "@vueuse/nuxt": "^13.9.0",
+    "add": "^2.0.6",
     "date-fns": "^4.1.0",
     "eslint": "^9.37.0",
     "nuxt-auth-utils": "^0.5.25",
     "nuxt-cron": "^1.8.0",
     "nuxt-mongoose": "^1.0.6",
+    "pnpm": "^10.19.0",
+    "ssl-checker": "^2.0.10",
     "typescript": "^5.9.3",
     "vue-tsc": "^3.1.0"
   }

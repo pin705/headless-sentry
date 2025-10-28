@@ -17,7 +17,15 @@ export const Monitor = defineMongooseModel('Monitor', {
   httpConfig: {
     headers: { type: Map, of: String },
     body: { type: String } // Lưu JSON string
-  }
+  },
+
+  ssl: {
+    isValid: { type: Boolean, default: null },
+    expiresAt: { type: Date, default: null }, // Ngày hết hạn
+    daysRemaining: { type: Number, default: null }, // Số ngày còn lại
+    errorMessage: { type: String, default: null },
+    lastCheckedAt: { type: Date, default: null } // Lần cuối kiểm tra SSL
+  },
 
 }, {
   timestamps: true

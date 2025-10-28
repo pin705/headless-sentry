@@ -55,7 +55,9 @@ export default defineEventHandler(async (event) => {
           latestStatus: { $cond: { if: '$latestResult.isUp', then: 'UP', else: { $cond: { if: '$latestResult', then: 'DOWN', else: 'N/A' } } } },
           latestLatency: '$latestResult.latency',
           latestCheckedAt: '$latestResult.timestamp',
-          latestStatusCode: '$latestResult.statusCode'
+          latestStatusCode: '$latestResult.statusCode',
+
+          ssl: 1
         }
       }
     ])

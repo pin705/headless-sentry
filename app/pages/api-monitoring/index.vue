@@ -254,10 +254,41 @@ async function onFormSubmit(event: FormSubmitEvent<Schema>) {
 
 // === Logic Bảng (Đã cập nhật) ===
 
-// (Tuân thủ Rule 4)
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
+const UTooltip = resolveComponent('UTooltip')
+const UIcon = resolveComponent('UIcon')
+
+function createSslIcon(row: any) {
+  // (Tuân thủ Rule 3)
+  const ssl = row.original.ssl
+  if (!ssl || ssl.daysRemaining === null) {
+    return null // Không có data
+  }
+
+  let iconName: string
+  let colorClass: string // (Tuân thủ Rule 7)
+  let tooltipText: string
+
+  console.log('SSL data for monitor:', ssl)
+  // (Tuân thủ Rule 7)
+  if (ssl.daysRemaining < 0) {
+    iconName = 'i-heroicons-shield-exclamation-solid'
+    colorClass = 'text-error-500'
+    tooltipText = `SSL đã hết hạn ${Math.abs(ssl.daysRemaining)} ngày trước!`
+  } else if (ssl.daysRemaining < 14) { // Cảnh báo < 14 ngày
+    iconName = 'i-heroicons-shield-exclamation-solid'
+    colorClass = 'text-warning-500' // (Tuân thủ Rule 7)
+    tooltipText = `SSL sẽ hết hạn sau ${ssl.daysRemaining} ngày.`
+  } else {
+    // SSL ổn (> 14 ngày)
+    return null // Không cần hiển thị icon
+  }
+
+  const icon = h(UIcon, { name: iconName, class: colorClass })
+  return h(UTooltip, { text: tooltipText }, () => icon)
+}
 
 // (Tuân thủ Rule 5)
 const columns = [
@@ -268,13 +299,27 @@ const columns = [
     }
   },
   { accessorKey: 'name', header: 'Tên',
-    cell: ({ row }: any) => h('div', { class: 'flex flex-col py-1' }, [
-      h('span', { class: 'font-medium text-base' }, row.original.name),
-      h('span', { class: 'text-gray-500 dark:text-gray-400 text-sm font-mono flex items-center gap-1.5' }, [
-        h(UBadge, { label: row.original.method, color: 'neutral', variant: 'subtle', size: 'xs' }),
-        h('span', { class: 'truncate max-w-sm' }, row.original.endpoint)
+    cell: ({ row }: any) => {
+      // (Tuân thủ Rule 3)
+      const monitor = row.original
+      const sslIcon = createSslIcon(row) // (MỚI) Lấy icon SSL
+
+      console.log('Rendering name cell for monitor:', sslIcon)
+      // (MỚI) Tạo các vnodes
+      const nameText = h('span', { class: 'font-medium text-base' }, monitor.name)
+      const endpointBadge = h(UBadge, { label: monitor.method, color: 'neutral', variant: 'subtle', size: 'xs' })
+      const endpointText = h('span', { class: 'truncate max-w-sm' }, monitor.endpoint)
+      const endpointDiv = h('span', { class: 'text-gray-500 dark:text-gray-400 text-sm font-mono flex items-center gap-1.5' }, [endpointBadge, endpointText])
+
+      // (MỚI) Hiển thị tên và icon SSL (nếu có)
+      const nameDiv = h('div', { class: 'flex items-center gap-1.5' }, [
+        nameText,
+        sslIcon // Thêm icon vào
       ])
-    ])
+
+
+      return h('div', { class: 'flex flex-col py-1' }, [nameDiv, endpointDiv])
+    }
   },
   { accessorKey: 'latestLatency', header: 'Độ trễ', class: 'w-24',
     cell: ({ row }: any) => row.original.latestLatency !== undefined
