@@ -1,10 +1,15 @@
 // server/api/monitors.post.ts
 import { z } from 'zod'
 
-// Xác thực input từ client
+const httpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as const
+const frequencies = [60, 300, 600, 1800, 3600] as const
+
 const bodySchema = z.object({
   name: z.string().min(1, 'Tên không được để trống'),
-  endpoint: z.string().url('URL không hợp lệ')
+  endpoint: z.string().url('URL không hợp lệ'),
+  method: z.enum(httpMethods).default('GET'),
+  frequency: z.number().refine(val => frequencies.includes(val as 60), 'Tần suất không hợp lệ').default(60)
+  // Thêm httpConfig validation nếu cần
 })
 
 export default defineEventHandler(async (event) => {
@@ -20,15 +25,17 @@ export default defineEventHandler(async (event) => {
       userId: session.user.userId,
       name: body.name,
       endpoint: body.endpoint,
-      // Các trường khác sẽ dùng giá trị default trong model
+      method: body.method,
+      frequency: body.frequency,
+      status: 'ACTIVE',
     })
 
-    return newMonitor.toObject() // Trả về object thay vì Mongoose document
+    return newMonitor.toObject()
   } catch (error: any) {
     if (error.issues) { // Lỗi validation từ Zod
       throw createError({ statusCode: 400, message: error.issues[0].message })
     }
     console.error('Lỗi tạo monitor:', error)
-    throw createError({ statusCode: 500, message: 'Lỗi máy chủ khi tạo monitor' })
+    throw createError({ statusCode: 500, message: 'Lỗi máy chủ' })
   }
 })
