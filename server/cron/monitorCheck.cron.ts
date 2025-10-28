@@ -1,64 +1,109 @@
-// server/tasks/monitorCheck.cron.ts
-
 import { defineCronHandler } from '#nuxt/cron'
-
 
 export default defineCronHandler(
   () => '*/1 * * * *', // Chạy mỗi phút
   async () => {
-    console.log('[Cron] Bắt đầu kiểm tra giám sát API...');
-  const monitorsToRun = await Monitor.find({ status: 'ACTIVE' }).lean();
+    console.log('[Cron] Bắt đầu kiểm tra giám sát API...')
 
-  for (const monitor of monitorsToRun) {
-    const startTime = Date.now();
-    let statusCode = 599; // Mã lỗi mặc định nếu không kết nối được
-    let isUp = false;
-    let responseStatus = 0; // Lưu status thực tế từ $fetch
-
-    try {
-      // Sử dụng $fetch của Nuxt/Nitro
-       await $fetch.raw(monitor.endpoint, {
-         method: monitor.method as any, // Ép kiểu nếu cần
-         timeout: 15000, // Timeout 15 giây
-         ignoreResponseError: true // Quan trọng: Để lấy được cả status lỗi
-      }).then(res => {
-        responseStatus = res.status;
-        isUp = res.ok; // status 200-299
-      }).catch(err => {
-        // Lỗi network hoặc lỗi khác không phải HTTP status
-        responseStatus = err.response?.status || 599;
-        isUp = false;
-        console.error(`Lỗi fetch ${monitor.endpoint}:`, err.message);
-      });
-
-      statusCode = responseStatus;
-
-    } catch (error: any) {
-       // Bắt các lỗi không mong muốn khác trong logic try
-      console.error(`Lỗi không xác định khi kiểm tra ${monitor.endpoint}:`, error);
-      statusCode = 599; // Mã lỗi chung
-      isUp = false;
+    const monitorsToRun = await Monitor.find({ status: 'ACTIVE' }).lean()
+    if (monitorsToRun.length === 0) {
+      console.log('[Cron] Không có monitor nào để kiểm tra.')
+      return
     }
 
-    const latency = Date.now() - startTime;
+    // --- VẤN ĐỀ 2: Tối ưu hiệu năng (Song song hóa) ---
 
-    // Ghi kết quả vào Time Series Collection
-    try {
-       await Result.create({
-        timestamp: new Date(),
-        meta: {
-          monitorId: monitor._id,
-          userId: monitor.userId,
-          location: 'default' // Thay đổi nếu có nhiều location
-        },
-        latency: latency,
-        statusCode: statusCode,
-        isUp: isUp
-      });
-    } catch(dbError) {
-      console.error(`Lỗi ghi kết quả cho ${monitor.name}:`, dbError);
+    // 1. Tạo mảng các promise kiểm tra
+    const checkPromises = monitorsToRun.map((monitor) => {
+      const startTime = Date.now()
+
+      return $fetch.raw(monitor.endpoint, {
+        method: monitor.method as any,
+        timeout: 15000, // 15 giây timeout
+        ignoreResponseError: true // Rất quan trọng!
+      })
+        .then((response) => {
+        // Thành công (kể cả lỗi 4xx, 5xx)
+          return {
+            status: 'fulfilled',
+            value: {
+              monitor,
+              latency: Date.now() - startTime,
+              statusCode: response.status,
+              isUp: response.ok // status 200-299
+            }
+          }
+        })
+        .catch((error) => {
+        // Thất bại (lỗi network, DNS, timeout...)
+          console.error(`Lỗi network khi fetch ${monitor.endpoint}:`, error.message)
+          return {
+            status: 'rejected',
+            value: {
+              monitor,
+              latency: Date.now() - startTime,
+              statusCode: error.response?.status || 599, // 599 là mã lỗi tùy chỉnh (ví dụ: timeout)
+              isUp: false
+            }
+          }
+        })
+    })
+
+    // 2. Chạy tất cả promise song song và đợi
+    // Dùng allSettled để dù 1 promise lỗi, các promise khác vẫn chạy tiếp
+    const results = await Promise.allSettled(checkPromises)
+
+    const resultsToInsert: any[] = []
+
+    results.forEach((result) => {
+      // Bỏ qua các lỗi không mong muốn (dù .catch ở trên đã xử lý)
+      if (result.status === 'fulfilled' && result.value.status === 'fulfilled') {
+        const { monitor, latency, statusCode, isUp } = result.value.value
+        resultsToInsert.push({
+          timestamp: new Date(),
+          meta: {
+            monitorId: monitor._id,
+            userId: monitor.userId,
+            location: 'default'
+          },
+          latency: latency,
+          statusCode: statusCode,
+          isUp: isUp
+        })
+      } else if (result.status === 'fulfilled' && result.value.status === 'rejected') {
+        // Xử lý các lỗi đã bắt (network, timeout...)
+        const { monitor, latency, statusCode, isUp } = result.value.value
+        resultsToInsert.push({
+          timestamp: new Date(),
+          meta: {
+            monitorId: monitor._id,
+            userId: monitor.userId,
+            location: 'default'
+          },
+          latency: latency,
+          statusCode: statusCode,
+          isUp: isUp
+        })
+      }
+    })
+
+    // 3. Ghi tất cả kết quả vào DB CHỈ MỘT LẦN
+    if (resultsToInsert.length > 0) {
+      try {
+        await Result.insertMany(resultsToInsert, {
+          ordered: false // Không quan tâm thứ tự, ghi nhanh nhất có thể
+        })
+      } catch (dbError) {
+        console.error(`[Cron] Lỗi nghiêm trọng khi insertMany vào DB:`, dbError)
+      }
     }
-  }
-  console.log(`[Cron] Hoàn thành kiểm tra ${monitorsToRun.length} monitors.`);
+
+    console.log(`[Cron] Hoàn thành kiểm tra ${monitorsToRun.length} monitors. Đã ghi ${resultsToInsert.length} kết quả.`)
   },
+  {
+    // Thêm tùy chọn này để ngăn cron chạy chồng chéo
+    // Nếu cron job trước chưa xong, job mới sẽ không bắt đầu
+    // concurrencyPolicy: 'FORBID'
+    // Tùy chọn: lazy: true (nếu dùng nuxt-scheduler)
+  }
 )
