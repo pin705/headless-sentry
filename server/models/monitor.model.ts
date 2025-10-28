@@ -16,11 +16,9 @@ export const Monitor = defineMongooseModel('Monitor', {
   // Nâng cao: Lưu trữ headers, body...
   httpConfig: {
     headers: { type: Map, of: String },
-    body: { type: String }, // Lưu JSON string
-  },
+    body: { type: String } // Lưu JSON string
+  }
 
-  // locations: [{ type: String, required: true, default: 'default' }],
-  createdAt: { type: Date, default: Date.now }
 }, {
   timestamps: true
 })

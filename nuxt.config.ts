@@ -7,7 +7,6 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
     '@vueuse/nuxt',
     '@vite-pwa/nuxt',
-    '@pinia/nuxt',
     '@nuxt/ui',
     'nuxt-cron'
   ],

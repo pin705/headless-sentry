@@ -7,17 +7,17 @@ const toast = useToast()
 const open = ref(false)
 
 const links = [[{
-  label: 'Home',
-  icon: 'i-lucide-house',
+  label: 'Tổng quan', // <-- Đổi từ 'Home'
+  icon: 'i-lucide-layout-dashboard', // <-- Đổi icon cho hợp lý
   to: '/',
   onSelect: () => {
     open.value = false
   }
 }, {
-  label: 'API Giám sát',
+  label: 'Giám sát', // <-- Đổi từ 'API Giám sát'
   icon: 'i-lucide-server',
   to: '/api-monitoring',
-  badge: '4',
+  // badge: '4', // (Tạm ẩn badge cứng)
   onSelect: () => {
     open.value = false
   }

@@ -17,3 +17,16 @@ export const formatTimeAgo = (dateString: string): string => {
 
   return 'Vừa xong'
 }
+
+export function getStatusAppearance(status: any): { color: string, label: string } {
+  if (status === 'PAUSED') {
+    return { color: 'neutral', label: 'Tạm dừng' } // 'neutral' thay cho 'gray'
+  }
+  if (status === 'ACTIVE') {
+    return { color: 'success', label: 'Hoạt động' } // 'success' thay cho 'green'
+  }
+  if (status === 'DOWN') {
+    return { color: 'error', label: 'Ngưng' } // 'error' thay cho 'red'
+  }
+  return { color: 'neutral', label: 'N/A' }
+}

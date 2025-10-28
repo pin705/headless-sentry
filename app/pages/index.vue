@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { sub } from 'date-fns'
 import type { DropdownMenuItem } from '@nuxt/ui'
+import type { Period, Range } from '~/types'
 
 const { isNotificationsSlideoverOpen } = useDashboard()
 
@@ -24,15 +25,12 @@ const period = ref<Period>('daily')
 <template>
   <UDashboardPanel id="home">
     <template #header>
-      <UDashboardNavbar
-        title="Home"
-        :ui="{ right: 'gap-3' }"
-      >
+      <UDashboardNavbar title="Home" :ui="{ right: 'gap-3' }">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
 
-        <!-- <template #right>
+        <template #right>
           <UTooltip text="Notifications" :shortcuts="['N']">
             <UButton
               color="neutral"
@@ -49,12 +47,15 @@ const period = ref<Period>('daily')
           <UDropdownMenu :items="items">
             <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
           </UDropdownMenu>
-        </template> -->
+        </template>
       </UDashboardNavbar>
 
       <UDashboardToolbar>
         <template #left>
-          hehehe
+          <!-- NOTE: The `-ms-1` class is used to align with the `DashboardSidebarCollapse` button here. -->
+          <!-- <HomeDateRangePicker v-model="range" class="-ms-1" />
+
+          <HomePeriodSelect v-model="period" :range="range" /> -->
         </template>
       </UDashboardToolbar>
     </template>

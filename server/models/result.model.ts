@@ -15,7 +15,8 @@ export const Result = defineMongooseModel('Result', {
   },
   latency: { type: Number, required: true }, // Thời gian phản hồi (ms)
   statusCode: { type: Number, required: true }, // Mã trạng thái HTTP
-  isUp: { type: Boolean, required: true } // True nếu statusCode < 400
+  isUp: { type: Boolean, required: true }, // True nếu statusCode < 400
+  errorMessage: { type: String, default: null, trim: true }
 }, {
   // Options cho Time Series Collection
   timeseries: {

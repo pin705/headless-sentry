@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
+// (MỚI) Thêm imports cho I18n
+import * as locales from '@nuxt/ui/locale'
 
 defineProps<{
   collapsed?: boolean
@@ -7,8 +9,10 @@ defineProps<{
 
 const colorMode = useColorMode()
 const appConfig = useAppConfig()
+// (MỚI) Thêm logic I18n
+const locale = ref('vi')
 
-const colors = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
+const colors = ['neutral', 'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 
 const user = ref({
@@ -23,7 +27,12 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
   type: 'label',
   label: user.value.name,
   avatar: user.value.avatar
-}], [{
+}], [
+  // (MỚI) Thêm slot cho bộ chọn ngôn ngữ
+  {
+    slot: 'locale'
+  }
+], [{
   label: 'Profile',
   icon: 'i-lucide-user'
 }, {
@@ -137,6 +146,15 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
         }"
         class="ms-0.5 size-2 rounded-full bg-(--chip-light) dark:bg-(--chip-dark)"
       />
+    </template>
+
+    <template #locale>
+      <div class="p-2">
+        <ULocaleSelect
+          v-model="locale"
+          :locales="Object.values(locales)"
+        />
+      </div>
     </template>
   </UDropdownMenu>
 </template>
