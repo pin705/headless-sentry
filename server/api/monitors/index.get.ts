@@ -58,7 +58,8 @@ export default defineEventHandler(async (event) => {
           latestStatusCode: '$latestResult.statusCode',
 
           ssl: 1,
-          httpConfig: 1
+          httpConfig: 1,
+          alertConfig: 1
         }
       }
     ])

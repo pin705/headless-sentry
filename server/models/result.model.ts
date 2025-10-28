@@ -24,5 +24,5 @@ export const Result = defineMongooseModel('Result', {
     metaField: 'meta',
     granularity: 'minutes' // Tối ưu lưu trữ theo phút
   },
-  expireAfterSeconds: 60 * 60 * 24 * 7 // Tự động xoá data cũ sau 7 ngày (tùy chọn)
+  expireAfterSeconds: 60 * 60 * 24 * 30 // Tự động xoá data cũ sau 30 ngày (tùy chọn)
 })

@@ -3,246 +3,252 @@
     v-model:open="isOpen"
     prevent-close
   >
-    <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
-      <template #header>
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold">
-            {{ isEditing ? 'Chỉnh sửa Dịch vụ' : 'Thêm Dịch vụ mới' }}
-          </h2>
+    <template #header>
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold">
+          {{ isEditing ? 'Chỉnh sửa Dịch vụ' : 'Thêm Dịch vụ mới' }}
+        </h2>
+      </div>
+    </template>
+
+    <template #body>
+      <UForm
+        :state="formState"
+        :schema="formSchema"
+        @submit="onFormSubmit"
+      >
+        <UTabs :items="formTabs">
+          <template #basic="{ item }">
+            <div class="space-y-4 pt-4">
+              <UFormField
+                label="Tên gợi nhớ"
+                name="name"
+                required
+              >
+                <UInput
+                  v-model="formState.name"
+                  placeholder="Ví dụ: API Sản phẩm Shopify"
+                  class="w-full"
+                />
+              </UFormField>
+              <UFormField
+                label="Endpoint URL"
+                name="endpoint"
+                required
+              >
+                <UInput
+                  v-model="formState.endpoint"
+                  type="url"
+                  placeholder="https://your-api.com/endpoint"
+                  class="w-full"
+                />
+              </UFormField>
+              <div class="grid grid-cols-2 gap-4">
+                <UFormField
+                  label="Method"
+                  name="method"
+                >
+                  <USelectMenu
+                    v-model="formState.method"
+                    :items="methodOptions"
+                    class="w-full"
+                  />
+                </UFormField>
+                <UFormField
+                  label="Tần suất"
+                  name="frequency"
+                >
+                  <USelectMenu
+                    v-model="formState.frequency"
+                    :items="frequencyOptions"
+                    value-key="value"
+                    class="w-full"
+                  />
+                </UFormField>
+              </div>
+            </div>
+          </template>
+
+          <template #advanced="{ item }">
+            <div class="space-y-4 pt-4">
+              <UFormField
+                label="HTTP Headers"
+                name="httpConfig.headers"
+              >
+                <div class="space-y-2">
+                  <div
+                    v-for="(header, index) in formState.httpConfig.headers"
+                    :key="index"
+                    class="flex items-center gap-2"
+                  >
+                    <UInput
+                      v-model="header.key"
+                      placeholder="Key"
+                      class="flex-1 w-full"
+                    />
+                    <UInput
+                      v-model="header.value"
+                      placeholder="Value"
+                      class="flex-1 w-full"
+                    />
+                    <UButton
+                      icon="i-heroicons-trash"
+                      color="error"
+                      variant="ghost"
+                      @click="removeHeader(index)"
+                    />
+                  </div>
+                  <UButton
+                    label="Thêm Header"
+                    icon="i-heroicons-plus"
+                    color="neutral"
+                    variant="outline"
+                    size="sm"
+                    @click="addHeader"
+                  />
+                </div>
+              </UFormField>
+              <UFormField
+                label="Request Body"
+                name="httpConfig.bodyType"
+                class="mt-4"
+              >
+                <USelectMenu
+                  v-model="formState.httpConfig.bodyType"
+                  :items="bodyTypeOptions"
+                  value-key="key"
+                  class="w-full"
+                />
+              </UFormField>
+              <UFormField
+                v-if="formState.httpConfig.bodyType !== 'none'"
+                name="httpConfig.body"
+                class="mt-2"
+              >
+                <UTextarea
+                  v-model="formState.httpConfig.body"
+                  :placeholder="formState.httpConfig.bodyType === 'json' ? 'Nhập nội dung JSON...' : 'Nhập nội dung text...'"
+                  :rows="5"
+                  autoresize
+                  class="w-full"
+                />
+              </UFormField>
+            </div>
+          </template>
+
+          <template #alerts="{ item }">
+            <div class="space-y-4 pt-4">
+              <UFormField
+                label="Ngưỡng độ trễ (Latency)"
+                name="alertConfig.latencyThreshold"
+              >
+                <UInput
+                  v-model.number="formState.alertConfig.latencyThreshold"
+                  type="number"
+                  placeholder="Ví dụ: 2000"
+                  :min="0"
+                  class="w-full"
+                >
+                  <template #trailing>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">ms</span>
+                  </template>
+                </UInput>
+                <template #help>
+                  Gửi cảnh báo nếu độ trễ vượt quá con số này (ví dụ: 2000ms = 2 giây). Để trống nếu không cần.
+                </template>
+              </UFormField>
+
+              <UFormField
+                label="Nội dung phản hồi (Body)"
+                name="alertConfig.responseBodyCheck"
+              >
+                <UInput
+                  v-model="formState.alertConfig.responseBodyCheck"
+                  placeholder="Ví dụ: &quot;error&quot;: true"
+                  class="w-full"
+                />
+                <template #help>
+                  Gửi cảnh báo nếu nội dung (response body) chứa chuỗi này. Để trống nếu không cần.
+                </template>
+              </UFormField>
+
+              <UFormField
+                label="Tỷ lệ lỗi (Error Rate)"
+                name="alertConfig.errorRateThreshold"
+              >
+                <UInput
+                  v-model.number="formState.alertConfig.errorRateThreshold"
+                  type="number"
+                  placeholder="Ví dụ: 5"
+                  :min="0"
+                  :max="100"
+                  class="w-full"
+                >
+                  <template #trailing>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">%</span>
+                  </template>
+                </UInput>
+                <template #help>
+                  Gửi cảnh báo nếu tỷ lệ lỗi vượt quá % này trong 10 phút. Để trống nếu không cần. (Tính năng đang phát triển).
+                </template>
+              </UFormField>
+
+              <UFormField
+                label="Kênh thông báo (Webhooks)"
+                name="alertConfig.channels"
+              >
+                <div class="space-y-2">
+                  <div
+                    v-for="(channel, index) in formState.alertConfig.channels"
+                    :key="index"
+                    class="flex items-center gap-2"
+                  >
+                    <UInput
+                      v-model="channel.url"
+                      placeholder="Nhập URL (Slack, Telegram, Discord...)"
+                      class="flex-1"
+                    />
+                    <UButton
+                      icon="i-heroicons-trash"
+                      color="error"
+                      variant="ghost"
+                      @click="removeChannel(index)"
+                    />
+                  </div>
+                  <UButton
+                    label="Thêm Webhook"
+                    icon="i-heroicons-plus"
+                    color="neutral"
+                    variant="outline"
+                    size="sm"
+                    @click="addChannel"
+                  />
+                </div>
+                <template #help>
+                  Gửi thông báo đến các URL này khi có cảnh báo.
+                </template>
+              </UFormField>
+            </div>
+          </template>
+        </UTabs>
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-800 mt-4">
           <UButton
             color="neutral"
             variant="ghost"
-            icon="i-heroicons-x-mark-20-solid"
-            class="-my-1"
             @click="isOpen = false"
+          >
+            Hủy
+          </UButton>
+          <UButton
+            type="submit"
+            :loading="formLoading"
+            :label="isEditing ? 'Lưu thay đổi' : 'Thêm Dịch vụ'"
+            color="primary"
           />
         </div>
-      </template>
-
-      <template #body>
-        <UForm
-          :state="formState"
-          :schema="formSchema"
-          @submit="onFormSubmit"
-        >
-          <UTabs :items="formTabs">
-            <template #basic="{ item }">
-              <div class="space-y-4 pt-4">
-                <UFormField
-                  label="Tên gợi nhớ"
-                  name="name"
-                  required
-                >
-                  <UInput
-                    v-model="formState.name"
-                    placeholder="Ví dụ: API Sản phẩm Shopify"
-                  />
-                </UFormField>
-                <UFormField
-                  label="Endpoint URL"
-                  name="endpoint"
-                  required
-                >
-                  <UInput
-                    v-model="formState.endpoint"
-                    type="url"
-                    placeholder="https://your-api.com/endpoint"
-                  />
-                </UFormField>
-                <div class="grid grid-cols-2 gap-4">
-                  <UFormField
-                    label="Method"
-                    name="method"
-                  >
-                    <USelectMenu
-                      v-model="formState.method"
-                      :options="methodOptions"
-                    />
-                  </UFormField>
-                  <UFormField
-                    label="Tần suất"
-                    name="frequency"
-                  >
-                    <USelectMenu
-                      v-model.number="formState.frequency"
-                      :options="frequencyOptions"
-                      value-attribute="value"
-                      option-attribute="label"
-                    />
-                  </UFormField>
-                </div>
-              </div>
-            </template>
-
-            <template #advanced="{ item }">
-              <div class="space-y-4 pt-4">
-                <UFormField
-                  label="HTTP Headers"
-                  name="httpConfig.headers"
-                >
-                  <div class="space-y-2">
-                    <div
-                      v-for="(header, index) in formState.httpConfig.headers"
-                      :key="index"
-                      class="flex items-center gap-2"
-                    >
-                      <UInput
-                        v-model="header.key"
-                        placeholder="Key"
-                        class="flex-1"
-                      />
-                      <UInput
-                        v-model="header.value"
-                        placeholder="Value"
-                        class="flex-1"
-                      />
-                      <UButton
-                        icon="i-heroicons-trash"
-                        color="error"
-                        variant="ghost"
-                        @click="removeHeader(index)"
-                      />
-                    </div>
-                    <UButton
-                      label="Thêm Header"
-                      icon="i-heroicons-plus"
-                      color="neutral"
-                      variant="outline"
-                      size="sm"
-                      @click="addHeader"
-                    />
-                  </div>
-                </UFormField>
-                <UFormField
-                  label="Request Body"
-                  name="httpConfig.bodyType"
-                  class="mt-4"
-                >
-                  <USelectMenu
-                    v-model="formState.httpConfig.bodyType"
-                    :options="bodyTypeOptions"
-                    value-attribute="key"
-                    option-attribute="label"
-                  />
-                </UFormField>
-                <UFormField
-                  v-if="formState.httpConfig.bodyType !== 'none'"
-                  name="httpConfig.body"
-                  class="mt-2"
-                >
-                  <UTextarea
-                    v-model="formState.httpConfig.body"
-                    :placeholder="formState.httpConfig.bodyType === 'json' ? 'Nhập nội dung JSON...' : 'Nhập nội dung text...'"
-                    :rows="5"
-                    autoresize
-                  />
-                </UFormField>
-              </div>
-            </template>
-
-            <template #alerts="{ item }">
-              <div class="space-y-4 pt-4">
-                <UFormField
-                  label="Ngưỡng độ trễ (Latency)"
-                  name="alertConfig.latencyThreshold"
-                >
-                  <UInput
-                    v-model.number="formState.alertConfig.latencyThreshold"
-                    type="number"
-                  >
-                    <template #trailing>
-                      <span class="text-xs text-gray-500 dark:text-gray-400">ms</span>
-                    </template>
-                  </UInput>
-                  <template #help>
-                    Gửi cảnh báo nếu độ trễ vượt quá con số này (ví dụ: 1500).
-                  </template>
-                </UFormField>
-
-                <UFormField
-                  label="Nội dung phản hồi (Body)"
-                  name="alertConfig.responseBodyCheck"
-                >
-                  <UInput
-                    v-model="formState.alertConfig.responseBodyCheck"
-                    placeholder="Ví dụ: &quot;error&quot;: true"
-                  />
-                  <template #help>
-                    Gửi cảnh báo nếu nội dung (response body) chứa chuỗi này.
-                  </template>
-                </UFormField>
-
-                <UFormField
-                  label="Tỷ lệ lỗi (Error Rate)"
-                  name="alertConfig.errorRateThreshold"
-                >
-                  <UInput
-                    v-model.number="formState.alertConfig.errorRateThreshold"
-                    type="number"
-                  >
-                    <template #trailing>
-                      <span class="text-xs text-gray-500 dark:text-gray-400">%</span>
-                    </template>
-                  </UInput>
-                  <template #help>
-                    Gửi cảnh báo nếu tỷ lệ lỗi vượt quá % này trong 10 phút.
-                  </template>
-                </UFormField>
-
-                <UFormField
-                  label="Kênh thông báo (Webhooks)"
-                  name="alertConfig.channels"
-                >
-                  <div class="space-y-2">
-                    <div
-                      v-for="(channel, index) in formState.alertConfig.channels"
-                      :key="index"
-                      class="flex items-center gap-2"
-                    >
-                      <UInput
-                        v-model="channel.url"
-                        placeholder="Nhập URL (Slack, Telegram, Discord...)"
-                        class="flex-1"
-                      />
-                      <UButton
-                        icon="i-heroicons-trash"
-                        color="error"
-                        variant="ghost"
-                        @click="removeChannel(index)"
-                      />
-                    </div>
-                    <UButton
-                      label="Thêm Webhook"
-                      icon="i-heroicons-plus"
-                      color="neutral"
-                      variant="outline"
-                      size="sm"
-                      @click="addChannel"
-                    />
-                  </div>
-                </UFormField>
-              </div>
-            </template>
-          </UTabs>
-
-          <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-800 mt-4">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              @click="isOpen = false"
-            >
-              Hủy
-            </UButton>
-            <UButton
-              type="submit"
-              :loading="formLoading"
-              :label="isEditing ? 'Lưu thay đổi' : 'Thêm Dịch vụ'"
-              color="primary"
-            />
-          </div>
-        </UForm>
-      </template>
-    </UCard>
+      </UForm>
+    </template>
   </UModal>
 </template>
 
@@ -352,6 +358,7 @@ function removeChannel(index: number) { formState.alertConfig.channels.splice(in
 
 // === Hàm Submit Form (Xử lý cả Create và Edit) ===
 async function onFormSubmit(event: FormSubmitEvent<Schema>) {
+  console.log('event.data', event.data)
   formLoading.value = true
   try {
     if (isEditing.value) {
