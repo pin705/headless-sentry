@@ -59,7 +59,8 @@ export default defineEventHandler(async (event) => {
 
           ssl: 1,
           httpConfig: 1,
-          alertConfig: 1
+          alertConfig: 1,
+          isPublic: 1
         }
       }
     ])

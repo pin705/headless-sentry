@@ -21,7 +21,6 @@ const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 //     alt: 'Benjamin Canac'
 //   }
 // })
-console.log('user', user.value)
 const items = computed<DropdownMenuItem[][]>(() => ([[{
   type: 'label',
   label: user.value?.email,
@@ -29,7 +28,20 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
     src: user.value?.avatar || 'https://www.gravatar.com/avatar/?d=mp',
     alt: 'User Avatar'
   }
-}], [{
+}],
+
+[
+  // (MỚI) Thêm Settings vào đây
+  {
+    label: 'Cài đặt', // Label mới
+    icon: 'i-lucide-settings', // Icon
+    to: '/settings/status-page' // Đường dẫn đến trang cài đặt
+  }
+  // { label: 'Profile', icon: 'i-lucide-user' }, // Bạn có thể giữ lại nếu muốn
+  // { label: 'Billing', icon: 'i-lucide-credit-card' }, // Bạn có thể giữ lại nếu muốn
+],
+
+[{
   label: 'Theme',
   icon: 'i-lucide-palette',
   children: [{

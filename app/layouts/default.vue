@@ -21,6 +21,14 @@ const links = [[{
   onSelect: () => {
     open.value = false
   }
+},
+{ // (MỚI) Thêm mục Settings
+  label: 'Cài đặt',
+  icon: 'i-lucide-settings', // Icon
+  to: '/settings/status-page', // Đường dẫn
+  onSelect: () => {
+    open.value = false
+  }
 }
 ]] satisfies NavigationMenuItem[][]
 

@@ -13,6 +13,8 @@ export const Monitor = defineMongooseModel('Monitor', {
   frequency: { type: Number, default: 60, enum: frequencies }, // Tần suất (giây)
   status: { type: String, default: 'ACTIVE', enum: ['ACTIVE', 'PAUSED'] },
 
+  isPublic: { type: Boolean, default: false }, // Mặc định là không công khai
+
   httpConfig: {
     // Chuyển từ Map sang mảng object (dễ quản lý bằng form)
     headers: [{
