@@ -190,7 +190,7 @@ const route = useRoute()
 const projectId = route.params.projectId as string
 console.log('Project ID từ route:', projectId)
 // === Data Fetching ===
-const { data, pending, error, refresh } = await useFetch(`/api/${projectId}/dashboard`, {
+const { data, pending, error, refresh } = await useFetch(`/api/projects/${projectId}/dashboard`, {
   lazy: true,
   // Cung cấp default value đầy đủ hơn
   default: () => ({

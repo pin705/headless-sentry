@@ -96,7 +96,7 @@ const dropdownItems = computed<DropdownMenuItem[][]>(() => {
       {
         label: 'Xem tất cả Project',
         icon: 'i-heroicons-squares-2x2',
-        to: '/settings/projects' // Link đến trang quản lý project
+        to: '/' // Link đến trang quản lý project
       },
       {
         label: 'Tạo Project Mới...',

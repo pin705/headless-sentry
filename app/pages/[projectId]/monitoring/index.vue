@@ -89,11 +89,12 @@ const UBadge = resolveComponent('UBadge')
 const UTooltip = resolveComponent('UTooltip')
 const UIcon = resolveComponent('UIcon')
 
-const { selectedProject } = useProjectState()
+const route = useRoute()
+const projectId = route.params.projectId as string
 
 const apiUrl = computed(() => {
-  if (!selectedProject.value?._id) return '' // Chưa chọn project thì không fetch
-  return `/api/projects/${selectedProject.value._id}/monitors`
+  if (!projectId) return '' // Chưa chọn project thì không fetch
+  return `/api/projects/${projectId}/monitors`
 })
 
 // (MỚI) State cho Modal Form
@@ -181,7 +182,7 @@ const historyColumns = [
     cell: ({ row }) => {
       const monitor = row.original
       const sslIcon = createSslIcon(row)
-      const nameText = h('span', { class: 'font-medium text-base' }, monitor.name)
+      const nameText = h('span', { class: 'font-medium text-base' }, monitor.name || 'Chưa đặt tên')
       const endpointBadge = h(UBadge, { label: monitor.method, color: 'neutral', variant: 'subtle', size: 'xs' })
       const endpointText = h('span', { class: 'truncate max-w-sm' }, monitor.endpoint)
       const endpointDiv = h('span', { class: 'text-gray-500 dark:text-gray-400 text-sm font-mono flex items-center gap-1.5' }, [endpointBadge, endpointText])
@@ -227,7 +228,7 @@ const getActionItems = (row): DropdownMenuItem[][] => [
   [{
     label: 'Xem chi tiết',
     icon: 'i-heroicons-chart-bar-20-solid',
-    onSelect: () => navigateTo(`/monitoring/${row.original._id}`)
+    onSelect: () => navigateTo(`/${projectId}/monitoring/${row.original._id}`)
   }, {
     label: 'Sửa',
     icon: 'i-heroicons-pencil-square-20-solid',

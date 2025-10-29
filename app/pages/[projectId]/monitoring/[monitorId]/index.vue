@@ -5,7 +5,7 @@
         <template #leading>
           <div class="flex items-center gap-2">
             <UButton
-              to="/monitoring"
+              :to="`/${projectId}/monitoring`"
               icon="i-heroicons-arrow-left"
               color="neutral"
               variant="ghost"
@@ -15,7 +15,7 @@
               v-if="monitorData"
               class="text-xl font-bold"
             >
-              {{ monitorData.name }}
+              {{ monitorData.name || 'Chưa đặt tên' }}
             </h1>
             <h1
               v-else-if="pendingMonitor"
@@ -249,7 +249,8 @@ import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalize
 
 const route = useRoute()
 const toast = useToast()
-const monitorId = route.params.id as string
+const monitorId = route.params.monitorId as string
+const projectId = route.params.projectId as string
 
 const UBadge = resolveComponent('UBadge')
 const UTooltip = resolveComponent('UTooltip')
@@ -261,7 +262,7 @@ const range = shallowRef<Range>({
 })
 
 const { data: monitorData, pending: pendingMonitor, error: errorMonitor } = await useFetch(
-  `/api/monitors/${monitorId}`,
+  `/api/projects/${projectId}/monitors/${monitorId}`,
   { lazy: true }
 )
 
@@ -329,7 +330,7 @@ watch([selectedRange, selectedStatus, selectedStatusCode, customRange], () => {
 
 // === 3. Lấy Dữ liệu Lịch sử (Phân trang & Lọc) ===
 const { data: resultsData, pending: pendingResults, error: errorResults, refresh: refreshResults } = await useFetch(
-  () => `/api/monitors/${monitorId}/results`,
+  () => `/api/projects/${projectId}/monitors/${monitorId}/results`,
   {
     query: queryParams,
     lazy: true,

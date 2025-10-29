@@ -13,7 +13,7 @@ export default defineCronHandler(
 
     // (FIXED) Lấy thêm alertConfig, lastAlertedAt, name
     const monitorsToRun = await Monitor.find({ status: 'ACTIVE' })
-      .select('endpoint method httpConfig userId alertConfig name lastAlertedAt')
+      .select('endpoint method httpConfig userId projectId alertConfig name lastAlertedAt')
       .lean()
 
     if (monitorsToRun.length === 0) {
@@ -132,7 +132,7 @@ export default defineCronHandler(
         const { monitor, latency, statusCode, isUp, errorMessage } = checkResultData
         resultsToInsert.push({
           timestamp: timestamp,
-          meta: { monitorId: monitor._id, userId: monitor.userId, location: 'default' },
+          meta: { monitorId: monitor._id, userId: monitor.userId, projectId: monitor.projectId, location: 'default' },
           latency: latency, statusCode: statusCode, isUp: isUp, errorMessage: errorMessage
         })
 

@@ -2,20 +2,19 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 
 const open = ref(false)
-const { user, clear } = useUserSession()
-const colorMode = useColorMode()
-const appConfig = useAppConfig()
 
+const { selectedProject } = useProjectState()
+console.log('Selected Project in Layout:', selectedProject.value)
 const links = [
   [{
     label: 'Tổng quan',
-    to: '/',
+    to: `/${selectedProject.value?._id || ''}`,
     onSelect: () => {
       open.value = false
     }
   }, {
     label: 'Giám sát',
-    to: '/monitoring',
+    to: `/${selectedProject.value?._id}/monitoring`,
     // badge: '4', // (Tạm ẩn badge cứng)
     onSelect: () => {
       open.value = false
@@ -23,7 +22,7 @@ const links = [
   },
   {
     label: 'Cài đặt',
-    to: '/settings/status-page',
+    to: `/${selectedProject.value?._id}/settings/status-page`,
     onSelect: () => {
       open.value = false
     }

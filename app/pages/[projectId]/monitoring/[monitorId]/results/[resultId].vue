@@ -124,12 +124,13 @@ import { computed } from 'vue'
 
 const route = useRoute()
 const toast = useToast()
-const monitorId = route.params.id as string
+const monitorId = route.params.monitorId as string
 const resultId = route.params.resultId as string
+const projectId = route.params.projectId as string
 
 // API Call để lấy chi tiết kết quả
 const { data, pending, error, refresh } = await useFetch(
-  `/api/monitors/${monitorId}/results/${resultId}`,
+  `/api/projects/${projectId}/monitors/${monitorId}/results/${resultId}`,
   { lazy: true }
 )
 

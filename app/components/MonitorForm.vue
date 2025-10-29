@@ -265,11 +265,12 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue', 'saved'])
 const toast = useToast()
 
-const { selectedProject } = useProjectState()
+const route = useRoute()
+const projectId = route.params.projectId as string
 
 const apiUrl = computed(() => {
-  if (!selectedProject.value?._id) return '' // Chưa chọn project thì không fetch
-  return `/api/projects/${selectedProject.value._id}/monitors`
+  if (!projectId) return '' // Chưa chọn project thì không fetch
+  return `/api/projects/${projectId}/monitors`
 })
 
 // === Quản lý State của Modal ===
