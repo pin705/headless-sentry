@@ -29,7 +29,7 @@ const bodySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-   await requireProjectMembership(event)
+  await requireProjectMembership(event)
 
   const monitorId = getRouterParam(event, 'monitorId')
   const projectId = getRouterParam(event, 'projectId')
@@ -41,10 +41,11 @@ export default defineEventHandler(async (event) => {
   try {
     // Validate body
     const body = await readValidatedBody(event, bodySchema.parse)
+    console.log('Dữ liệu cập nhật monitor:', body?.name)
 
     // Tìm và cập nhật monitor
     const updatedMonitor = await Monitor.findOneAndUpdate(
-      { _id: monitorId, projectId }, // Điều kiện tìm
+      { _id: monitorId }, // Điều kiện tìm
       { $set: body }, // Dữ liệu cập nhật
       { new: true } // Trả về document đã cập nhật
     )
