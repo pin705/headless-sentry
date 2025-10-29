@@ -21,124 +21,123 @@ const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 //     alt: 'Benjamin Canac'
 //   }
 // })
-const items = computed<DropdownMenuItem[][]>(() => ([[{
-  type: 'label',
-  label: user.value?.email,
-  avatar: {
-    src: user.value?.avatar || 'https://www.gravatar.com/avatar/?d=mp',
-    alt: 'User Avatar'
-  }
-}],
-
-[
-  // (MỚI) Thêm Settings vào đây
-  {
-    label: 'Cài đặt', // Label mới
-    icon: 'i-lucide-settings', // Icon
-    to: '/settings/status-page' // Đường dẫn đến trang cài đặt
-  }
-  // { label: 'Profile', icon: 'i-lucide-user' }, // Bạn có thể giữ lại nếu muốn
-  // { label: 'Billing', icon: 'i-lucide-credit-card' }, // Bạn có thể giữ lại nếu muốn
-],
-
-[{
-  label: 'Theme',
-  icon: 'i-lucide-palette',
-  children: [{
-    label: 'Primary',
-    slot: 'chip',
-    chip: appConfig.ui.colors.primary,
-    content: {
-      align: 'center',
-      collisionPadding: 16
-    },
-    children: colors.map(color => ({
-      label: color,
-      chip: color,
-      slot: 'chip',
-      checked: appConfig.ui.colors.primary === color,
-      type: 'checkbox',
-      onSelect: (e) => {
-        e.preventDefault()
-
-        appConfig.ui.colors.primary = color
-      }
-    }))
-  }, {
-    label: 'Neutral',
-    slot: 'chip',
-    chip: appConfig.ui.colors.neutral === 'neutral' ? 'old-neutral' : appConfig.ui.colors.neutral,
-    content: {
-      align: 'end',
-      collisionPadding: 16
-    },
-    children: neutrals.map(color => ({
-      label: color,
-      chip: color === 'neutral' ? 'old-neutral' : color,
-      slot: 'chip',
-      type: 'checkbox',
-      checked: appConfig.ui.colors.neutral === color,
-      onSelect: (e) => {
-        e.preventDefault()
-
-        appConfig.ui.colors.neutral = color
-      }
-    }))
-  }]
-}, {
-  label: 'Appearance',
-  icon: 'i-lucide-sun-moon',
-  children: [{
-    label: 'Light',
-    icon: 'i-lucide-sun',
-    type: 'checkbox',
-    checked: colorMode.value === 'light',
-    onSelect(e: Event) {
-      e.preventDefault()
-
-      colorMode.preference = 'light'
+const items = computed<DropdownMenuItem[][]>(() => ([
+  [{
+    type: 'label',
+    label: user.value?.email,
+    avatar: {
+      src: user.value?.avatar || 'https://www.gravatar.com/avatar/?d=mp',
+      alt: 'User Avatar'
     }
-  }, {
-    label: 'Dark',
-    icon: 'i-lucide-moon',
-    type: 'checkbox',
-    checked: colorMode.value === 'dark',
-    onUpdateChecked(checked: boolean) {
-      if (checked) {
-        colorMode.preference = 'dark'
-      }
+  }],
+  [
+    {
+      label: 'Theme',
+      icon: 'i-lucide-palette',
+      children: [{
+        label: 'Primary',
+        slot: 'chip',
+        chip: appConfig.ui.colors.primary,
+        content: {
+          align: 'center',
+          collisionPadding: 16
+        },
+        children: colors.map(color => ({
+          label: color,
+          chip: color,
+          slot: 'chip',
+          checked: appConfig.ui.colors.primary === color,
+          type: 'checkbox',
+          onSelect: (e) => {
+            e.preventDefault()
+
+            appConfig.ui.colors.primary = color
+          }
+        }))
+      }, {
+        label: 'Neutral',
+        slot: 'chip',
+        chip: appConfig.ui.colors.neutral === 'neutral' ? 'old-neutral' : appConfig.ui.colors.neutral,
+        content: {
+          align: 'end',
+          collisionPadding: 16
+        },
+        children: neutrals.map(color => ({
+          label: color,
+          chip: color === 'neutral' ? 'old-neutral' : color,
+          slot: 'chip',
+          type: 'checkbox',
+          checked: appConfig.ui.colors.neutral === color,
+          onSelect: (e) => {
+            e.preventDefault()
+
+            appConfig.ui.colors.neutral = color
+          }
+        }))
+      }]
     },
-    onSelect(e: Event) {
-      e.preventDefault()
+    {
+      label: 'Appearance',
+      icon: 'i-lucide-sun-moon',
+      children: [
+        {
+          label: 'System',
+          icon: 'i-lucide-monitor',
+          type: 'checkbox',
+          checked: colorMode.value === 'system',
+          onSelect(e: Event) {
+            e.preventDefault()
+
+            colorMode.preference = 'system'
+          }
+        },
+        {
+          label: 'Light',
+          icon: 'i-lucide-sun',
+          type: 'checkbox',
+          checked: colorMode.value === 'light',
+          onSelect(e: Event) {
+            e.preventDefault()
+
+            colorMode.preference = 'light'
+          }
+        }, {
+          label: 'Dark',
+          icon: 'i-lucide-moon',
+          type: 'checkbox',
+          checked: colorMode.value === 'dark',
+          onUpdateChecked(checked: boolean) {
+            if (checked) {
+              colorMode.preference = 'dark'
+            }
+          },
+          onSelect(e: Event) {
+            e.preventDefault()
+          }
+        }]
     }
-  }]
-}], [ // Add a new section for Logout
-  {
-    label: 'Đăng xuất', // Logout label
-    icon: 'i-lucide-log-out',
-    // Define the click action
-    onSelect: async () => {
-      console.log('Logging out...')
-      await clear()
-      // Optionally redirect, though middleware might handle this
-      await navigateTo('/login')
+
+  ], [ // Add a new section for Logout
+    {
+      label: 'Đăng xuất', // Logout label
+      icon: 'i-lucide-log-out',
+      // Define the click action
+      onSelect: async () => {
+        console.log('Logging out...')
+        await clear()
+        // Optionally redirect, though middleware might handle this
+        await navigateTo('/login')
+      }
     }
-  }
-]]))
+  ]]))
 </script>
 
 <template>
   <UDropdownMenu
     :items="items"
-    :content="{ align: 'center', collisionPadding: 12 }"
-    :ui="{ content: collapsed ? 'w-48' : 'w-(--reka-dropdown-menu-trigger-width)' }"
   >
     <UButton
-      v-bind="{
-        ...user,
-        label: collapsed ? undefined : user?.email,
-        trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down'
-      }"
+
       color="neutral"
       variant="ghost"
       block
@@ -147,17 +146,12 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
       :ui="{
         trailingIcon: 'text-dimmed'
       }"
+      :avatar="{
+        src: user?.avatar || 'https://www.gravatar.com/avatar/?d=mp',
+        alt: 'User Avatar',
+        size: collapsed ? 'md' : 'sm'
+      }"
     />
-
-    <template #chip-leading="{ item }">
-      <span
-        :style="{
-          '--chip-light': `var(--color-${(item as any).chip}-500)`,
-          '--chip-dark': `var(--color-${(item as any).chip}-400)`
-        }"
-        class="ms-0.5 size-2 rounded-full bg-(--chip-light) dark:bg-(--chip-dark)"
-      />
-    </template>
 
     <!-- <template #locale>
       <div class="p-2">
