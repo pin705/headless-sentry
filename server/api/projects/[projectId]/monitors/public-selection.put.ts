@@ -1,4 +1,3 @@
-// server/api/monitors/public-selection.put.ts
 import { z } from 'zod'
 import mongoose from 'mongoose'
 
@@ -19,6 +18,7 @@ export default defineEventHandler(async (event) => {
   try {
     const body = await readValidatedBody(event, bodySchema.parse)
     const userId = new mongoose.Types.ObjectId(session.user.userId)
+    const projectId = getRouterParam(event, 'projectId')
 
     // Chuyển đổi mảng string IDs thành mảng ObjectId
     const selectedObjectIds = body.selectedIds.map(id => new mongoose.Types.ObjectId(id))
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
     const updateSelectedPromise = Monitor.updateMany(
       {
         _id: { $in: selectedObjectIds }, // ID nằm trong danh sách chọn
-        userId: userId // Thuộc user này
+        projectId: projectId // Thuộc user này
       },
       { $set: { isPublic: true } }
     )
@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
     const updateUnselectedPromise = Monitor.updateMany(
       {
         _id: { $nin: selectedObjectIds }, // ID KHÔNG nằm trong danh sách chọn
-        userId: userId // Thuộc user này
+        projectId: projectId // Thuộc user này
       },
       { $set: { isPublic: false } }
     )

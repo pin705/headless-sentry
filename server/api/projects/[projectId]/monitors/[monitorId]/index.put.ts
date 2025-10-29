@@ -1,4 +1,3 @@
-// server/api/monitors/[id].put.ts
 import { z } from 'zod'
 
 // Tái sử dụng validation schema từ file POST
@@ -30,12 +29,11 @@ const bodySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
-  const monitorId = getRouterParam(event, 'id')
+   await requireProjectMembership(event)
 
-  if (!session.user?.userId) {
-    throw createError({ statusCode: 401, message: 'Yêu cầu đăng nhập' })
-  }
+  const monitorId = getRouterParam(event, 'monitorId')
+  const projectId = getRouterParam(event, 'projectId')
+
   if (!monitorId) {
     throw createError({ statusCode: 400, message: 'Thiếu Monitor ID' })
   }
@@ -46,7 +44,7 @@ export default defineEventHandler(async (event) => {
 
     // Tìm và cập nhật monitor
     const updatedMonitor = await Monitor.findOneAndUpdate(
-      { _id: monitorId, userId: session.user.userId }, // Điều kiện tìm
+      { _id: monitorId, projectId }, // Điều kiện tìm
       { $set: body }, // Dữ liệu cập nhật
       { new: true } // Trả về document đã cập nhật
     )

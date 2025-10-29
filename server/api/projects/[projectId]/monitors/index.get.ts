@@ -1,18 +1,13 @@
-// server/api/monitors/index.get.ts
 import mongoose from 'mongoose'
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
-  if (!session.user?.userId) {
-    throw createError({ statusCode: 401, message: 'Yêu cầu đăng nhập' })
-  }
+  await requireProjectMembership(event)
 
   try {
-    const userId = new mongoose.Types.ObjectId(session.user.userId)
-
+    const projectId = getRouterParam(event, 'projectId') // Lấy projectId
     const monitorsWithStatus = await Monitor.aggregate([
       // 1. Lọc monitor của user hiện tại
-      { $match: { userId: userId } },
+      { $match: { projectId: new mongoose.Types.ObjectId(projectId) } },
 
       // 2. Sắp xếp (tùy chọn, ví dụ: theo tên)
       { $sort: { name: 1 } },

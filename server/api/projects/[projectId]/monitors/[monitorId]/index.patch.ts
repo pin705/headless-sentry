@@ -1,12 +1,8 @@
-// server/api/monitors/[id].patch.ts
-
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
-  const monitorId = getRouterParam(event, 'id')
+  await requireProjectMembership(event)
 
-  if (!session.user?.userId) {
-    throw createError({ statusCode: 401, message: 'Yêu cầu đăng nhập' })
-  }
+  const monitorId = getRouterParam(event, 'monitorId')
+  const projectId = getRouterParam(event, 'projectId')
   if (!monitorId) {
     throw createError({ statusCode: 400, message: 'Thiếu Monitor ID' })
   }
@@ -14,7 +10,7 @@ export default defineEventHandler(async (event) => {
   try {
     const monitor = await Monitor.findOne({
       _id: monitorId,
-      userId: session.user.userId
+      projectId
     })
 
     if (!monitor) {

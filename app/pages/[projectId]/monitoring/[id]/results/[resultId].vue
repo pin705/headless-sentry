@@ -5,7 +5,7 @@
         <template #leading>
           <div class="flex items-center gap-2">
             <UButton
-              :to="`/api-monitoring/${monitorId}`"
+              :to="`/monitoring/${monitorId}`"
               icon="i-heroicons-arrow-left"
               color="neutral"
               variant="ghost"

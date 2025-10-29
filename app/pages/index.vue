@@ -1,276 +1,249 @@
 <template>
-  <UDashboardPanel id="home">
+  <UDashboardPanel id="projects-list">
     <template #header>
-      <UDashboardNavbar title="Tổng quan">
-        <!-- <template #leading>
-          <UDashboardSidebarCollapse />
-        </template> -->
-
+      <UDashboardNavbar title="Quản lý Projects">
         <template #right>
-          <UButton
-            :icon="pending ? 'i-heroicons-arrow-path-solid' : 'i-heroicons-arrow-path'"
-            :loading="pending"
-            variant="ghost"
-            color="neutral"
-            aria-label="Làm mới"
-            @click="refresh()"
-          />
+          <div class="flex items-center gap-4">
+            <UButton
+              :icon="loadingProjects ? 'i-heroicons-arrow-path-solid' : 'i-heroicons-arrow-path'"
+              :loading="loadingProjects"
+              variant="ghost"
+              color="neutral"
+              aria-label="Làm mới"
+              @click="refreshProjects"
+            />
+            <UButton
+              icon="i-heroicons-plus-solid"
+              label="Tạo Project Mới"
+              color="primary"
+              @click="isCreateModalOpen = true"
+            />
+          </div>
         </template>
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <div
-        v-if="pending"
-        class="p-4 flex items-center justify-center h-64"
+        v-if="loadingProjects"
+        class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
-        <UIcon
-          name="i-heroicons-arrow-path"
-          class="animate-spin text-gray-500 w-8 h-8"
+        <USkeleton
+          v-for="i in 3"
+          :key="i"
+          class="h-28"
         />
       </div>
+
       <div
-        v-else-if="error"
-        class="p-4"
+        v-else-if="userProjects.length === 0"
+        class="p-4 text-center text-gray-500 dark:text-gray-400"
       >
-        <p class="text-error-500">
-          Không thể tải thống kê trang tổng quan.
-        </p>
+        <UIcon
+          name="i-heroicons-folder-open"
+          class="w-12 h-12 mx-auto mb-2"
+        />
+        <p>Bạn chưa tham gia Project nào.</p>
+        <UButton
+          label="Tạo Project đầu tiên"
+          icon="i-heroicons-plus"
+          color="primary"
+          variant="soft"
+          class="mt-4"
+          @click="isCreateModalOpen = true"
+        />
       </div>
 
       <div
-        v-else-if="data"
-        class="p-4 space-y-4"
+        v-else
+        class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <UCard>
-            <template #header>
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">Tổng số</span><UIcon
-                  name="i-lucide-server"
-                  class="w-5 h-5 text-gray-400 dark:text-gray-500"
-                />
-              </div>
-            </template>
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-bold">{{ data.totalMonitors }}</span><span class="text-sm">dịch vụ</span>
+        <UCard
+          v-for="project in userProjects"
+          :key="project._id"
+          class="hover:ring-2 hover:ring-primary-500 dark:hover:ring-primary-400 cursor-pointer transition-shadow duration-200"
+          :ui="{ body: { padding: 'p-4' }, ring: 'ring-1 ring-gray-200 dark:ring-gray-800' }"
+          @click="navigateToProject(project._id)"
+        >
+          <div class="flex justify-between items-start">
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-lg truncate">{{ project.name }}</span>
+              <UBadge
+                v-if="project.ownerId === currentUser?.userId"
+                label="Owner"
+                color="primary"
+                variant="soft"
+                size="xs"
+              />
             </div>
-          </UCard>
-          <UCard>
-            <template #header>
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-success-500">Đang Hoạt động</span><UIcon
-                  name="i-lucide-check-circle"
-                  class="w-5 h-5 text-success-400"
-                />
-              </div>
-            </template>
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-bold">{{ data.totalUp }}</span><span
-                v-if="data.totalDown > 0 || data.totalPaused > 0"
-                class="text-sm"
-              >/ {{ data.totalMonitors - data.totalPaused }}</span>
-            </div>
-          </UCard>
-          <UCard>
-            <template #header>
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-error-500">Ngưng hoạt động</span><UIcon
-                  name="i-lucide-alert-triangle"
-                  class="w-5 h-5 text-error-400"
-                />
-              </div>
-            </template>
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-bold">{{ data.totalDown }}</span><span
-                v-if="data.totalPaused > 0"
-                class="text-sm text-neutral-500"
-              >({{ data.totalPaused }} tạm dừng)</span>
-            </div>
-          </UCard>
-          <UCard>
-            <template #header>
-              <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">Uptime (24 Giờ)</span><UIcon
-                  name="i-lucide-shield-check"
-                  class="w-5 h-5 text-gray-400 dark:text-gray-500"
-                />
-              </div>
-            </template>
-            <div class="flex items-baseline gap-2">
-              <span
-                class="text-3xl font-bold"
-                :class="uptimeColorClass"
-              >
-                <span v-if="data.uptimePercent24h < 99.99 && data.uptimePercent24h > 90">{{ data.uptimePercent24h.toFixed(2) }}</span>
-                <span v-else>{{ data.uptimePercent24h.toFixed(0) }}</span>%
-              </span>
-              <span class="text-sm">/ {{ data.avgLatency24h }} ms</span>
-            </div>
-          </UCard>
-        </div>
 
-        <UCard>
-          <template #header>
-            <h3 class="font-semibold">
-              Độ trễ trung bình (24 Giờ qua - Tính theo giờ)
-            </h3>
-          </template>
-          <VisXYContainer
-            v-if="latencyChartFormattedData.length > 1"
-            :data="latencyChartFormattedData"
-            :x="xLatency"
-            :y="yLatency"
-            class="h-64"
-          >
-            <VisLine
-              :x="xLatency"
-              :y="yLatency"
-              color="#3b82f6"
-            /> <VisAxis
-              type="x"
-              :tick-format="formatHourTick"
-              :grid-line="false"
-            />
-            <VisAxis
-              type="y"
-              :tick-format="(v: number) => `${v} ms`"
-            />
-            <VisTooltip />
-          </VisXYContainer>
-          <div
-            v-else
-            class="h-64 flex items-center justify-center"
-          >
-            <p class="text-gray-500">
-              Không đủ dữ liệu để vẽ biểu đồ độ trễ.
-            </p>
+            <UDropdownMenu
+              :items="getActionItems(project)"
+              :popper="{ placement: 'bottom-end' }"
+            >
+              <UButton
+                icon="i-heroicons-ellipsis-horizontal-20-solid"
+                color="neutral"
+                variant="ghost"
+                size="sm"
+                square
+              />
+            </UDropdownMenu>
           </div>
         </UCard>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <UCard>
-            <template #header>
-              <h3 class="font-semibold">
-                Lỗi Gần Đây (24 Giờ)
-              </h3>
-            </template>
-            <UTable
-              :data="data.recentErrors"
-              :columns="errorColumns"
-              :empty-state="{ icon: 'i-heroicons-check-circle', label: 'Không có lỗi nào gần đây. Tuyệt vời!' }"
-              :ui="{ td: { padding: 'py-2 px-3' } }"
-            />
-          </UCard>
-
-          <UCard>
-            <template #header>
-              <h3 class="font-semibold">
-                Cảnh Báo Đã Gửi (24 Giờ)
-              </h3>
-            </template>
-            <UTable
-              :data="data.recentAlerts"
-              :columns="alertColumns"
-              :empty-state="{ icon: 'i-heroicons-bell-slash', label: 'Không có cảnh báo nào được gửi gần đây.' }"
-              :ui="{ td: { padding: 'py-2 px-3' } }"
-            />
-          </UCard>
-        </div>
       </div>
+
+      <UModal v-model:open="isDeleteModalOpen">
+        <template #header>
+          <h3 class="text-lg font-semibold">
+            Xác nhận Xóa Project
+          </h3>
+        </template>
+        <template #body>
+          <p>Bạn có chắc chắn muốn xóa Project <strong>{{ projectToDelete?.name }}</strong> không? Tất cả Monitors và dữ liệu liên quan cũng sẽ bị xóa vĩnh viễn.</p>
+          <p class="mt-2 text-sm text-warning-500">
+            Hành động này không thể hoàn tác.
+          </p>
+        </template>
+        <template #footer>
+          <div class="flex justify-end gap-3">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              @click="isDeleteModalOpen = false"
+            >
+              Hủy
+            </UButton>
+            <UButton
+              color="error"
+              :loading="deleteLoading"
+              @click="confirmDelete"
+            >
+              Xác nhận Xóa
+            </UButton>
+          </div>
+        </template>
+      </UModal>
+
+      <CreateProjectModal
+        v-model="isCreateModalOpen"
+        @created="onProjectCreated"
+      />
     </template>
   </UDashboardPanel>
 </template>
 
 <script setup lang="ts">
-import { h, computed } from 'vue'
-import { VisXYContainer, VisLine, VisAxis, VisTooltip } from '@unovis/vue'
+import type { DropdownMenuItem } from '@nuxt/ui'
 
-// === Data Fetching ===
-const { data, pending, error, refresh } = await useFetch('/api/dashboard/stats', {
-  lazy: true,
-  // Cung cấp default value đầy đủ hơn
-  default: () => ({
-    totalMonitors: 0, totalUp: 0, totalDown: 0, totalPaused: 0,
-    uptimePercent24h: 100, avgLatency24h: 0,
-    latencyChartData: [], recentErrors: [], recentAlerts: []
-  })
+const toast = useToast()
+const { user: currentUser } = useUserSession()
+const { userProjects, loadingProjects, fetchUserProjects, selectProject, selectedProject } = useProjectState() // Added selectedProject
+
+// Fetch projects on mount
+onMounted(() => {
+  fetchUserProjects()
 })
 
-if (error.value) {
-  console.error('Lỗi tải dashboard stats:', error.value)
-  // Có thể dùng useToast ở đây nếu cần
+// === Actions Logic ===
+const UDropdownMenu = resolveComponent('UDropdownMenu') // (Rule 4)
+const UButton = resolveComponent('UButton')
+// const UBadge = resolveComponent('UBadge') // If UBadge is used in render functions
+
+// Modal Delete state
+const isDeleteModalOpen = ref(false)
+const deleteLoading = ref(false)
+const projectToDelete = ref<any>(null) // Store the whole project object
+
+// (Rule 3) Define Actions Items based on role (currently just Owner check)
+const getActionItems = (project: any): DropdownMenuItem[][] => {
+  const isOwner = project.ownerId === currentUser.value?.userId
+
+  const items: DropdownMenuItem[][] = [[
+    {
+      label: 'Cài đặt Project',
+      icon: 'i-heroicons-cog-6-tooth',
+      to: `/settings/projects/${project._id}` // Link to specific project settings
+    }
+    // Add Manage Members link later
+    // { label: 'Quản lý Thành viên', icon: 'i-heroicons-users', to: `/settings/projects/${project._id}/members` }
+  ]]
+
+  // Only Owner can delete
+  if (isOwner) {
+    items.push([{
+      label: 'Xóa Project',
+      icon: 'i-heroicons-trash-20-solid',
+      labelClass: 'text-error-500 dark:text-error-400', // (Rule 7)
+      click: () => openDeleteModal(project) // Pass the project object
+    }])
+  }
+
+  return items
 }
 
-// === Logic Biểu đồ Latency ===
-const xLatency = (d: { hour: string, avgLatency: number }) => new Date(d.hour)
-const yLatency = (d: { hour: string, avgLatency: number }) => d.avgLatency
-
-const latencyChartFormattedData = computed(() => {
-  return (data.value?.latencyChartData || []).map(item => ({
-    hour: item.hour,
-    avgLatency: item.avgLatency
-  }))
-})
-
-const formatHourTick = (value: number | Date) => {
-  return new Date(value).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+// Open Delete Modal
+function openDeleteModal(project: any) {
+  projectToDelete.value = project
+  isDeleteModalOpen.value = true
 }
 
-// === Logic Bảng Lỗi Gần Đây ===
-const UTooltip = resolveComponent('UTooltip')
-const UIcon = resolveComponent('UIcon')
+// Confirm Delete Project
+async function confirmDelete() {
+  if (!projectToDelete.value) return
+  deleteLoading.value = true
+  try {
+    // (Rule 3)
+    await $fetch(`/api/projects/${projectToDelete.value._id}`, { method: 'DELETE' })
+    toast.add({ title: 'Đã xóa', description: `Đã xóa Project "${projectToDelete.value.name}".`, color: 'success' })
+    isDeleteModalOpen.value = false
+    const deletedProjectId = projectToDelete.value._id // Store ID before nulling
+    projectToDelete.value = null
+    await fetchUserProjects() // Reload project list
 
-// (Tuân thủ Rule 5)
-const errorColumns = [
-  { accessorKey: 'monitor', header: 'Dịch vụ',
-    cell: ({ row }: any) => {
-      // (Tuân thủ Rule 3)
-      const monitor = row.original.meta?.monitorId // monitorId đã được populate
-      return monitor
-        ? h('span', { class: 'text-sm font-medium hover:underline cursor-pointer', onClick: () => navigateTo(`/api-monitoring/${monitor._id}`) }, monitor.name) // Link tới trang chi tiết
-        : h('span', { class: 'text-sm text-gray-500' }, 'N/A')
+    // (NEW) If the deleted project was the selected one, select another
+    if (selectedProject.value?._id === deletedProjectId) {
+      selectProject(userProjects.value[0] || null) // Select the first available or null
     }
-  },
-  { accessorKey: 'error', header: 'Chi tiết lỗi',
-    cell: ({ row }: any) => {
-      // (Tuân thủ Rule 3, 7)
-      const statusCode = row.original.statusCode
-      const errorMessage = row.original.errorMessage || 'Lỗi không xác định'
-      // Hiển thị message đầy đủ trong tooltip, cắt ngắn trên bảng
-      const shortError = errorMessage.substring(0, 60) + (errorMessage.length > 60 ? '...' : '')
-      const errorText = `[${statusCode}] ${shortError}`
+  } catch (err: any) {
+    toast.add({ title: 'Lỗi', description: err.data?.message || 'Không thể xóa Project.', color: 'error' })
+  } finally {
+    deleteLoading.value = false
+  }
+}
 
-      // Luôn dùng Tooltip để hiển thị message đầy đủ
-      return h(UTooltip, {
-        text: errorMessage,
-        popper: { placement: 'top-start', arrow: true }
-      }, () => h('span', { class: 'text-sm text-error-500 cursor-help' }, errorText))
+// === Create Project Logic ===
+const isCreateModalOpen = ref(false)
+
+async function onProjectCreated(newProject: any) {
+  await fetchUserProjects() // Reload list
+  // Automatically select and navigate to the new project's overview page
+  if (newProject?._id) {
+    const found = userProjects.value.find(p => p._id === newProject._id)
+    if (found) {
+      selectProject(found) // Set as selected
+      navigateTo(`/${found._id}`) // Navigate to the new root project page
     }
-  },
-  { accessorKey: 'timestamp', header: 'Thời gian', class: 'w-32 text-right',
-    cell: ({ row }: any) => h('span', { class: 'text-sm text-gray-500 dark:text-gray-400' }, formatTimeAgo(new Date(row.original.timestamp)))
   }
-]
+}
 
-// === Logic Bảng Cảnh Báo Gần Đây ===
-const alertColumns = [
-  { accessorKey: 'name', header: 'Dịch vụ',
-    cell: ({ row }: any) => h('span', { class: 'text-sm font-medium hover:underline cursor-pointer', onClick: () => navigateTo(`/api-monitoring/${row.original._id}`) }, row.original.name) // Link tới trang chi tiết
-  },
-  { accessorKey: 'alertTime', header: 'Gửi lúc', class: 'w-32 text-right',
-    // (Tuân thủ Rule 3)
-    cell: ({ row }: any) => h('span', { class: 'text-sm text-gray-500 dark:text-gray-400' }, formatTimeAgo(new Date(row.original.alertConfig.lastAlertedAt)))
+// Refresh Function
+async function refreshProjects() {
+  await fetchUserProjects()
+}
+
+// === Navigation ===
+// (NEW) Navigate to the root project page
+function navigateToProject(projectId: string) {
+  // Find the project object to pass to selectProject if needed
+  const project = userProjects.value.find(p => p._id === projectId)
+  if (project) {
+    selectProject(project) // Ensure the selected project state is updated
   }
-]
+  navigateTo(`/${projectId}`) // Use the new root route structure
+}
 
-// === Logic màu Uptime ===
-// (Tuân thủ Rule 7)
-const uptimeColorClass = computed(() => {
-  if (!data.value) return 'text-neutral-500'
-  const uptime = data.value.uptimePercent24h
-  if (uptime >= 99.9) return 'text-success-500' // Chỉ xanh khi > 99.9
-  if (uptime >= 99) return 'text-warning-500' // Vàng từ 99 - 99.9
-  return 'text-error-500' // Đỏ nếu < 99
+useHead({
+  title: 'Quản lý Projects'
 })
 </script>

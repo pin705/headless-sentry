@@ -5,7 +5,7 @@ import mongoose from 'mongoose'
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
-  const monitorId = getRouterParam(event, 'id') // Lấy monitorId từ route
+  const monitorId = getRouterParam(event, 'monitorId') // Lấy monitorId từ route
   const resultId = getRouterParam(event, 'resultId') // Lấy resultId từ route
 
   if (!session.user?.userId) {

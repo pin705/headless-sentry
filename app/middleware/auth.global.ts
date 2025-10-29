@@ -31,7 +31,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
       return navigateTo('/')
     }
 
-    // Nếu truy cập các trang khác (/, /api-monitoring, ...), cho phép
+    // Nếu truy cập các trang khác (/, /monitoring, ...), cho phép
     return
   }
 })

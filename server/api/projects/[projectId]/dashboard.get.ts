@@ -1,22 +1,19 @@
-// server/api/dashboard/stats.get.ts
 import mongoose from 'mongoose'
-// (MỚI) Thêm các hàm date-fns cần thiết
 import { subHours, subDays, startOfHour, endOfHour } from 'date-fns'
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
-  if (!session.user?.userId) {
-    throw createError({ statusCode: 401, message: 'Yêu cầu đăng nhập' })
-  }
+  await requireUserSession(event)
+  const projectId = getRouterParam(event, 'projectId')
 
-  const userId = new mongoose.Types.ObjectId(session.user.userId)
   const now = new Date()
   const date24hAgo = subHours(now, 24) // Mốc 24 giờ trước
+
+  const projectIdObjectId = new mongoose.Types.ObjectId(projectId)
 
   try {
     // === 1. Lấy trạng thái MỚI NHẤT của TẤT CẢ monitors (Giữ nguyên) ===
     const latestStatesPromise = Monitor.aggregate([
-      { $match: { userId: userId } },
+      { $match: { projectId: projectIdObjectId } },
       { $lookup: {
         from: 'results', let: { monitorId: '$_id' },
         pipeline: [
@@ -30,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
     // === 2. Lấy % Uptime và Latency trung bình trong 24h qua (Giữ nguyên) ===
     const stats24hPromise = Result.aggregate([
-      { $match: { 'meta.userId': userId, 'timestamp': { $gte: date24hAgo } } },
+      { $match: { 'meta.projectId': projectIdObjectId, 'timestamp': { $gte: date24hAgo } } },
       { $group: {
         _id: null, totalChecks: { $sum: 1 }, totalUp: { $sum: { $cond: ['$isUp', 1, 0] } }, avgLatency: { $avg: '$latency' }
       } }
@@ -38,7 +35,7 @@ export default defineEventHandler(async (event) => {
 
     // === (MỚI) 3. Lấy dữ liệu Biểu đồ Latency (Trung bình mỗi giờ trong 24h) ===
     const latencyChartPromise = Result.aggregate([
-      { $match: { 'meta.userId': userId, 'timestamp': { $gte: date24hAgo } } },
+      { $match: { 'meta.projectId': projectIdObjectId, 'timestamp': { $gte: date24hAgo } } },
       { $group: {
         // Nhóm theo giờ
         _id: { $dateTrunc: { date: '$timestamp', unit: 'hour' } },
@@ -50,7 +47,7 @@ export default defineEventHandler(async (event) => {
 
     // === (MỚI) 4. Lấy 5 Lỗi Gần Nhất ===
     const recentErrorsPromise = Result.find({
-      'meta.userId': userId,
+      'meta.projectId': projectIdObjectId,
       'isUp': false, // Chỉ lấy các lần kiểm tra thất bại
       'timestamp': { $gte: date24hAgo } // Chỉ trong 24h
     })
@@ -67,7 +64,7 @@ export default defineEventHandler(async (event) => {
     // === (MỚI) 5. Lấy 5 Cảnh báo Gần Nhất (Ước tính) ===
     // Tìm các monitor có lastAlertedAt trong 24h qua
     const recentAlertsPromise = Monitor.find({
-      'userId': userId,
+      'projectId': projectIdObjectId,
       'alertConfig.lastAlertedAt': { $gte: date24hAgo }
     })
       .sort({ 'alertConfig.lastAlertedAt': -1 }) // Mới nhất trước

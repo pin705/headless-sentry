@@ -265,6 +265,13 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue', 'saved'])
 const toast = useToast()
 
+const { selectedProject } = useProjectState()
+
+const apiUrl = computed(() => {
+  if (!selectedProject.value?._id) return '' // Chưa chọn project thì không fetch
+  return `/api/projects/${selectedProject.value._id}/monitors`
+})
+
 // === Quản lý State của Modal ===
 const isOpen = computed({
   get: () => props.modelValue,
@@ -358,19 +365,18 @@ function removeChannel(index: number) { formState.alertConfig.channels.splice(in
 
 // === Hàm Submit Form (Xử lý cả Create và Edit) ===
 async function onFormSubmit(event: FormSubmitEvent<Schema>) {
-  console.log('event.data', event.data)
   formLoading.value = true
   try {
     if (isEditing.value) {
       // --- Chế độ EDIT (dùng API PUT) ---
-      await $fetch(`/api/monitors/${props.monitor._id}`, {
+      await $fetch(`${apiUrl.value}/${props.monitor._id}`, {
         method: 'PUT',
         body: event.data
       })
       toast.add({ title: 'Thành công', description: 'Đã cập nhật dịch vụ.' })
     } else {
       // --- Chế độ CREATE (dùng API POST) ---
-      await $fetch('/api/monitors', {
+      await $fetch(apiUrl.value, {
         method: 'POST',
         body: event.data
       })

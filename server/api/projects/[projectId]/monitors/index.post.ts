@@ -1,16 +1,13 @@
-// server/api/monitors/index.post.ts (hoặc [id].put.ts)
 import { z } from 'zod'
 
 const httpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as const
 
-// (MỚI) Zod Schema Nâng cao
 const bodySchema = z.object({
   name: z.string().min(1, 'Tên không được để trống'),
   endpoint: z.string().url('URL không hợp lệ'),
   method: z.enum(httpMethods).default('GET'),
   frequency: z.number().default(60),
 
-  // (MỚI) Validation cho httpConfig
   httpConfig: z.object({
     headers: z.array(z.object({
       key: z.string().min(1, 'Header Key không được trống'),
@@ -36,10 +33,9 @@ export default defineEventHandler(async (event) => {
 
   try {
     const body = await readValidatedBody(event, bodySchema.parse)
-
-    // (MỚI) Dữ liệu tạo monitor đã bao gồm httpConfig
+    const projectId = getRouterParam(event, 'projectId')
     const newMonitor = await Monitor.create({
-      userId: session.user.userId,
+      projectId,
       name: body.name,
       endpoint: body.endpoint,
       method: body.method,
@@ -50,7 +46,7 @@ export default defineEventHandler(async (event) => {
     })
 
     return newMonitor.toObject()
-  } catch (error: any) {
+  } catch (error) {
     if (error.issues) {
       throw createError({ statusCode: 400, message: error.issues[0].message })
     }

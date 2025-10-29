@@ -15,7 +15,7 @@ const links = [
     }
   }, {
     label: 'Giám sát',
-    to: '/api-monitoring',
+    to: '/monitoring',
     // badge: '4', // (Tạm ẩn badge cứng)
     onSelect: () => {
       open.value = false
@@ -46,13 +46,14 @@ onMounted(async () => {
 <template>
   <div>
     <UDashboardToolbar>
-     <template #left>
-       <UNavigationMenu
-        :items="links"
-        highlight
-        class="flex-1"
-      />
-     </template>
+      <template #left>
+        <ProjectSelector />
+        <UNavigationMenu
+          :items="links"
+          highlight
+          class="flex-1"
+        />
+      </template>
 
       <template #right>
         <UserMenu />

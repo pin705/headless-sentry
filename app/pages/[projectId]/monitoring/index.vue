@@ -1,5 +1,5 @@
 <template>
-  <UDashboardPanel id="api-monitoring">
+  <UDashboardPanel id="monitoring">
     <template #header>
       <UDashboardNavbar title="Giám sát Dịch vụ">
         <!-- <template #leading>
@@ -89,12 +89,19 @@ const UBadge = resolveComponent('UBadge')
 const UTooltip = resolveComponent('UTooltip')
 const UIcon = resolveComponent('UIcon')
 
+const { selectedProject } = useProjectState()
+
+const apiUrl = computed(() => {
+  if (!selectedProject.value?._id) return '' // Chưa chọn project thì không fetch
+  return `/api/projects/${selectedProject.value._id}/monitors`
+})
+
 // (MỚI) State cho Modal Form
 const isFormModalOpen = ref(false)
 const monitorToEdit = ref<any>(null) // Lưu trữ *monitor.original*
 
 // (MỚI) Hàm mở Modal (chỉ set data)
-function openFormModal(monitorOriginal: any | null) {
+function openFormModal(monitorOriginal) {
   monitorToEdit.value = monitorOriginal
   isFormModalOpen.value = true
 }
@@ -105,7 +112,7 @@ function onFormSaved() {
 }
 
 // (MỚI) Hàm helper tạo icon SSL (Trigger bằng Click)
-function createSslIcon(row: any) {
+function createSslIcon(row) {
   // (Tuân thủ Rule 3)
   const ssl = row.original.ssl
 
@@ -163,7 +170,7 @@ function createSslIcon(row: any) {
 // (Tuân thủ Rule 5)
 const historyColumns = [
   { accessorKey: 'latestStatus', header: 'Trạng thái', class: 'w-24',
-    cell: ({ row }: any) => {
+    cell: ({ row }) => {
       const { color, label } = getStatusAppearance(row.original.status)
       return h(UBadge, { color: color, variant: 'soft', class: 'w-20 justify-center' }, () => label)
     }
@@ -171,7 +178,7 @@ const historyColumns = [
   {
     accessorKey: 'name',
     header: 'Dịch vụ',
-    cell: ({ row }: any) => {
+    cell: ({ row }) => {
       const monitor = row.original
       const sslIcon = createSslIcon(row)
       const nameText = h('span', { class: 'font-medium text-base' }, monitor.name)
@@ -183,17 +190,17 @@ const historyColumns = [
     }
   },
   { accessorKey: 'latestLatency', header: 'Độ trễ', class: 'w-24',
-    cell: ({ row }: any) => row.original.latestLatency !== undefined
+    cell: ({ row }) => row.original.latestLatency !== undefined
       ? h('span', { class: 'font-mono text-sm' }, `${row.original.latestLatency} ms`)
       : h('span', { class: 'text-gray-400' }, '--')
   },
   { accessorKey: 'latestCheckedAt', header: 'Kiểm tra cuối', class: 'w-32',
-    cell: ({ row }: any) => row.original.latestCheckedAt
+    cell: ({ row }) => row.original.latestCheckedAt
       ? h('span', { class: 'text-sm' }, formatTimeAgo(new Date(row.original.latestCheckedAt)))
       : h('span', { class: 'text-gray-400' }, 'Chưa chạy')
   },
   { accessorKey: 'actions', header: '', class: 'w-10 text-right',
-    cell: ({ row }: any) => h(UDropdownMenu,
+    cell: ({ row }) => h(UDropdownMenu,
       { items: getActionItems(row), content: { align: 'end' } },
       () => h(UButton, { icon: 'i-heroicons-ellipsis-horizontal-20-solid', color: 'neutral', variant: 'ghost' })
     )
@@ -206,7 +213,7 @@ const deleteLoading = ref(false)
 const monitorToDelete = ref<any>(null)
 
 // (Tuân thủ Rule 6)
-const { data: monitors, pending, error, refresh } = await useFetch('/api/monitors', {
+const { data: monitors, pending, error, refresh } = await useFetch(apiUrl.value, {
   lazy: true,
   default: () => []
 })
@@ -216,11 +223,11 @@ if (error.value) {
 }
 
 // (Tuân thủ Rule 3)
-const getActionItems = (row: any): DropdownMenuItem[][] => [
+const getActionItems = (row): DropdownMenuItem[][] => [
   [{
     label: 'Xem chi tiết',
     icon: 'i-heroicons-chart-bar-20-solid',
-    onSelect: () => navigateTo(`/api-monitoring/${row.original._id}`)
+    onSelect: () => navigateTo(`/monitoring/${row.original._id}`)
   }, {
     label: 'Sửa',
     icon: 'i-heroicons-pencil-square-20-solid',
@@ -241,16 +248,16 @@ const getActionItems = (row: any): DropdownMenuItem[][] => [
 // Hàm Tạm dừng / Kích hoạt
 async function toggleStatus(id: string) {
   try {
-    await $fetch(`/api/monitors/${id}`, { method: 'PATCH' })
+    await $fetch(`${apiUrl.value}${id}`, { method: 'PATCH' })
     toast.add({ title: 'Thành công', description: 'Đã cập nhật trạng thái.' })
     refresh()
-  } catch (err: any) {
+  } catch (err) {
     toast.add({ title: 'Lỗi', description: err.data?.message || 'Không thể cập nhật.', color: 'error' })
   }
 }
 
 // Hàm mở Modal Xóa
-function openDeleteModal(row: any) {
+function openDeleteModal(row) {
   monitorToDelete.value = row
   isDeleteModalOpen.value = true
 }
@@ -260,12 +267,12 @@ async function confirmDelete() {
   if (!monitorToDelete.value) return
   deleteLoading.value = true
   try {
-    await $fetch(`/api/monitors/${monitorToDelete.value.original._id}`, { method: 'DELETE' })
+    await $fetch(`${apiUrl.value}/${monitorToDelete.value.original._id}`, { method: 'DELETE' })
     toast.add({ title: 'Đã xóa', description: `Đã xóa ${monitorToDelete.value.original.name}.` })
     isDeleteModalOpen.value = false
     monitorToDelete.value = null
     refresh()
-  } catch (err: any) {
+  } catch (err) {
     toast.add({ title: 'Lỗi', description: err.data?.message || 'Không thể xóa.', color: 'error' })
   } finally {
     deleteLoading.value = false

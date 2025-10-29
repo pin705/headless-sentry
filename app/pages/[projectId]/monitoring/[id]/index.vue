@@ -5,7 +5,7 @@
         <template #leading>
           <div class="flex items-center gap-2">
             <UButton
-              to="/api-monitoring"
+              to="/monitoring"
               icon="i-heroicons-arrow-left"
               color="neutral"
               variant="ghost"
@@ -405,7 +405,7 @@ const historyColumns = [
       // (Tuân thủ Rule 3)
       const resultId = row.original._id
       const monitorId = route.params.id // Lấy monitorId từ route hiện tại
-      const linkTo = `/api-monitoring/${monitorId}/results/${resultId}`
+      const linkTo = `/monitoring/${monitorId}/results/${resultId}`
       const timeAgo = formatTimeAgo(new Date(row.original.timestamp))
 
       // Dùng component NuxtLink để điều hướng
