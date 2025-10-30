@@ -294,7 +294,7 @@ const monitorColumns = [
 ]
 
 // (Tuân thủ Rule 6)
-const { data: monitors, pending: pendingMonitors, refresh: refreshMonitors } = await useFetch('/api/monitors', {
+const { data: monitors, pending: pendingMonitors, refresh: refreshMonitors } = await useFetch(`/api/projects/${projectId}/monitors`, {
   default: () => [],
   transform: (data: any[]) => data.map((m: any) => ({ _id: m._id, name: m.name, endpoint: m.endpoint, isPublic: m.isPublic }))
 })

@@ -21,7 +21,7 @@
           <template #basic="{ item }">
             <div class="space-y-4 pt-4">
               <UFormField
-                label="Tên gợi nhớ"
+                label="Dịch Vụ"
                 name="name"
                 required
               >

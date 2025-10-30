@@ -18,15 +18,15 @@ export const formatTimeAgo = (dateString: string): string => {
   return 'Vừa xong'
 }
 
-export function getStatusAppearance(status: any): { color: string, label: string } {
-  if (status === 'PAUSED') {
-    return { color: 'neutral', label: 'Tạm dừng' } // 'neutral' thay cho 'gray'
+export function getStatusAppearance(row: any): { color: string, label: string } {
+  if (row.status === 'PAUSED') {
+    return { color: 'warning', label: 'Tạm dừng' }
   }
-  if (status === 'ACTIVE') {
-    return { color: 'success', label: 'Hoạt động' } // 'success' thay cho 'green'
+  if (row.latestStatus === 'UP') {
+    return { color: 'success', label: 'Hoạt động' }
   }
-  if (status === 'DOWN') {
-    return { color: 'error', label: 'Ngưng' } // 'error' thay cho 'red'
+  if (row.latestStatus === 'DOWN') {
+    return { color: 'error', label: 'Ngưng' }
   }
   return { color: 'neutral', label: 'N/A' }
 }

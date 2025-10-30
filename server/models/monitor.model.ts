@@ -1,4 +1,3 @@
-// server/models/monitor.model.ts
 import { defineMongooseModel } from '#nuxt/mongoose'
 import type { Schema } from 'mongoose'
 

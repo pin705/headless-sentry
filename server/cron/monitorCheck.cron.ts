@@ -12,7 +12,7 @@ export default defineCronHandler(
 
     // Lấy monitors đang active và các trường cần thiết
     const monitorsToRun = await Monitor.find({ status: 'ACTIVE' })
-      .select('endpoint method httpConfig userId projectId alertConfig name lastAlertedAt') // Đã bao gồm projectId và userId
+      .select('endpoint method httpConfig projectId alertConfig name lastAlertedAt') // Đã bao gồm projectId
       .lean()
 
     if (monitorsToRun.length === 0) {
@@ -141,8 +141,8 @@ export default defineCronHandler(
 
       if (checkResultData) {
         const { monitor, latency, statusCode, isUp, errorMessage } = checkResultData
-        // Đảm bảo monitor._id, monitor.userId và monitor.projectId tồn tại
-        if (!monitor?._id || !monitor?.userId || !monitor?.projectId) {
+        // Đảm bảo monitor._id, và monitor.projectId tồn tại
+        if (!monitor?._id || !monitor?.projectId) {
           console.error('[Cron] Thiếu ID trong dữ liệu monitor khi ghi kết quả:', monitor)
           return // Bỏ qua bản ghi lỗi này
         }
@@ -150,7 +150,6 @@ export default defineCronHandler(
           timestamp: timestamp,
           meta: {
             monitorId: monitor._id,
-            userId: monitor.userId, // User tạo monitor (owner)
             projectId: monitor.projectId, // Project chứa monitor
             location: 'default'
           },

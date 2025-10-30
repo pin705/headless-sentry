@@ -1,4 +1,3 @@
-// server/models/result.model.ts
 import { defineMongooseModel } from '#nuxt/mongoose'
 import type { Schema } from 'mongoose'
 
@@ -10,7 +9,6 @@ export const Result = defineMongooseModel('Result', {
   timestamp: { type: Date, required: true }, // Dấu thời gian kiểm tra
   meta: {
     monitorId: { type: 'ObjectId' as unknown as Schema.Types.ObjectId, ref: 'Monitor', required: true },
-    userId: { type: 'ObjectId' as unknown as Schema.Types.ObjectId, ref: 'User', required: true },
     projectId: { type: 'ObjectId' as unknown as Schema.Types.ObjectId, ref: 'Project', required: true, index: true },
     location: { type: String, default: 'default' } // MVP chỉ cần 1 location
   },

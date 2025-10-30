@@ -70,11 +70,11 @@
               class="flex items-center gap-2"
             >
               <UBadge
-                :color="getStatusAppearance(latestResult).color"
+                :color="getStatusUBadge(latestResult).color"
                 variant="soft"
                 class="w-20 justify-center"
               >
-                {{ getStatusAppearance(latestResult).label }}
+                {{ getStatusUBadge(latestResult).label }}
               </UBadge>
               <span class="text-sm text-gray-500 dark:text-gray-400">
                 Kiểm tra cuối: {{ formatTimeAgo(new Date(latestResult.timestamp)) }}
@@ -243,9 +243,7 @@
 import { h, ref, computed, watch } from 'vue'
 import { sub } from 'date-fns'
 import { VisXYContainer, VisLine, VisAxis, VisTooltip } from '@unovis/vue'
-// (Mới) Import hàm xử lý ngày
-import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
-// (Giả định component DatePicker đã được đăng ký global bởi Nuxt UI Pro)
+import { CalendarDate } from '@internationalized/date'
 
 const route = useRoute()
 const toast = useToast()
@@ -287,7 +285,6 @@ const rangeOptions = [
   // { key: 'custom', label: 'Tùy chỉnh...' }
 ]
 
-// Bộ lọc bảng (Giữ nguyên)
 const selectedStatus = ref('all') // UP/DOWN
 const selectedStatusCode = ref('all') // 2xx/3xx...
 
@@ -304,7 +301,6 @@ const statusCodeOptions = [
   { key: '5xx', label: 'Lỗi Server (5xx)' }
 ]
 
-// (Nâng cấp) Tham số query cho API
 const queryParams = computed(() => {
   const params: any = {
     page: page.value,
@@ -322,13 +318,11 @@ const queryParams = computed(() => {
   return params
 })
 
-// (Nâng cấp) Reset về trang 1 khi bộ lọc thay đổi
 watch([selectedRange, selectedStatus, selectedStatusCode, customRange], () => {
   page.value = 1
   console.log('Bộ lọc thay đổi, đặt lại trang về 1')
 }, { deep: true }) // Thêm deep watch cho object `customRange`
 
-// === 3. Lấy Dữ liệu Lịch sử (Phân trang & Lọc) ===
 const { data: resultsData, pending: pendingResults, error: errorResults, refresh: refreshResults } = await useFetch(
   () => `/api/projects/${projectId}/monitors/${monitorId}/results`,
   {
@@ -338,15 +332,10 @@ const { data: resultsData, pending: pendingResults, error: errorResults, refresh
     watch: [queryParams]
   }
 )
-
-// Dữ liệu cho UTable
 const tableResults = computed(() => resultsData.value?.results || [])
-// Dữ liệu cho UPagination
 const totalResults = computed(() => resultsData.value?.total || 0)
-// Dữ liệu cho kết quả mới nhất
 const latestResult = computed(() => (monitorData.value.status))
 
-// === 4. Logic Biểu đồ @unovis (Giữ nguyên) ===
 const x = (d: { timestamp: string, latency: number }) => new Date(d.timestamp)
 const y = (d: { timestamp: string, latency: number }) => d.latency
 
@@ -361,6 +350,13 @@ const chartData = computed(() => {
 // Định dạng nhãn trục X (ví dụ: "11:57 AM")
 const formatDateTick = (value: number | Date) => {
   return new Date(value).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+}
+
+function getStatusUBadge(latestResult) {
+  if (latestResult === 'ACTIVE') {
+    return { color: 'success', label: latestResult }
+  }
+  return { color: 'error', label: latestResult }
 }
 
 const historyColumns = [
@@ -402,8 +398,6 @@ const historyColumns = [
   },
   { accessorKey: 'timestamp', header: 'Thời gian',
     cell: ({ row }: any) => {
-      // (MỚI) Bọc trong NuxtLink
-      // (Tuân thủ Rule 3)
       const resultId = row.original._id
       const monitorId = route.params.id // Lấy monitorId từ route hiện tại
       const linkTo = `/monitoring/${monitorId}/results/${resultId}`
@@ -415,6 +409,6 @@ const historyColumns = [
         class: 'text-sm text-primary-500 dark:text-primary-400 hover:underline cursor-pointer' // Style như link
       }, () => timeAgo) // Nội dung link là thời gian
     }
-  },
+  }
 ]
 </script>

@@ -256,7 +256,7 @@ function createSslIcon(row) {
 const historyColumns = [
   { accessorKey: 'latestStatus', header: 'Trạng thái', class: 'w-24',
     cell: ({ row }) => {
-      const { color, label } = getStatusAppearance(row.original.status)
+      const { color, label } = getStatusAppearance(row.original)
       return h(UBadge, { color: color, variant: 'soft', class: 'w-20 justify-center' }, () => label)
     }
   },

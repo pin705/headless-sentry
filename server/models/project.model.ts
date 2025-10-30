@@ -20,5 +20,14 @@ export const Project = defineMongooseModel('Project', {
     title: { type: String, default: 'Trạng thái Dịch vụ' },
     logoUrl: { type: String, default: null },
     customDomain: { type: String, unique: true, sparse: true, trim: true, lowercase: true }
+  },
+
+  customDomains: {
+    type: String,
+    unique: true, // Đảm bảo mỗi domain chỉ được dùng 1 lần
+    sparse: true, // Cho phép nhiều giá trị null
+    default: null,
+    trim: true,
+    lowercase: true // Lưu trữ tên miền dạng chữ thường
   }
 }, { timestamps: true })
