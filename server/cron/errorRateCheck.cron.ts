@@ -3,7 +3,6 @@ import { ofetch } from 'ofetch'
 import mongoose from 'mongoose'
 import { subMinutes } from 'date-fns' // Cần hàm này
 
-// Sử dụng lại ALERT_COOLDOWN từ monitorCheck (hoặc định nghĩa lại ở đây)
 const ALERT_COOLDOWN = 5 * 60 * 1000 // 5 phút
 
 // Khoảng thời gian để tính tỷ lệ lỗi (ví dụ: 10 phút)

@@ -1,7 +1,6 @@
 import { defineCronHandler } from '#nuxt/cron'
 import sslChecker from 'ssl-checker'
 
-// (MỚI) Hàm helper để lấy hostname từ URL
 const getHostname = (url: string): string | null => {
   try {
     return new URL(url).hostname
