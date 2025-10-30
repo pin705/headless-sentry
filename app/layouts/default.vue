@@ -4,7 +4,7 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 const open = ref(false)
 const { selectedProject } = useProjectState()
 console.log('Selected Project in Layout:', selectedProject.value)
-const links = [
+const links = computed(() => [
   [{
     label: 'Tổng quan',
     to: `/${selectedProject.value?._id || ''}`,
@@ -21,14 +21,14 @@ const links = [
   },
   {
     label: 'Cài đặt',
-    to: `/${selectedProject.value?._id}/settings/status-page`,
+    to: `/${selectedProject.value?._id}/settings`,
     onSelect: () => {
       open.value = false
     }
   }
   ]
 
-] satisfies NavigationMenuItem[][]
+] satisfies NavigationMenuItem[][])
 
 onMounted(async () => {
   const cookie = useCookie('cookie-consent')

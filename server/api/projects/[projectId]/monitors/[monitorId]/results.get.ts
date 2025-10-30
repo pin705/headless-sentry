@@ -1,8 +1,6 @@
-// server/api/monitors/[id]/results.get.ts
 import mongoose from 'mongoose'
 import { z } from 'zod'
 
-// (Mới) Thêm validation cho query
 const querySchema = z.object({
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(100).default(10),

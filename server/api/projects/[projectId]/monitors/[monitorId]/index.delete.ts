@@ -1,4 +1,3 @@
-
 export default defineEventHandler(async (event) => {
   await requireProjectMembership(event)
 

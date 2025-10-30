@@ -1,4 +1,3 @@
-// server/api/projects/index.get.ts
 import mongoose from 'mongoose'
 
 export default defineEventHandler(async (event) => {

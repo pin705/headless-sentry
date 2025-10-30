@@ -100,7 +100,7 @@ const dropdownItems = computed<DropdownMenuItem[][]>(() => {
   const projectItems: DropdownMenuItem[] = userProjects.value.map(project => ({
     label: project.name,
     project: project, // Lưu trữ object project
-    click: () => selectProject(project)
+    onSelect: () => selectProject(project)
   }))
 
   return [
@@ -114,7 +114,7 @@ const dropdownItems = computed<DropdownMenuItem[][]>(() => {
       {
         label: 'Tạo Project Mới...',
         icon: 'i-heroicons-plus-circle',
-        click: () => { isCreateModalOpen.value = true }
+        onSelect: () => { isCreateModalOpen.value = true }
       }
     ]
   ]

@@ -1,4 +1,3 @@
-// server/api/projects/index.post.ts
 import { z } from 'zod'
 import mongoose from 'mongoose'
 

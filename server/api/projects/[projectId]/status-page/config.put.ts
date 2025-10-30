@@ -1,4 +1,3 @@
-// server/api/status-page/config.put.ts
 import { z } from 'zod'
 import mongoose from 'mongoose'
 
@@ -25,25 +24,23 @@ const configSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
-  if (!session.user?.userId) {
-    throw createError({ statusCode: 401, message: 'Yêu cầu đăng nhập' })
-  }
+  await requireProjectMembership(event)
+  const projectId = getRouterParam(event, 'projectId')
 
   try {
     const body = await readValidatedBody(event, configSchema.parse)
-    const userId = new mongoose.Types.ObjectId(session.user.userId)
+    const projectIdObjectId = new mongoose.Types.ObjectId(projectId)
 
     // --- (Nâng cấp) Kiểm tra tính duy nhất ---
     const checks = []
     // 1. Check Slug uniqueness
     if (body.isEnabled && body.slug) {
-      checks.push(User.findOne({ 'statusPage.slug': body.slug, '_id': { $ne: userId } }))
+      checks.push(Project.findOne({ 'statusPage.slug': body.slug, '_id': { $ne: projectIdObjectId } }))
     }
     // 2. Check Custom Domain uniqueness
-    if (body.isEnabled && body.customDomain) {
-      checks.push(User.findOne({ 'statusPage.customDomain': body.customDomain, '_id': { $ne: userId } }))
-    }
+    // if (body.isEnabled && body.customDomain) {
+    //   checks.push(Project.findOne({ 'statusPage.customDomain': body.customDomain, '_id': { $ne: projectIdObjectId } }))
+    // }
 
     const [existingSlugUser, existingDomainUser] = await Promise.all(checks)
 
@@ -53,31 +50,29 @@ export default defineEventHandler(async (event) => {
     if (existingDomainUser) {
       throw createError({ statusCode: 409, message: 'Tên miền tùy chỉnh này đã được sử dụng.' })
     }
-    // --- Hết kiểm tra tính duy nhất ---
 
     // Xử lý logic khi tắt trang trạng thái
     if (!body.isEnabled) {
       body.slug = null
-      body.customDomain = null // Cũng xóa custom domain khi tắt
+      // body.customDomain = null // Cũng xóa custom domain khi tắt
     } else if (!body.slug) {
       throw createError({ statusCode: 400, message: 'Slug là bắt buộc khi bật trang trạng thái.' })
     }
 
-    // Cập nhật thông tin User
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
+    // Cập nhật thông tin Project
+    const updatedProject = await Project.findByIdAndUpdate(
+      projectIdObjectId,
       // (Nâng cấp) Đảm bảo ghi đè toàn bộ object statusPage
       { $set: { statusPage: body } },
       { new: true, select: 'statusPage' }
     ).lean()
 
-    if (!updatedUser) {
+    if (!updatedProject) {
       throw createError({ statusCode: 404, message: 'Không tìm thấy người dùng' })
     }
 
-    return updatedUser.statusPage
-  } catch (error: any) {
-    // ... (Error handling giữ nguyên, chỉ cần thêm check 409) ...
+    return updatedProject.statusPage
+  } catch (error) {
     if (error.issues) {
       throw createError({ statusCode: 400, message: error.issues[0].message })
     }

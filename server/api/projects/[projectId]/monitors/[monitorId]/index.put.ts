@@ -10,7 +10,6 @@ const bodySchema = z.object({
   method: z.enum(httpMethods).default('GET'),
   frequency: z.number().default(60),
 
-  // (MỚI) Validation cho httpConfig
   httpConfig: z.object({
     headers: z.array(z.object({
       key: z.string().min(1, 'Header Key không được trống'),

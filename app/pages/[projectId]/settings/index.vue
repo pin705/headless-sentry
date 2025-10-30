@@ -181,8 +181,9 @@ const schema = z.object({
 type Schema = z.output<typeof schema>
 const state = reactive<Partial<Schema>>({ isEnabled: false, slug: '', title: '', logoUrl: null, customDomain: null })
 
+const projectId = useRoute().params.projectId as string
 // Fetch cấu hình hiện tại (Giữ nguyên)
-const { data: currentConfig, pending: pendingConfig, error: errorConfig } = await useFetch('/api/status-page/config')
+const { data: currentConfig, pending: pendingConfig, error: errorConfig } = await useFetch(`/api/projects/${projectId}/status-page/config`)
 watch(currentConfig, (newConfig) => {
   if (newConfig) {
     Object.assign(state, newConfig)
@@ -193,7 +194,7 @@ watch(currentConfig, (newConfig) => {
 async function saveConfig(event: FormSubmitEvent<Schema>) {
   saving.value = true
   try {
-    const updated = await $fetch('/api/status-page/config', { method: 'PUT', body: event.data })
+    const updated = await $fetch(`/api/projects/${projectId}/status-page/config`, { method: 'PUT', body: event.data })
     Object.assign(state, updated)
     toast.add({ title: 'Đã lưu cấu hình chung.', color: 'success' })
   } catch (err: any) {

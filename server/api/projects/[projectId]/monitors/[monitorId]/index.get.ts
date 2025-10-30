@@ -1,4 +1,3 @@
-// server/api/monitors/[id].get.ts
 import mongoose from 'mongoose'
 
 export default defineEventHandler(async (event) => {

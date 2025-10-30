@@ -1,9 +1,7 @@
-// server/cron/monitorCheck.cron.ts
 import { defineCronHandler } from '#nuxt/cron'
 import { ofetch } from 'ofetch' // <-- IMPORTED
 import mongoose from 'mongoose' // <-- IMPORTED
 
-// (MỚI) Thời gian cooldown giữa các cảnh báo (tính bằng mili giây)
 const ALERT_COOLDOWN = 5 * 60 * 1000 // 5 phút // <-- DEFINED
 
 export default defineCronHandler(
@@ -11,7 +9,6 @@ export default defineCronHandler(
   async () => {
     console.log('[Cron] Bắt đầu kiểm tra giám sát API...')
 
-    // (FIXED) Lấy thêm alertConfig, lastAlertedAt, name
     const monitorsToRun = await Monitor.find({ status: 'ACTIVE' })
       .select('endpoint method httpConfig userId projectId alertConfig name lastAlertedAt')
       .lean()
@@ -28,7 +25,6 @@ export default defineCronHandler(
       const startTime = Date.now()
       const fetchOptions: any = { /* ... logic xây dựng options ... */ }
 
-      // (Logic xây dựng fetchOptions từ httpConfig giữ nguyên)
       if (monitor.httpConfig?.headers?.length > 0) {
         fetchOptions.headers = Object.fromEntries(monitor.httpConfig.headers.map(h => [h.key, h.value]))
       }

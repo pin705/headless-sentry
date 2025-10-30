@@ -1,4 +1,3 @@
-// server/cron/errorRateCheck.cron.ts
 import { defineCronHandler } from '#nuxt/cron'
 import { ofetch } from 'ofetch'
 import mongoose from 'mongoose'

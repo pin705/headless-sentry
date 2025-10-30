@@ -1,4 +1,3 @@
-// server/api/monitors/[id]/results/[resultId].get.ts
 import { Result } from '~~/server/models/result.model'
 import { Monitor } from '~~/server/models/monitor.model' // Cần populate Monitor
 import mongoose from 'mongoose'
