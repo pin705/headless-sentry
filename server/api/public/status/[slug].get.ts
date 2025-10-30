@@ -7,14 +7,14 @@ export default defineEventHandler(async (event) => {
 
   try {
     // 1. Tìm User (hoặc Org) dựa trên slug VÀ trang phải được bật
-    const user = await User.findOne({
+    const project = await Project.findOne({
       'statusPage.slug': slug,
       'statusPage.isEnabled': true
     })
     .select('statusPage') // Chỉ lấy config trang trạng thái
     .lean()
 
-    if (!user) {
+    if (!project) {
       throw createError({ statusCode: 404, message: 'Không tìm thấy trang trạng thái' })
     }
 
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
     const monitorsStatus = await Monitor.aggregate([
       // Lọc theo userId và isPublic
       { $match: {
-          userId: user._id,
+          projectId: project._id,
           isPublic: true,
           status: 'ACTIVE' // Chỉ hiển thị monitor đang active
       }},
@@ -63,7 +63,7 @@ export default defineEventHandler(async (event) => {
 
     // 3. Trả về cấu hình trang và danh sách trạng thái monitor
     return {
-      config: user.statusPage, // Title, Logo
+      config: project.statusPage, // Title, Logo
       monitors: monitorsStatus
     }
 

@@ -19,6 +19,10 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/tailwind.css'],
 
+  routeRules: {
+    '/status/**': { ssr: true }
+  },
+
   compatibilityDate: '2025-01-15',
   vite: {
     plugins: [tailwindcss()]

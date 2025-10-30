@@ -42,7 +42,8 @@ export default defineEventHandler(async (event) => {
       frequency: body.frequency,
       status: 'ACTIVE',
       httpConfig: body.httpConfig,
-      alertConfig: body.alertConfig
+      alertConfig: body.alertConfig,
+      userId: session.user.userId,
     })
 
     return newMonitor.toObject()

@@ -66,11 +66,11 @@
         <UCard
           v-for="monitor in monitors"
           :key="monitor._id"
-          :ui="{ body: { padding: 'p-4' }, ring: 'ring-1 ring-gray-200 dark:ring-gray-800' }"
+          :ui="{ body: { padding: 'p-4' }, ring: 'ring-1 ring-gray-200 dark:ring-gray-800', divide: 'divide-y divide-gray-200 dark:divide-gray-800' }"
         >
-          <div class="flex justify-between items-start">
-            <div class="flex items-center gap-1.5">
-              <span class_name="text-lg font-semibold truncate">
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="text-base font-semibold truncate">
                 <NuxtLink
                   :to="`/${projectId}/monitoring/${monitor._id}`"
                   class="hover:underline"
@@ -97,7 +97,7 @@
 
           <div class="flex items-center gap-2 text-sm mt-1">
             <component :is="renderStatusBadge(monitor)" />
-            <span class="text-gray-500 dark:text-gray-400">
+            <span class="text-gray-500 dark:text-gray-400 text-xs">
               {{ monitor.latestCheckedAt ? formatTimeAgo(new Date(monitor.latestCheckedAt)) : 'Chưa chạy' }}
             </span>
           </div>
@@ -112,12 +112,40 @@
             <span class="truncate font-mono text-xs">{{ monitor.endpoint }}</span>
           </div>
 
-          <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-800 flex justify-between items-end">
-            <div>
-              <span class="text-xs text-gray-500 dark:text-gray-400">ĐỘ TRỄ (LATENCY)</span>
-              <div class="text-2xl font-bold font-mono">
-                {{ monitor.latestLatency ?? '--' }} <span class="text-lg text-gray-500 dark:text-gray-400">ms</span>
-              </div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-3 space-y-1">
+            <div
+              v-if="monitor.publicPageUrl"
+              class="flex items-center gap-1"
+            >
+              <UIcon
+                name="i-heroicons-globe-alt"
+                class="w-3.5 h-3.5"
+              />
+              <NuxtLink
+                :to="monitor.publicPageUrl"
+                target="_blank"
+                class="hover:underline text-primary-500 dark:text-primary-400"
+              >
+                Trang trạng thái công khai
+              </NuxtLink>
+            </div>
+            <div
+              v-if="monitor.creator"
+              class="flex items-center gap-1.5"
+            >
+              <UAvatar
+                :src="monitor.creator.avatar || 'https://www.gravatar.com/avatar/?d=mp'"
+                :alt="monitor.creator.email"
+                size="3xs"
+              />
+              <span>Tạo bởi {{ monitor.creator.email }}</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-800">
+            <span class="text-xs text-gray-500 dark:text-gray-400">ĐỘ TRỄ (LATENCY)</span>
+            <div class="text-2xl font-semibold font-mono">
+              {{ monitor.latestLatency ?? '--' }} <span class="text-lg text-gray-500 dark:text-gray-400">ms</span>
             </div>
           </div>
         </UCard>
@@ -172,6 +200,7 @@ const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
 const UTooltip = resolveComponent('UTooltip')
 const UIcon = resolveComponent('UIcon')
+const UAvatar = resolveComponent('UAvatar')
 
 const route = useRoute()
 const projectId = route.params.projectId as string
