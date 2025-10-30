@@ -20,7 +20,7 @@ const links = computed(() => [
     }
   },
   {
-    label: 'Cài đặt',
+    label: 'Cấu hình',
     to: `/${selectedProject.value?._id}/settings`,
     onSelect: () => {
       open.value = false

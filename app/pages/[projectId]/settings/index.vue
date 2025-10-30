@@ -118,7 +118,7 @@
               <UButton
                 type="submit"
                 :loading="saving"
-                label="Lưu Cấu hình"
+                label="Lưu cấu hình"
                 color="primary"
               />
             </div>
@@ -159,7 +159,6 @@
 import { ref, reactive, watch, h } from 'vue'
 import { z } from 'zod'
 import type { FormSubmitEvent } from '#ui/types'
-// (Tuân thủ Rule)
 import { UCheckbox, USwitch } from '#components'
 
 const toast = useToast()
@@ -204,7 +203,6 @@ async function saveConfig(event: FormSubmitEvent<Schema>) {
   }
 }
 
-// === (MỚI) Logic Upload Logo ===
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploading = ref(false)
 
@@ -267,51 +265,69 @@ function removeLogo() {
   toast.add({ title: 'Đã xóa logo', description: 'Nhấn "Lưu Cấu hình Chung" để áp dụng.' })
 }
 
-// === Logic Chọn Monitor (Giữ nguyên) ===
 const savingSelection = ref(false)
 const selectedMonitors = ref<any[]>([])
 
-// (Tuân thủ Rule 5)
 const monitorColumns = [
   {
     id: 'select',
-    header: ({ table }: { table: any }) =>
+    header: ({ table }) =>
       h(UCheckbox, {
-        'checked': table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() ? 'indeterminate' : false),
-        'onChange': (event: Event) => table.toggleAllPageRowsSelected(!!(event.target as HTMLInputElement).checked),
+        'modelValue': table.getIsSomePageRowsSelected()
+          ? 'indeterminate'
+          : table.getIsAllPageRowsSelected(),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+          if (value) {
+            const pageRows = table.getPageRows()
+            pageRows.forEach((row) => {
+              if (!selectedMonitors.value.find(m => m._id === row.original._id)) {
+                selectedMonitors.value.push(row.original)
+              }
+            })
+          } else {
+            const pageRowIds = table.getPageRows().map(row => row.original._id)
+            selectedMonitors.value = selectedMonitors.value.filter(m => !pageRowIds.includes(m._id))
+          }
+          table.toggleAllPageRowsSelected(!!value)
+        },
         'aria-label': 'Select all'
       }),
-    cell: ({ row }: { row: any }) =>
+    cell: ({ row }) =>
       h(UCheckbox, {
-        'checked': row.getIsSelected(),
-        'onChange': (event: Event) => row.toggleSelected(!!(event.target as HTMLInputElement).checked),
+        'modelValue': selectedMonitors.value.find(m => m._id === row.original._id)
+          ? true
+          : false,
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => {
+          if (value) {
+            selectedMonitors.value.push(row.original)
+          } else {
+            selectedMonitors.value = selectedMonitors.value.filter(m => m._id !== row.original._id)
+          }
+          row.toggleSelected(!!value)
+        },
         'aria-label': 'Select row'
-      }),
-    enableSorting: false, size: 20
+      })
   },
   { accessorKey: 'name', header: 'Tên Dịch vụ' },
   { accessorKey: 'endpoint', header: 'Endpoint' }
 ]
 
-// (Tuân thủ Rule 6)
 const { data: monitors, pending: pendingMonitors, refresh: refreshMonitors } = await useFetch(`/api/projects/${projectId}/monitors`, {
   default: () => [],
   transform: (data: any[]) => data.map((m: any) => ({ _id: m._id, name: m.name, endpoint: m.endpoint, isPublic: m.isPublic }))
 })
 
-// Đồng bộ selectedMonitors
 watch(monitors, (newMonitors) => {
   if (newMonitors) {
     selectedMonitors.value = newMonitors.filter(m => m.isPublic)
   }
 }, { immediate: true })
 
-// Lưu Lựa chọn Monitor (Giữ nguyên)
 async function saveMonitorSelection() {
   savingSelection.value = true
   const selectedIds = selectedMonitors.value.map(m => m._id)
   try {
-    await $fetch('/api/monitors/public-selection', { method: 'PUT', body: { selectedIds } })
+    await $fetch(`/api/projects/${projectId}/monitors/public-selection`, { method: 'PUT', body: { selectedIds } })
     toast.add({ title: 'Đã lưu lựa chọn dịch vụ.', color: 'success' })
     await refreshMonitors() // Tải lại để cập nhật isPublic
   } catch (err: any) {

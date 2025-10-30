@@ -10,15 +10,11 @@ const bodySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
-  if (!session.user?.userId) {
-    throw createError({ statusCode: 401, message: 'Yêu cầu đăng nhập' })
-  }
+  await requireProjectMembership(event)
 
   try {
     const body = await readValidatedBody(event, bodySchema.parse)
-    const userId = new mongoose.Types.ObjectId(session.user.userId)
-    const projectId = getRouterParam(event, 'projectId')
+    const projectId = new mongoose.Types.ObjectId(getRouterParam(event, 'projectId'))
 
     // Chuyển đổi mảng string IDs thành mảng ObjectId
     const selectedObjectIds = body.selectedIds.map(id => new mongoose.Types.ObjectId(id))
