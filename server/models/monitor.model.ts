@@ -7,6 +7,7 @@ const frequencies = [60, 300, 600, 1800, 3600] // 1m, 5m, 10m, 30m, 1h
 
 export const Monitor = defineMongooseModel('Monitor', {
   projectId: { type: 'ObjectId' as unknown as Schema.Types.ObjectId, ref: 'Project', required: true, index: true },
+  name: { type: String, required: true },
   endpoint: { type: String, required: true },
   method: { type: String, default: 'GET', enum: httpMethods },
   frequency: { type: Number, default: 60, enum: frequencies }, // Tần suất (giây)

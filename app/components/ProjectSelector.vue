@@ -19,6 +19,14 @@
 
       <span class="truncate text-sm font-semibold max-w-[140px]">
         {{ selectedProject?.name || 'Đang tải...' }}
+        <UBadge
+          v-if="isOwner"
+          label="Owner"
+          color="primary"
+          variant="soft"
+          size="xs"
+          class="ms-2"
+        />
       </span>
 
       <UIcon
@@ -65,6 +73,8 @@
 import { computed, ref } from 'vue'
 import type { DropdownMenuItem } from '@nuxt/ui'
 
+const { user: currentUser } = useUserSession()
+
 // Sử dụng state đã tạo
 const {
   selectedProject,
@@ -74,6 +84,9 @@ const {
   selectProject
 } = useProjectState()
 
+const isOwner = computed(() => {
+  return selectedProject.value?.ownerId === currentUser.value?.userId
+})
 // State cho modal tạo project
 const isCreateModalOpen = ref(false)
 

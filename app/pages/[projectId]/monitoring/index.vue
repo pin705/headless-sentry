@@ -2,9 +2,6 @@
   <UDashboardPanel id="monitoring">
     <template #header>
       <UDashboardNavbar title="Giám sát Dịch vụ">
-        <!-- <template #leading>
-          <UDashboardSidebarCollapse />
-        </template> -->
         <template #right>
           <div class="flex items-center gap-4">
             <UButton
@@ -27,17 +24,104 @@
     </template>
 
     <template #body>
-      <UCard
-        class="m-4"
-        :ui="{ header: { padding: 'p-4 sm:px-6' }, body: { padding: 'p-0 sm:p-0' } }"
+      <div
+        v-if="pending"
+        class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
-        <UTable
-          :data="monitors"
-          :columns="historyColumns"
-          :loading="pending"
-          :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: 'Chưa có dịch vụ nào được giám sát.' }"
+        <USkeleton
+          v-for="i in 3"
+          :key="i"
+          class="h-44 rounded-lg"
         />
-      </UCard>
+      </div>
+
+      <div
+        v-else-if="monitors.length === 0"
+        class="p-4 flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 min-h-[300px]"
+      >
+        <UIcon
+          name="i-heroicons-circle-stack-20-solid"
+          class="w-12 h-12 mx-auto mb-2"
+        />
+        <h3 class="text-lg font-semibold">
+          Chưa có dịch vụ nào
+        </h3>
+        <p class="text-sm">
+          Hãy bắt đầu bằng cách thêm dịch vụ giám sát đầu tiên của bạn.
+        </p>
+        <UButton
+          label="Thêm dịch vụ mới"
+          icon="i-heroicons-plus"
+          color="primary"
+          variant="soft"
+          class="mt-4"
+          @click="openFormModal(null)"
+        />
+      </div>
+
+      <div
+        v-else
+        class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+        <UCard
+          v-for="monitor in monitors"
+          :key="monitor._id"
+          :ui="{ body: { padding: 'p-4' }, ring: 'ring-1 ring-gray-200 dark:ring-gray-800' }"
+        >
+          <div class="flex justify-between items-start">
+            <div class="flex items-center gap-1.5">
+              <span class_name="text-lg font-semibold truncate">
+                <NuxtLink
+                  :to="`/${projectId}/monitoring/${monitor._id}`"
+                  class="hover:underline"
+                >
+                  {{ monitor.name }}
+                </NuxtLink>
+              </span>
+              <component :is="createSslIcon({ original: monitor })" />
+            </div>
+            <UDropdownMenu
+              :items="getActionItems({ original: monitor })"
+              :popper="{ placement: 'bottom-end' }"
+            >
+              <UButton
+                icon="i-heroicons-ellipsis-horizontal-20-solid"
+                color="neutral"
+                variant="ghost"
+                size="sm"
+                square
+                @click.stop
+              />
+            </UDropdownMenu>
+          </div>
+
+          <div class="flex items-center gap-2 text-sm mt-1">
+            <component :is="renderStatusBadge(monitor)" />
+            <span class="text-gray-500 dark:text-gray-400">
+              {{ monitor.latestCheckedAt ? formatTimeAgo(new Date(monitor.latestCheckedAt)) : 'Chưa chạy' }}
+            </span>
+          </div>
+
+          <div class="flex items-center gap-1.5 text-sm mt-2 text-gray-500 dark:text-gray-400">
+            <UBadge
+              :label="monitor.method"
+              color="neutral"
+              variant="subtle"
+              size="xs"
+            />
+            <span class="truncate font-mono text-xs">{{ monitor.endpoint }}</span>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-800 flex justify-between items-end">
+            <div>
+              <span class="text-xs text-gray-500 dark:text-gray-400">ĐỘ TRỄ (LATENCY)</span>
+              <div class="text-2xl font-bold font-mono">
+                {{ monitor.latestLatency ?? '--' }} <span class="text-lg text-gray-500 dark:text-gray-400">ms</span>
+              </div>
+            </div>
+          </div>
+        </UCard>
+      </div>
 
       <UModal v-model:open="isDeleteModalOpen">
         <template #header>
@@ -208,6 +292,11 @@ const historyColumns = [
   }
 ]
 
+function renderStatusBadge(monitor: any) {
+  const { color, label } = getStatusAppearance(monitor)
+  return h(UBadge, { color: color, variant: 'soft' }, () => label)
+}
+
 // Modal Xóa
 const isDeleteModalOpen = ref(false)
 const deleteLoading = ref(false)
@@ -230,7 +319,7 @@ const getActionItems = (row): DropdownMenuItem[][] => [
     icon: 'i-heroicons-chart-bar-20-solid',
     onSelect: () => navigateTo(`/${projectId}/monitoring/${row.original._id}`)
   }, {
-    label: 'Sửa',
+    label: 'Cập nhật',
     icon: 'i-heroicons-pencil-square-20-solid',
     onSelect: () => openFormModal(row.original) // (MỚI)
   }, {

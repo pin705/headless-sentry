@@ -19,6 +19,6 @@ export const Project = defineMongooseModel('Project', {
     slug: { type: String, unique: true, sparse: true, index: true },
     title: { type: String, default: 'Trạng thái Dịch vụ' },
     logoUrl: { type: String, default: null },
-    customDomain: { type: String, unique: true, sparse: true, default: null, trim: true, lowercase: true }
-  },
+    customDomain: { type: String, unique: true, sparse: true, trim: true, lowercase: true }
+  }
 }, { timestamps: true })

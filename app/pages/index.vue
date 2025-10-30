@@ -63,7 +63,7 @@
           :key="project._id"
           class="hover:ring-2 hover:ring-primary-500 dark:hover:ring-primary-400 cursor-pointer transition-shadow duration-200"
           :ui="{ body: { padding: 'p-4' }, ring: 'ring-1 ring-gray-200 dark:ring-gray-800' }"
-          @click="navigateToProject(project._id)"
+          @click.stop="navigateToProject(project._id)"
         >
           <div class="flex justify-between items-start">
             <div class="flex items-center gap-2">
@@ -87,6 +87,7 @@
                 variant="ghost"
                 size="sm"
                 square
+                @click.stop
               />
             </UDropdownMenu>
           </div>
@@ -222,7 +223,7 @@ async function onProjectCreated(newProject: any) {
     const found = userProjects.value.find(p => p._id === newProject._id)
     if (found) {
       selectProject(found) // Set as selected
-      navigateTo(`/${found._id}`) // Navigate to the new root project page
+      navigateTo(`/`) // Navigate to the new root project page
     }
   }
 }

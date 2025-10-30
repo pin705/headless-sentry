@@ -2,7 +2,6 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 
 const open = ref(false)
-
 const { selectedProject } = useProjectState()
 console.log('Selected Project in Layout:', selectedProject.value)
 const links = [
@@ -27,9 +26,6 @@ const links = [
       open.value = false
     }
   }
-  ],
-  [
-
   ]
 
 ] satisfies NavigationMenuItem[][]
@@ -44,18 +40,23 @@ onMounted(async () => {
 
 <template>
   <div>
-    <UDashboardToolbar>
+    <UDashboardToolbar class="border-none">
       <template #left>
         <ProjectSelector />
+      </template>
+
+      <template #right>
+        <UserMenu />
+      </template>
+    </UDashboardToolbar>
+
+    <UDashboardToolbar class="border-none">
+      <template #left>
         <UNavigationMenu
           :items="links"
           highlight
           class="flex-1"
         />
-      </template>
-
-      <template #right>
-        <UserMenu />
       </template>
     </UDashboardToolbar>
 

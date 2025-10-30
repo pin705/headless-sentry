@@ -3,7 +3,7 @@ import { z } from 'zod'
 import mongoose from 'mongoose'
 
 const bodySchema = z.object({
-  name: z.string().min(1, 'Tên Project không được để trống').max(100, 'Tên Project quá dài')
+  name: z.string().min(1, 'Tên Project không được để trống').max(100, 'Tên Project quá dài'),
 })
 
 export default defineEventHandler(async (event) => {
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
         userId: userId,
         email: session.user.email, // Lấy email từ session
         role: 'owner'
-      }]
+      }],
       // Cấu hình statusPage sẽ lấy giá trị mặc định từ model
     })
 
@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
     // await User.findByIdAndUpdate(userId, { $addToSet: { projectIds: newProject._id } });
 
     return newProject.toObject()
+
   } catch (error: any) {
     if (error.issues) { // Lỗi Zod
       throw createError({ statusCode: 400, message: error.issues[0].message })
