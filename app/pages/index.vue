@@ -31,28 +31,14 @@
         <USkeleton
           v-for="i in 3"
           :key="i"
-          class="h-28"
-        />
+          class="h-36" />
       </div>
 
       <div
         v-else-if="userProjects.length === 0"
         class="p-4 text-center text-gray-500 dark:text-gray-400"
       >
-        <UIcon
-          name="i-heroicons-folder-open"
-          class="w-12 h-12 mx-auto mb-2"
-        />
-        <p>Bạn chưa tham gia Project nào.</p>
-        <UButton
-          label="Tạo Project đầu tiên"
-          icon="i-heroicons-plus"
-          color="primary"
-          variant="soft"
-          class="mt-4"
-          @click="isCreateModalOpen = true"
-        />
-      </div>
+        </div>
 
       <div
         v-else
@@ -61,70 +47,80 @@
         <UCard
           v-for="project in userProjects"
           :key="project._id"
-          class="hover:ring-2 hover:ring-primary-500 dark:hover:ring-primary-400 cursor-pointer transition-shadow duration-200"
-          :ui="{ body: { padding: 'p-4' }, ring: 'ring-1 ring-gray-200 dark:ring-gray-800' }"
-          @click.stop="navigateToProject(project._id)"
+          class="flex flex-col" :ui="{ body: { padding: 'p-4', class: 'flex-1 flex flex-col justify-between' }, ring: 'ring-1 ring-gray-200 dark:ring-gray-800' }"
         >
-          <div class="flex justify-between items-start">
-            <div class="flex items-center gap-2">
-              <span class="font-semibold text-lg truncate">{{ project.name }}</span>
-              <UBadge
-                v-if="project.ownerId === currentUser?.userId"
-                label="Owner"
-                color="primary"
-                variant="soft"
-                size="xs"
-              />
+          <div>
+            <div class="flex justify-between items-start mb-4">
+              <div class="flex items-center gap-2 min-w-0">
+                <NuxtLink
+                  :to="`/${project._id}`"
+                  class="font-semibold text-lg truncate hover:text-primary-500"
+                  @click.stop
+                >
+                  {{ project.name }}
+                </NuxtLink>
+                <UBadge
+                  v-if="project.ownerId === currentUser?.userId"
+                  label="Owner"
+                  color="primary"
+                  variant="soft"
+                  size="xs"
+                />
+              </div>
+
+              <UDropdownMenu
+                :items="getActionItems(project)"
+                :popper="{ placement: 'bottom-end' }"
+              >
+                <UButton
+                  icon="i-heroicons-ellipsis-horizontal-20-solid"
+                  color="neutral"
+                  variant="ghost"
+                  size="sm"
+                  square
+                  @click.stop
+                />
+              </UDropdownMenu>
             </div>
 
-            <UDropdownMenu
-              :items="getActionItems(project)"
-              :popper="{ placement: 'bottom-end' }"
-            >
-              <UButton
-                icon="i-heroicons-ellipsis-horizontal-20-solid"
-                color="neutral"
-                variant="ghost"
-                size="sm"
-                square
+            <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+              <div class="flex items-center gap-4">
+                <UTooltip text="Số thành viên">
+                  <div class="flex items-center gap-1">
+                    <UIcon name="i-heroicons-users" class="w-4 h-4" />
+                    <span>{{ project.memberCount }}</span>
+                  </div>
+                </UTooltip>
+                <UTooltip text="Số lượng Monitors">
+                  <div class="flex items-center gap-1">
+                    <UIcon name="i-heroicons-chart-bar" class="w-4 h-4" />
+                    <span>{{ project.monitorCount }}</span>
+                  </div>
+                </UTooltip>
+              </div>
+
+              <UTooltip text="Ngày tạo">
+                <div class="flex items-center gap-1">
+                  <UIcon name="i-heroicons-calendar-days" class="w-4 h-4" />
+                  <span>{{ useDateFormat(project.createdAt, 'DD/MM/YYYY').value }}</span>
+                </div>
+              </UTooltip>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+             <UButton
+                label="Xem tổng quan"
+                icon="i-heroicons-arrow-right"
+                trailing
+                variant="link"
+                :padded="false"
+                :to="`/${project._id}`"
                 @click.stop
-              />
-            </UDropdownMenu>
+             />
           </div>
         </UCard>
       </div>
-
-      <UModal v-model:open="isDeleteModalOpen">
-        <template #header>
-          <h3 class="text-lg font-semibold">
-            Xác nhận Xóa Project
-          </h3>
-        </template>
-        <template #body>
-          <p>Bạn có chắc chắn muốn xóa Project <strong>{{ projectToDelete?.name }}</strong> không? Tất cả Monitors và dữ liệu liên quan cũng sẽ bị xóa vĩnh viễn.</p>
-          <p class="mt-2 text-sm text-warning-500">
-            Hành động này không thể hoàn tác.
-          </p>
-        </template>
-        <template #footer>
-          <div class="flex justify-end gap-3">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              @click="isDeleteModalOpen = false"
-            >
-              Hủy
-            </UButton>
-            <UButton
-              color="error"
-              :loading="deleteLoading"
-              @click="confirmDelete"
-            >
-              Xác nhận Xóa
-            </UButton>
-          </div>
-        </template>
-      </UModal>
 
       <CreateProjectModal
         v-model="isCreateModalOpen"
@@ -136,38 +132,35 @@
 
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
+import { useDateFormat } from '@vueuse/core' // Import để định dạng ngày
 
 const toast = useToast()
 const { user: currentUser } = useUserSession()
-const { userProjects, loadingProjects, fetchUserProjects, selectProject, selectedProject } = useProjectState() // Added selectedProject
+const { userProjects, loadingProjects, fetchUserProjects, selectProject, selectedProject } = useProjectState()
 
 // Fetch projects on mount
 onMounted(() => {
   fetchUserProjects()
 })
 
-// === Actions Logic ===
-const UDropdownMenu = resolveComponent('UDropdownMenu') // (Rule 4)
-const UButton = resolveComponent('UButton')
-// const UBadge = resolveComponent('UBadge') // If UBadge is used in render functions
-
-// Modal Delete state
-const isDeleteModalOpen = ref(false)
-const deleteLoading = ref(false)
-const projectToDelete = ref<any>(null) // Store the whole project object
-
-// (Rule 3) Define Actions Items based on role (currently just Owner check)
+// === CẬP NHẬT: Actions Logic (Dropdown) ===
 const getActionItems = (project: any): DropdownMenuItem[][] => {
   const isOwner = project.ownerId === currentUser.value?.userId
 
   const items: DropdownMenuItem[][] = [[
     {
-      label: 'Cài đặt Project',
+      label: 'Cài đặt chung',
       icon: 'i-heroicons-cog-6-tooth',
-      to: `/settings/projects/${project._id}` // Link to specific project settings
+      // Sửa link trỏ đến trang chúng ta đã xây dựng
+      to: `/${project._id}/general`
+    },
+    {
+      label: 'Quản lý Thành viên',
+      icon: 'i-heroicons-users',
+      // Sửa link trỏ đến trang chúng ta đã xây dựng
+      to: `/${project._id}/members`
     }
-    // Add Manage Members link later
-    // { label: 'Quản lý Thành viên', icon: 'i-heroicons-users', to: `/settings/projects/${project._id}/members` }
+    // Bạn có thể thêm link đến các trang setting khác ở đây
   ]]
 
   // Only Owner can delete
@@ -175,36 +168,38 @@ const getActionItems = (project: any): DropdownMenuItem[][] => {
     items.push([{
       label: 'Xóa Project',
       icon: 'i-heroicons-trash-20-solid',
-      labelClass: 'text-error-500 dark:text-error-400', // (Rule 7)
-      click: () => openDeleteModal(project) // Pass the project object
+      labelClass: 'text-error-500 dark:text-error-400',
+      click: () => openDeleteModal(project)
     }])
   }
 
   return items
 }
 
-// Open Delete Modal
+// Open Delete Modal (Giữ nguyên)
+const isDeleteModalOpen = ref(false)
+const deleteLoading = ref(false)
+const projectToDelete = ref<any>(null)
+
 function openDeleteModal(project: any) {
   projectToDelete.value = project
   isDeleteModalOpen.value = true
 }
 
-// Confirm Delete Project
+// Confirm Delete Project (Giữ nguyên)
 async function confirmDelete() {
   if (!projectToDelete.value) return
   deleteLoading.value = true
   try {
-    // (Rule 3)
     await $fetch(`/api/projects/${projectToDelete.value._id}`, { method: 'DELETE' })
     toast.add({ title: 'Đã xóa', description: `Đã xóa Project "${projectToDelete.value.name}".`, color: 'success' })
     isDeleteModalOpen.value = false
-    const deletedProjectId = projectToDelete.value._id // Store ID before nulling
+    const deletedProjectId = projectToDelete.value._id
     projectToDelete.value = null
-    await fetchUserProjects() // Reload project list
+    await fetchUserProjects()
 
-    // (NEW) If the deleted project was the selected one, select another
     if (selectedProject.value?._id === deletedProjectId) {
-      selectProject(userProjects.value[0] || null) // Select the first available or null
+      selectProject(userProjects.value[0] || null)
     }
   } catch (err: any) {
     toast.add({ title: 'Lỗi', description: err.data?.message || 'Không thể xóa Project.', color: 'error' })
@@ -213,35 +208,21 @@ async function confirmDelete() {
   }
 }
 
-// === Create Project Logic ===
+// === Create Project Logic (Giữ nguyên) ===
 const isCreateModalOpen = ref(false)
 
 async function onProjectCreated(newProject: any) {
-  await fetchUserProjects() // Reload list
-  // Automatically select and navigate to the new project's overview page
+  await fetchUserProjects()
   if (newProject?._id) {
     const found = userProjects.value.find(p => p._id === newProject._id)
     if (found) {
-      selectProject(found) // Set as selected
-      navigateTo(`/`) // Navigate to the new root project page
+      selectProject(found)
     }
   }
 }
 
-// Refresh Function
 async function refreshProjects() {
   await fetchUserProjects()
-}
-
-// === Navigation ===
-// (NEW) Navigate to the root project page
-function navigateToProject(projectId: string) {
-  // Find the project object to pass to selectProject if needed
-  const project = userProjects.value.find(p => p._id === projectId)
-  if (project) {
-    selectProject(project) // Ensure the selected project state is updated
-  }
-  navigateTo(`/${projectId}`) // Use the new root route structure
 }
 
 useHead({

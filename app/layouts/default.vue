@@ -4,6 +4,7 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 const open = ref(false)
 const { selectedProject } = useProjectState()
 console.log('Selected Project in Layout:', selectedProject.value)
+
 const links = computed(() => [
   [{
     label: 'Tổng quan',
@@ -20,8 +21,24 @@ const links = computed(() => [
     }
   },
   {
-    label: 'Cấu hình',
+    // Đổi tên cho rõ nghĩa
+    label: 'Cấu hình Giám sát',
     to: `/${selectedProject.value?._id}/monitoring/settings`,
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  // --- MỤC MỚI THÊM ---
+  {
+    label: 'Cài đặt chung',
+    to: `/${selectedProject.value?._id}/general`, // Trỏ đến general.vue
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
+    label: 'Thành viên',
+    to: `/${selectedProject.value?._id}/members`, // Trỏ đến members.vue
     onSelect: () => {
       open.value = false
     }

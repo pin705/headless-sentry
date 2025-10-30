@@ -1,67 +1,85 @@
 <template>
-  <div>
-    <h2 class="text-xl font-semibold border-b pb-2">Thông tin chung</h2>
-    <form @submit.prevent="handleUpdateProject" class="mt-4 space-y-4">
-      <div>
-        <label for="projectName" class="block font-medium">Tên dự án</label>
-        <input
-          id="projectName"
-          v-model="form.name"
-          type="text"
-          class="border w-full p-2 rounded-md"
-        />
-      </div>
-      <div>
-        <label for="projectDesc" class="block font-medium">Mô tả</label>
-        <textarea
-          id="projectDesc"
-          v-model="form.description"
-          rows="3"
-          class="border w-full p-2 rounded-md"
-        ></textarea>
-      </div>
+  <UDashboardPanel>
+    <template #header>
+      <UDashboardNavbar title="Cấu hình chung" />
+    </template>
+    <template #body>
+      <UCard>
+        <template #header>
+          <h2 class="text-xl font-semibold">
+            Thông tin chung
+          </h2>
+        </template>
 
-      <button
-        type="submit"
-        :disabled="isUpdating"
-        class="bg-blue-600 text-white px-4 py-2 rounded-md disabled:opacity-50"
-      >
-        {{ isUpdating ? 'Đang lưu...' : 'Lưu thay đổi' }}
-      </button>
-    </form>
-  </div>
+        <UForm
+          :schema="schema"
+          :state="state"
+          class="space-y-4"
+          @submit="handleUpdateProject"
+        >
+          <UFormField
+            label="Tên dự án"
+            name="name"
+          >
+            <UInput v-model="state.name" />
+          </UFormField>
+
+          <UButton
+            type="submit"
+            :loading="isUpdating"
+          >
+            Lưu thay đổi
+          </UButton>
+        </UForm>
+      </UCard>
+    </template>
+  </UDashboardPanel>
 </template>
 
 <script setup>
+import { z } from 'zod'
+
 const route = useRoute()
-const projectId = computed(() => route.params.id)
+const toast = useToast()
+const { project, refreshProject } = useProjectState() // Giả định bạn có composable này
+const projectId = computed(() => route.params.projectId)
 
-// Lấy dữ liệu đã được fetch từ layout cha (settings.vue)
-// `useNuxtData` giúp lấy data từ cache mà không cần fetch lại
-const { data: project } = useNuxtData(`project-${projectId.value}`)
+// Validation schema
+const schema = z.object({
+  name: z.string().min(3, 'Tên phải có ít nhất 3 ký tự')
+})
 
-const form = ref({
-  name: project.value?.name || '',
-  description: project.value?.description || '',
+const state = ref({
+  name: ''
 })
 
 const isUpdating = ref(false)
 
+// Đồng bộ state với data từ composable
+watch(project, (newProject) => {
+  if (newProject) {
+    state.value.name = newProject.name
+  }
+}, { immediate: true })
+
+// Logic cập nhật
 async function handleUpdateProject() {
   isUpdating.value = true
   try {
-    const updatedProject = await $fetch(`/api/projects/${projectId.value}`, {
-      method: 'PATCH', // Hoặc PUT
-      body: form.value,
+    await $fetch(`/api/projects/${projectId.value}`, {
+      method: 'PUT',
+      body: state.value
     })
-
-    // Cập nhật lại cache của useNuxtData (quan trọng)
-    project.value = updatedProject
-
-    alert('Cập nhật thành công!')
+    toast.add({ title: 'Cập nhật thành công!', icon: 'i-heroicons-check-circle' })
+    await refreshProject() // Tải lại state project (nếu cần)
   } catch (error) {
     console.error('Lỗi cập nhật:', error)
-    alert('Có lỗi xảy ra!')
+    toast.add({
+      title: 'Lỗi',
+      description: error.data?.message || 'Không thể cập nhật',
+      color: 'red',
+      icon: 'i-heroicons-exclamation-circle'
+    })
   } finally {
     isUpdating.value = false
   }

@@ -1,7 +1,7 @@
 <template>
   <UDashboardPanel id="status-page-settings">
     <template #header>
-      <UDashboardNavbar title="Cấu hình Trang Trạng thái Công khai" />
+      <UDashboardNavbar title="Cấu hình Trang" />
     </template>
 
     <template #body>
@@ -21,7 +21,7 @@
           >
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
               <UFormField
-                label="Bật Trang Trạng thái Công khai"
+                label="Bật Trang Trạng"
                 name="isEnabled"
               >
                 <USwitch v-model="state.isEnabled" />
