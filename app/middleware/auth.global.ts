@@ -1,4 +1,10 @@
 export default defineNuxtRouteMiddleware(async (to) => {
+  const { host } = useRequestURL()
+
+  if (host.startsWith('status.')) {
+    return // Cho phép truy cập, không làm gì thêm
+  }
+
   const { loggedIn } = useUserSession()
 
   // Danh sách các trang công khai (không cần đăng nhập)

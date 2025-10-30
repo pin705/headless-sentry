@@ -21,7 +21,7 @@ const links = computed(() => [
   },
   {
     label: 'Cấu hình',
-    to: `/${selectedProject.value?._id}/settings`,
+    to: `/${selectedProject.value?._id}/monitoring/settings`,
     onSelect: () => {
       open.value = false
     }
@@ -46,7 +46,7 @@ onMounted(async () => {
       </template>
 
       <template #right>
-        <UserMenu />
+        <UserlayMenu />
       </template>
     </UDashboardToolbar>
 
