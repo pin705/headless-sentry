@@ -4,7 +4,7 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Time%20Series-4EA94B?logo=mongodb&labelColor=001e2b)](https://www.mongodb.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-<details open>
+<details>
 <summary>🇻🇳 Tiếng Việt</summary>
 
 Một hệ thống giám sát uptime và performance mạnh mẽ được xây dựng với Nuxt 3, MongoDB Time Series và AWS S3. Headless Sentry cung cấp giải pháp monitoring toàn diện cho websites và APIs của bạn với khả năng cảnh báo realtime và status page công khai.
@@ -234,7 +234,7 @@ Vui lòng tạo [GitHub Issue](https://github.com/pin705/headless-sentry/issues)
 
 </details>
 
-<details>
+<details open>
 <summary>🇺🇸 English</summary>
 
 A powerful uptime and performance monitoring system built with Nuxt 3, MongoDB Time Series, and AWS S3. Headless Sentry provides comprehensive monitoring solutions for your websites and APIs with real-time alerts and public status pages.
