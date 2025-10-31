@@ -4,7 +4,7 @@
       <UDashboardNavbar title="Cấu hình Thành viên" />
     </template>
     <template #body>
-      <UCard>
+      <UCard class="mb-6">
         <template #header>
           <h3 class="text-lg font-semibold">
             Mời thành viên mới
@@ -49,70 +49,30 @@
       </UCard>
 
       <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">
-            Thành viên trong dự án
-          </h3>
-        </template>
-        <UTable
-          :columns="memberColumns"
-          :data="data?.members"
-          :loading="pending"
-          :empty-state="{ icon: 'i-heroicons-users', label: 'Chưa có thành viên.' }"
+        <UTabs
+          :items="tabItems"
+          class="w-full"
         >
-          <template #user-data="{ row }">
-            <div class="flex flex-col">
-              <span class="font-medium">{{ row.userId?.name || 'N/A' }}</span>
-              <span class="text-xs text-gray-500">{{ row.userId?.email || row.email }}</span>
-            </div>
-          </template>
-
-          <template #role-data="{ row }">
-            <USelectMenu
-              :model-value="row.role"
-              :items="roleOptions"
-              :disabled="row.role === 'owner'"
-              @update:model-value="(newRole) => handleChangeRole(row._id, newRole)"
+          <template #members>
+            <UTable
+              :columns="memberColumns"
+              :data="data?.members"
+              :loading="pending"
+              :empty-state="{ icon: 'i-heroicons-users', label: 'Chưa có thành viên.' }"
+              class="mt-4"
             />
           </template>
 
-          <template #actions-data="{ row }">
-            <UButton
-              v-if="row.role !== 'owner'"
-              icon="i-heroicons-trash"
-              size="sm"
-              color="red"
-              variant="ghost"
-              title="Xóa thành viên"
-              @click="handleRemoveMember(row._id)"
+          <template #invites>
+            <UTable
+              :columns="inviteColumns"
+              :data="data?.pendingInvites"
+              :loading="pending"
+              :empty-state="{ icon: 'i-heroicons-envelope', label: 'Không có lời mời nào đang chờ.' }"
+              class="mt-4"
             />
           </template>
-        </UTable>
-      </UCard>
-
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">
-            Lời mời đang chờ
-          </h3>
-        </template>
-        <UTable
-          :columns="inviteColumns"
-          :data="data?.pendingInvites"
-          :loading="pending"
-          :empty-state="{ icon: 'i-heroicons-envelope', label: 'Không có lời mời nào đang chờ.' }"
-        >
-          <template #actions-data="{ row }">
-            <UButton
-              icon="i-heroicons-x-circle"
-              size="sm"
-              color="gray"
-              variant="ghost"
-              title="Hủy lời mời"
-              @click="handleCancelInvite(row._id)"
-            />
-          </template>
-        </UTable>
+        </UTabs>
       </UCard>
     </template>
   </UDashboardPanel>
@@ -137,26 +97,138 @@ const form = ref({
   role: 'member'
 })
 const isInviting = ref(false)
+const USelectMenu = resolveComponent('USelectMenu')
+const UButton = resolveComponent('UButton')
 
-// --- Cấu hình cột cho Bảng ---
-const memberColumns = [
-  { accessorKey: 'user', header: 'Thành viên' },
-  { accessorKey: 'role', header: 'Vai trò', class: 'w-40' },
-  { accessorKey: 'actions', header: 'Hành động', class: 'w-20 text-right' }
-]
-const inviteColumns = [
-  { accessorKey: 'email', header: 'Email' },
-  { accessorKey: 'role', header: 'Vai trò', class: 'w-40' },
-  { accessorKey: 'actions', header: 'Hành động', class: 'w-20 text-right' }
-]
-
-// --- Fetch Data ---
-// (Sử dụng API /api/projects/[projectId]/members/index.get.ts đã tạo ở bước trước)
 const { data, pending, refresh: refreshLists } = await useFetch(
   () => `/api/projects/${projectId.value}/members`
 )
 
-// --- Logic (đã cập nhật để dùng useToast) ---
+// --- Cấu hình Tabs ---
+const tabItems = computed(() => [
+  {
+    slot: 'members',
+    label: 'Thành viên',
+    icon: 'i-heroicons-users',
+    // Hiển thị số lượng thành viên
+    badge: data.value?.members?.length || 0
+  },
+  {
+    slot: 'invites',
+    label: 'Lời mời đang chờ',
+    icon: 'i-heroicons-envelope',
+    // Hiển thị số lượng lời mời
+    badge: data.value?.pendingInvites?.length || 0
+  }
+])
+
+const memberColumns = [
+  {
+    accessorKey: 'user', // Giống ví dụ của bạn
+    header: 'Thành viên',
+    cell: ({ row }) => { // Giống ví dụ của bạn
+      const userName = row.original.userId?.name || 'N/A'
+      const userEmail = row.original.userId?.email || row.original.email
+      return h('div', { class: 'flex flex-col' }, [
+        h('span', { class: 'font-medium' }, userName),
+        h('span', { class: 'text-xs text-gray-500' }, userEmail)
+      ])
+    }
+  },
+  {
+    accessorKey: 'role',
+    header: 'Vai trò',
+    class: 'w-48',
+    cell: ({ row }) => {
+      // Owner thì chỉ hiển thị text
+      if (row.original.role === 'owner') {
+        return h('span', { class: 'font-medium p-1 text-gray-700 dark:text-gray-300' }, 'Owner')
+      }
+
+      // Render component USelectMenu
+      return h(USelectMenu, {
+        'modelValue': row.original.role,
+        'options': roleOptions,
+        'disabled': row.original.role === 'owner',
+        'onUpdate:modelValue': newRole => handleChangeRole(row.original._id, newRole)
+      })
+    }
+  },
+  {
+    accessorKey: 'actions',
+    header: 'Hành động',
+    class: 'w-20 text-right',
+    cell: ({ row }) => {
+      if (row.original.role === 'owner') {
+        return null // Không có hành động cho Owner
+      }
+
+      // Render component UButton
+      return h(UButton, {
+        icon: 'i-heroicons-trash',
+        size: 'sm',
+        color: 'red',
+        variant: 'ghost',
+        title: 'Xóa thành viên',
+        onClick: () => handleRemoveMember(row.original._id)
+      })
+    }
+  }
+]
+
+// Đây là inviteColumns bạn nói đang sai, giờ đã được viết lại
+const inviteColumns = [
+  {
+    accessorKey: 'email', // Dùng cell mặc định (chỉ text)
+    header: 'Email'
+  },
+  {
+    accessorKey: 'role', // Dùng cell mặc định (chỉ text)
+    header: 'Vai trò',
+    class: 'w-48'
+  },
+  {
+    accessorKey: 'actions',
+    header: 'Hành động',
+    class: 'w-28 text-right',
+    cell: ({ row }) => {
+      // Render 2 nút bấm
+      const copyButton = h(UButton, {
+        icon: 'i-heroicons-clipboard-document',
+        size: 'sm',
+        color: 'gray',
+        variant: 'ghost',
+        title: 'Copy link mời',
+        onClick: () => copyInviteLink(row.original.token)
+      })
+      const cancelButton = h(UButton, {
+        icon: 'i-heroicons-x-circle',
+        size: 'sm',
+        color: 'gray',
+        variant: 'ghost',
+        title: 'Hủy lời mời',
+        onClick: () => handleCancelInvite(row.original._id)
+      })
+      // Trả về một div bọc 2 nút
+      return h('div', { class: 'flex items-center justify-end gap-2' }, [copyButton, cancelButton])
+    }
+  }
+]
+
+// --- HÀM MỚI: Copy Link Mời ---
+function getInviteLink(token) {
+  const origin = window.location.origin
+  return `${origin}/accept-invite?token=${token}`
+}
+
+function copyInviteLink(token) {
+  const link = getInviteLink(token)
+  navigator.clipboard.writeText(link).then(() => {
+    toast.add({ title: 'Đã copy link mời!', icon: 'i-heroicons-check-circle' })
+  }).catch(() => {
+    toast.add({ title: 'Lỗi', description: 'Không thể tự động copy', color: 'red' })
+  })
+}
 
 async function handleInvite() {
   isInviting.value = true

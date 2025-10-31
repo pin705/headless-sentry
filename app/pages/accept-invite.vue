@@ -67,7 +67,7 @@ definePageMeta({
 
 const route = useRoute()
 const token = computed(() => route.query.token)
-const { session } = useAuth() // Giả định bạn dùng Nuxt Auth
+const { session } = useUserSession() // Giả định bạn dùng Nuxt Auth
 
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -87,7 +87,7 @@ async function acceptInvite() {
   isAuthError.value = false
 
   try {
-    const res = await $fetch('/api/project/accept-invite', {
+    const res = await $fetch('/api/projects/accept-invite', {
       method: 'POST',
       body: { token: token.value }
     })
