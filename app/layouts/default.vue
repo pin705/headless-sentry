@@ -8,22 +8,32 @@ const links = computed(() => [
     {
       label: 'Tổng quan',
       to: `/${selectedProject.value?._id || ''}`,
-      exactActiveClass: 'text-primary-600 dark:text-primary-400'
+      exactActiveClass: 'text-primary-600 dark:text-primary-400',
+      icon: 'i-lucide-layout-dashboard'
     },
     {
       label: 'Giám sát',
       to: `/${selectedProject.value?._id}/monitoring`,
-      exactActiveClass: 'text-primary-600 dark:text-primary-400'
+      exactActiveClass: 'text-primary-600 dark:text-primary-400',
+      icon: 'i-lucide-activity'
     },
     {
-      label: 'Cấu hình Giám sát',
+      label: 'Bảo trì',
+      to: `/${selectedProject.value?._id}/maintenance`,
+      exactActiveClass: 'text-primary-600 dark:text-primary-400',
+      icon: 'i-lucide-wrench'
+    },
+    {
+      label: 'Báo cáo SLA',
+      to: `/${selectedProject.value?._id}/reports`,
+      exactActiveClass: 'text-primary-600 dark:text-primary-400',
+      icon: 'i-lucide-chart-bar'
+    },
+    {
+      label: 'Cài đặt',
       to: `/${selectedProject.value?._id}/monitoring/settings`,
-      exactActiveClass: 'text-primary-600 dark:text-primary-400'
-    },
-    {
-      label: 'Cấu hình Dự án',
-      to: `/${selectedProject.value?._id}/project-settings`,
-      exactActiveClass: 'text-primary-600 dark:text-primary-400'
+      exactActiveClass: 'text-primary-600 dark:text-primary-400',
+      icon: 'i-lucide-settings'
     }
   ]
 ] satisfies NavigationMenuItem[][])

@@ -24,6 +24,19 @@
     </template>
 
     <template #body>
+      <!-- Info Banner -->
+      <div class="p-6 pb-0">
+        <UAlert
+          icon="i-lucide-info"
+          color="primary"
+          variant="soft"
+          title="Hỗ trợ nhiều loại giám sát"
+          description="Headless Sentry hỗ trợ HTTP, Keyword, Ping và Heartbeat monitoring. Chọn loại phù hợp khi thêm dịch vụ mới."
+          :close-button="{ icon: 'i-lucide-x', color: 'neutral', variant: 'ghost' }"
+          :ui="{ description: 'text-sm' }"
+        />
+      </div>
+
       <div
         v-if="pending"
         class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
@@ -110,6 +123,13 @@
 
           <div class="flex items-center gap-2 text-sm mb-3 text-gray-500 dark:text-gray-400">
             <UBadge
+              :label="getMonitorTypeLabel(monitor.type)"
+              :color="getMonitorTypeBadgeColor(monitor.type)"
+              variant="subtle"
+              size="xs"
+            />
+            <UBadge
+              v-if="monitor.type === 'http'"
               :label="monitor.method"
               color="neutral"
               variant="subtle"
@@ -394,5 +414,25 @@ async function confirmDelete() {
   } finally {
     deleteLoading.value = false
   }
+}
+
+function getMonitorTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    http: 'HTTP',
+    keyword: 'Keyword',
+    ping: 'Ping',
+    heartbeat: 'Heartbeat'
+  }
+  return labels[type] || type
+}
+
+function getMonitorTypeBadgeColor(type: string): string {
+  const colors: Record<string, string> = {
+    http: 'blue',
+    keyword: 'purple',
+    ping: 'green',
+    heartbeat: 'red'
+  }
+  return colors[type] || 'neutral'
 }
 </script>
