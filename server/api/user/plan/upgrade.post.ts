@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import { getRequireUserSession, handleValidationError } from '~~/server/utils/validation'
-import { getPlanLimits } from '~~/shared/constants/plans'
 
 // Models (User, Transaction) are auto-imported by nuxt-mongoose
 
@@ -83,6 +82,14 @@ export default defineEventHandler(async (event) => {
           note: `Nâng cấp lên gói ${body.targetPlan.toUpperCase()} bằng số dư tài khoản`
         })
 
+        await replaceUserSession(event, {
+          ...session,
+          user: {
+            ...session.user,
+            ...user.toObject()
+          }
+        })
+
         return {
           success: true,
           message: 'Nâng cấp thành công',
@@ -94,6 +101,7 @@ export default defineEventHandler(async (event) => {
       case 'lemon_squeezy':
         // Return checkout information for Lemon Squeezy
         // In production, you would create a checkout session via Lemon Squeezy API
+
         return {
           success: true,
           paymentMethod: 'lemon_squeezy',
