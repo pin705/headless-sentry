@@ -178,5 +178,13 @@
     "daysAgo": "{count} days ago",
     "monthsAgo": "{count} months ago",
     "yearsAgo": "{count} years ago"
+  },
+  "monitor": {
+    "status": {
+      "paused": "Paused",
+      "up": "Up",
+      "down": "Down",
+      "na": "N/A"
+    }
   }
 }

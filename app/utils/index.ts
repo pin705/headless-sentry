@@ -31,7 +31,11 @@ export const formatTimeAgo = (dateString: string | Date, t?: (key: string, param
   return t ? t('time.justNow') : 'Vừa xong'
 }
 
-export function getStatusAppearance(row: any): { color: string, label: string } {
+/**
+ * @deprecated Use useMonitorStatus composable instead for i18n support
+ * This function is kept for backwards compatibility
+ */
+export function getStatusAppearance(row: { status?: string, latestStatus?: string }): { color: string, label: string } {
   if (row.status === 'PAUSED') {
     return { color: 'warning', label: 'Tạm dừng' }
   }

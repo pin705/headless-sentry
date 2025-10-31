@@ -204,5 +204,13 @@
     "daysAgo": "{count} ngày trước",
     "monthsAgo": "{count} tháng trước",
     "yearsAgo": "{count} năm trước"
+  },
+  "monitor": {
+    "status": {
+      "paused": "Tạm dừng",
+      "up": "Hoạt động",
+      "down": "Ngưng",
+      "na": "N/A"
+    }
   }
 }
