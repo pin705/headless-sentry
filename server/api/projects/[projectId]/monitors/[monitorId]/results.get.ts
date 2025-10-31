@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
 import { z } from 'zod'
+import { validateObjectId } from '~~/server/utils/validation'
 
 const querySchema = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -15,16 +15,13 @@ export default defineEventHandler(async (event) => {
   await requireProjectMembership(event)
 
   const monitorId = getRouterParam(event, 'monitorId')
-  if (!monitorId || !mongoose.Types.ObjectId.isValid(monitorId)) {
-    throw createError({ statusCode: 400, message: 'Monitor ID không hợp lệ' })
-  }
+  const monitorIdObj = validateObjectId(monitorId, 'Monitor ID')
 
   // (Mới) Parse và validate query
   const queryResult = await getQuery(event)
   const query = querySchema.parse(queryResult)
 
   const skip = (query.page - 1) * query.limit
-  const monitorIdObj = new mongoose.Types.ObjectId(monitorId)
 
   // --- Xây dựng Query cho MongoDB ---
   const matchQuery: any = { 'meta.monitorId': monitorIdObj }

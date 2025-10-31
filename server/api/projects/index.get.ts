@@ -1,11 +1,7 @@
-import mongoose from 'mongoose'
+import { requireUserSession } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
-  if (!session.user?.userId) {
-    throw createError({ statusCode: 401, message: 'Yêu cầu đăng nhập' })
-  }
-  const userId = new mongoose.Types.ObjectId(session.user.userId)
+  const { userId } = await requireUserSession(event)
 
   // Sử dụng Aggregation để đếm số lượng member và monitor
   const projects = await Project.aggregate([

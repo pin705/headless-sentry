@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import mongoose from 'mongoose'
+import { validateObjectId, handleValidationError } from '~~/server/utils/validation'
 
 // (MỚI) Regex để validate tên miền cơ bản
 const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/
@@ -26,10 +26,10 @@ const configSchema = z.object({
 export default defineEventHandler(async (event) => {
   await requireProjectMembership(event)
   const projectId = getRouterParam(event, 'projectId')
+  const projectIdObjectId = validateObjectId(projectId, 'Project ID')
 
   try {
     const body = await readValidatedBody(event, configSchema.parse)
-    const projectIdObjectId = new mongoose.Types.ObjectId(projectId)
 
     // --- (Nâng cấp) Kiểm tra tính duy nhất ---
     const checks = []
@@ -72,10 +72,8 @@ export default defineEventHandler(async (event) => {
     }
 
     return updatedProject.statusPage
-  } catch (error) {
-    if (error.issues) {
-      throw createError({ statusCode: 400, message: error.issues[0].message })
-    }
+  } catch (error: any) {
+    handleValidationError(error)
     if (error.statusCode === 409 || error.statusCode === 400) throw error
     console.error('Lỗi cập nhật config status page:', error)
     throw createError({ statusCode: 500, message: 'Lỗi máy chủ' })

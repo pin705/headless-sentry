@@ -1,14 +1,14 @@
-import mongoose from 'mongoose'
-import { subHours, subDays, startOfHour, endOfHour } from 'date-fns'
+import { subHours } from 'date-fns'
+import { validateObjectId } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
+  // Verify user is authenticated (return value not needed here)
   await requireUserSession(event)
   const projectId = getRouterParam(event, 'projectId')
+  const projectIdObjectId = validateObjectId(projectId, 'Project ID')
 
   const now = new Date()
   const date24hAgo = subHours(now, 24) // Mốc 24 giờ trước
-
-  const projectIdObjectId = new mongoose.Types.ObjectId(projectId)
 
   try {
     // === 1. Lấy trạng thái MỚI NHẤT của TẤT CẢ monitors (Giữ nguyên) ===

@@ -1,26 +1,19 @@
 // server/api/projects/[projectId].put.ts
 import { z } from 'zod'
 import mongoose from 'mongoose'
+import { requireUserSession, validateObjectId, handleValidationError } from '~~/server/utils/validation'
 
 const bodySchema = z.object({
   name: z.string().min(1, 'Tên Project không được để trống').max(100, 'Tên Project quá dài')
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
+  const { userId } = await requireUserSession(event)
   const projectId = getRouterParam(event, 'projectId')
-
-  if (!session.user?.userId) {
-    throw createError({ statusCode: 401, message: 'Yêu cầu đăng nhập' })
-  }
-  if (!projectId || !mongoose.Types.ObjectId.isValid(projectId)) {
-    throw createError({ statusCode: 400, message: 'Project ID không hợp lệ' })
-  }
+  const projectIdObj = validateObjectId(projectId, 'Project ID')
 
   try {
     const body = await readValidatedBody(event, bodySchema.parse)
-    const userId = new mongoose.Types.ObjectId(session.user.userId)
-    const projectIdObj = new mongoose.Types.ObjectId(projectId)
 
     // Tìm project
     const project = await Project.findById(projectIdObj)
@@ -40,9 +33,7 @@ export default defineEventHandler(async (event) => {
 
     return project.toObject()
   } catch (error: any) {
-    if (error.issues) { // Lỗi Zod
-      throw createError({ statusCode: 400, message: error.issues[0].message })
-    }
+    handleValidationError(error)
     console.error(`Lỗi cập nhật project ${projectId}:`, error)
     if (error.statusCode === 404 || error.statusCode === 403) throw error
     throw createError({ statusCode: 500, message: 'Lỗi máy chủ' })

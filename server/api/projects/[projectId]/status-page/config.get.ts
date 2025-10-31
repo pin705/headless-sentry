@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import { validateObjectId } from '~~/server/utils/validation'
 
 // (Mới) Định nghĩa kiểu dữ liệu trả về và giá trị mặc định
 const defaultStatusPageConfig = {
@@ -11,9 +11,9 @@ const defaultStatusPageConfig = {
 export default defineEventHandler(async (event) => {
   await requireProjectMembership(event)
   const projectId = getRouterParam(event, 'projectId')
+  const projectIdObjectId = validateObjectId(projectId, 'Project ID')
 
   try {
-    const projectIdObjectId = new mongoose.Types.ObjectId(projectId)
 
     // Tìm người dùng và chỉ lấy trường statusPage
     const project = await Project.findById(projectIdObjectId)
