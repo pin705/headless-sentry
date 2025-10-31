@@ -17,7 +17,10 @@ export const User = defineMongooseModel(
     // Plan and billing fields
     plan: { type: String, enum: ['free', 'pro'], default: 'free' },
     balance: { type: Number, default: 0 }, // Balance in VND
-    planExpiresAt: { type: Date, default: null }
+    planExpiresAt: { type: Date, default: null },
+
+    // Language preference
+    language: { type: String, enum: ['vi', 'en'], default: 'vi' }
   },
   {
     timestamps: true

@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
     await user.save()
 
     // Create transaction record for audit trail
-    await Transaction.create({
+    const transaction = await Transaction.create({
       userId: user._id,
       amount,
       type: 'deposit',
@@ -55,6 +55,47 @@ export default defineEventHandler(async (event) => {
       note: note || 'Nạp tiền qua Sepay',
       metadata: { adminEmail: email }
     })
+
+    // Send payment success email (for deposits)
+    try {
+      const config = useRuntimeConfig()
+      const { createPaymentSuccessTemplate, sendMail } = await import('~~/server/utils/sendMail')
+      const { getLanguageForUser } = await import('~~/server/utils/i18n')
+      
+      // Get user's preferred language
+      const userLang = await getLanguageForUser(user._id.toString(), userEmail)
+      
+      const emailTemplate = createPaymentSuccessTemplate(
+        userEmail,
+        transaction.amount,
+        transaction._id.toString(),
+        user.plan || 'free',
+        user.planExpiresAt || new Date(),
+        userLang
+      )
+
+      await sendMail(
+        {
+          to: userEmail,
+          from: config.email.from,
+          subject: emailTemplate.subject,
+          html: emailTemplate.html
+        },
+        {
+          host: config.email.host,
+          port: parseInt(config.email.port),
+          secure: config.email.secure,
+          auth: {
+            user: config.email.user,
+            pass: config.email.pass
+          }
+        }
+      )
+      console.log('Payment success email sent to:', userEmail)
+    } catch (emailError) {
+      console.error('Failed to send payment email:', emailError)
+      // Don't throw error as the payment was successful
+    }
 
     return {
       success: true,

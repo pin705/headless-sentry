@@ -10,6 +10,8 @@ export interface MailOptions {
   bcc?: string | string[]
 }
 
+export type SupportedLanguage = 'vi' | 'en'
+
 export interface SMTPConfig {
   host: string
   port: number
@@ -644,4 +646,356 @@ export function createWelcomeNewMemberTemplate(
   `
 
   return { subject, html }
+}
+
+/**
+ * Get base email template with modern styling
+ */
+function getEmailBaseTemplate(content: string, lang: SupportedLanguage = 'vi') {
+  const translations = {
+    vi: {
+      footer: 'Email này được gửi tự động từ hệ thống Headless Sentry.',
+      noReply: 'Vui lòng không trả lời email này.',
+      docs: 'Tài liệu',
+      support: 'Hỗ trợ',
+      unsubscribe: 'Hủy đăng ký'
+    },
+    en: {
+      footer: 'This email was sent automatically from Headless Sentry system.',
+      noReply: 'Please do not reply to this email.',
+      docs: 'Documentation',
+      support: 'Support',
+      unsubscribe: 'Unsubscribe'
+    }
+  }
+
+  const t = translations[lang]
+
+  return `
+    <!DOCTYPE html>
+    <html lang="${lang}">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <title>Headless Sentry</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          line-height: 1.6;
+          color: #1f2937;
+          background-color: #f9fafb;
+          padding: 20px;
+        }
+        .email-container {
+          max-width: 600px;
+          margin: 0 auto;
+          background: #ffffff;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .email-header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: #ffffff;
+          padding: 40px 30px;
+          text-align: center;
+        }
+        .email-header h1 {
+          font-size: 28px;
+          font-weight: 700;
+          margin-bottom: 8px;
+        }
+        .email-header p {
+          font-size: 16px;
+          opacity: 0.95;
+        }
+        .email-content {
+          padding: 40px 30px;
+        }
+        .email-footer {
+          background: #f9fafb;
+          padding: 30px;
+          text-align: center;
+          border-top: 1px solid #e5e7eb;
+        }
+        .email-footer p {
+          font-size: 14px;
+          color: #6b7280;
+          margin-bottom: 12px;
+        }
+        .email-footer a {
+          color: #667eea;
+          text-decoration: none;
+          margin: 0 8px;
+        }
+        .email-footer a:hover {
+          text-decoration: underline;
+        }
+        .button {
+          display: inline-block;
+          padding: 12px 32px;
+          background: #667eea;
+          color: #ffffff;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 600;
+          margin: 20px 0;
+          transition: background 0.3s;
+        }
+        .button:hover {
+          background: #5568d3;
+        }
+        .info-box {
+          background: #f3f4f6;
+          border-left: 4px solid #667eea;
+          padding: 20px;
+          border-radius: 6px;
+          margin: 20px 0;
+        }
+        .success-box {
+          background: #d1fae5;
+          border-left: 4px solid #10b981;
+          padding: 20px;
+          border-radius: 6px;
+          margin: 20px 0;
+        }
+        .warning-box {
+          background: #fef3c7;
+          border-left: 4px solid #f59e0b;
+          padding: 20px;
+          border-radius: 6px;
+          margin: 20px 0;
+        }
+        .error-box {
+          background: #fee2e2;
+          border-left: 4px solid #ef4444;
+          padding: 20px;
+          border-radius: 6px;
+          margin: 20px 0;
+        }
+        h2 {
+          font-size: 24px;
+          color: #111827;
+          margin-bottom: 16px;
+        }
+        h3 {
+          font-size: 18px;
+          color: #374151;
+          margin-bottom: 12px;
+        }
+        p {
+          margin-bottom: 16px;
+          color: #4b5563;
+        }
+        ul {
+          margin-left: 20px;
+          margin-bottom: 16px;
+        }
+        li {
+          margin-bottom: 8px;
+          color: #4b5563;
+        }
+        .badge {
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 600;
+          text-transform: uppercase;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-error { background: #fee2e2; color: #991b1b; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        @media only screen and (max-width: 600px) {
+          .email-container { border-radius: 0; }
+          .email-header, .email-content, .email-footer { padding: 20px; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        ${content}
+        <div class="email-footer">
+          <p>${t.footer}<br>${t.noReply}</p>
+          <p>
+            <a href="https://github.com/pin705/headless-sentry">📚 ${t.docs}</a> |
+            <a href="mailto:support@headless-sentry.com">💬 ${t.support}</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+}
+
+/**
+ * Template for payment success notification
+ */
+export function createPaymentSuccessTemplate(
+  userEmail: string,
+  amount: number,
+  transactionId: string,
+  plan: string,
+  expiryDate: Date,
+  lang: SupportedLanguage = 'vi'
+) {
+  const translations = {
+    vi: {
+      subject: '[Headless Sentry] Thanh toán thành công',
+      title: '✅ Thanh toán Thành Công',
+      subtitle: 'Giao dịch của bạn đã được xử lý thành công',
+      greeting: 'Xin chào',
+      thankYou: 'Cảm ơn bạn đã thanh toán!',
+      transactionDetails: 'Chi tiết giao dịch',
+      transactionId: 'Mã giao dịch',
+      amount: 'Số tiền',
+      date: 'Ngày giao dịch',
+      planUpgraded: 'Gói của bạn đã được nâng cấp thành công',
+      enjoyFeatures: `Bạn giờ có thể truy cập tất cả các tính năng của gói ${plan.toUpperCase()}.`,
+      validUntil: 'Có hiệu lực đến',
+      viewDashboard: '🎯 Vào Dashboard',
+      regards: 'Trân trọng,<br>Đội ngũ Headless Sentry'
+    },
+    en: {
+      subject: '[Headless Sentry] Payment Successful',
+      title: '✅ Payment Successful',
+      subtitle: 'Your transaction has been processed successfully',
+      greeting: 'Hello',
+      thankYou: 'Thank you for your payment!',
+      transactionDetails: 'Transaction Details',
+      transactionId: 'Transaction ID',
+      amount: 'Amount',
+      date: 'Transaction Date',
+      planUpgraded: 'Your plan has been successfully upgraded',
+      enjoyFeatures: `You can now access all features of the ${plan.toUpperCase()} plan.`,
+      validUntil: 'Valid until',
+      viewDashboard: '🎯 Go to Dashboard',
+      regards: 'Best regards,<br>Headless Sentry Team'
+    }
+  }
+
+  const t = translations[lang]
+  const formattedAmount = new Intl.NumberFormat(lang === 'vi' ? 'vi-VN' : 'en-US', {
+    style: 'currency',
+    currency: 'VND'
+  }).format(amount)
+  const formattedDate = new Date().toLocaleString(lang === 'vi' ? 'vi-VN' : 'en-US')
+  const formattedExpiry = expiryDate.toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')
+
+  const content = `
+    <div class="email-header">
+      <h1>${t.title}</h1>
+      <p>${t.subtitle}</p>
+    </div>
+    <div class="email-content">
+      <p>${t.greeting} <strong>${userEmail}</strong>,</p>
+      <p>${t.thankYou}</p>
+
+      <div class="success-box">
+        <h3>${t.planUpgraded}</h3>
+        <p>${t.enjoyFeatures}</p>
+        <p><strong>${t.validUntil}:</strong> ${formattedExpiry}</p>
+      </div>
+
+      <div class="info-box">
+        <h3>${t.transactionDetails}</h3>
+        <p style="margin-bottom: 8px;"><strong>${t.transactionId}:</strong> ${transactionId}</p>
+        <p style="margin-bottom: 8px;"><strong>${t.amount}:</strong> ${formattedAmount}</p>
+        <p style="margin-bottom: 0;"><strong>${t.date}:</strong> ${formattedDate}</p>
+      </div>
+
+      <div style="text-align: center;">
+        <a href="${process.env.NUXT_PUBLIC_APP_URL || 'http://localhost:3000'}" class="button">
+          ${t.viewDashboard}
+        </a>
+      </div>
+
+      <p>${t.regards}</p>
+    </div>
+  `
+
+  return {
+    subject: t.subject,
+    html: getEmailBaseTemplate(content, lang)
+  }
+}
+
+/**
+ * Template for payment failure notification
+ */
+export function createPaymentFailureTemplate(
+  userEmail: string,
+  amount: number,
+  reason: string,
+  lang: SupportedLanguage = 'vi'
+) {
+  const translations = {
+    vi: {
+      subject: '[Headless Sentry] Thanh toán thất bại',
+      title: '❌ Thanh toán Thất Bại',
+      subtitle: 'Rất tiếc, giao dịch của bạn không thể hoàn tất',
+      greeting: 'Xin chào',
+      sorryMessage: 'Chúng tôi rất tiếc phải thông báo rằng giao dịch của bạn không thành công.',
+      reason: 'Lý do',
+      amount: 'Số tiền',
+      tryAgain: 'Vui lòng thử lại hoặc sử dụng phương thức thanh toán khác.',
+      contactSupport: 'Nếu vấn đề vẫn tiếp diễn, vui lòng liên hệ bộ phận hỗ trợ của chúng tôi.',
+      tryAgainButton: '🔄 Thử lại',
+      regards: 'Trân trọng,<br>Đội ngũ Headless Sentry'
+    },
+    en: {
+      subject: '[Headless Sentry] Payment Failed',
+      title: '❌ Payment Failed',
+      subtitle: 'Unfortunately, your transaction could not be completed',
+      greeting: 'Hello',
+      sorryMessage: 'We regret to inform you that your transaction was unsuccessful.',
+      reason: 'Reason',
+      amount: 'Amount',
+      tryAgain: 'Please try again or use a different payment method.',
+      contactSupport: 'If the problem persists, please contact our support team.',
+      tryAgainButton: '🔄 Try Again',
+      regards: 'Best regards,<br>Headless Sentry Team'
+    }
+  }
+
+  const t = translations[lang]
+  const formattedAmount = new Intl.NumberFormat(lang === 'vi' ? 'vi-VN' : 'en-US', {
+    style: 'currency',
+    currency: 'VND'
+  }).format(amount)
+
+  const content = `
+    <div class="email-header">
+      <h1>${t.title}</h1>
+      <p>${t.subtitle}</p>
+    </div>
+    <div class="email-content">
+      <p>${t.greeting} <strong>${userEmail}</strong>,</p>
+      <p>${t.sorryMessage}</p>
+
+      <div class="error-box">
+        <p style="margin-bottom: 8px;"><strong>${t.amount}:</strong> ${formattedAmount}</p>
+        <p style="margin-bottom: 0;"><strong>${t.reason}:</strong> ${reason}</p>
+      </div>
+
+      <p>${t.tryAgain}</p>
+      <p>${t.contactSupport}</p>
+
+      <div style="text-align: center;">
+        <a href="${process.env.NUXT_PUBLIC_APP_URL || 'http://localhost:3000'}/pricing" class="button">
+          ${t.tryAgainButton}
+        </a>
+      </div>
+
+      <p>${t.regards}</p>
+    </div>
+  `
+
+  return {
+    subject: t.subject,
+    html: getEmailBaseTemplate(content, lang)
+  }
 }

@@ -1,0 +1,151 @@
+{
+  "common": {
+    "appName": "Headless Sentry",
+    "language": "Language",
+    "home": "Home",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "profile": "Profile",
+    "settings": "Settings",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "viewMore": "View More",
+    "viewLess": "View Less",
+    "dashboard": "Dashboard",
+    "all": "All",
+    "showing": "Showing",
+    "of": "of"
+  },
+  "auth": {
+    "loginTitle": "Login to your account",
+    "registerTitle": "Create new account",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Name",
+    "loginButton": "Login",
+    "registerButton": "Register",
+    "forgotPassword": "Forgot password?",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "loginWithGithub": "Login with GitHub",
+    "loginWithGoogle": "Login with Google",
+    "loginSuccess": "Login successful",
+    "registerSuccess": "Registration successful",
+    "logoutSuccess": "Logout successful"
+  },
+  "pricing": {
+    "title": "Pricing Plans",
+    "description": "Choose the plan that fits your monitoring needs. Upgrade or downgrade at any time.",
+    "currentPlan": "Current Plan",
+    "upgradeTo": "Upgrade to {plan}",
+    "downgradeTo": "Downgrade to {plan}",
+    "monthly": "/month",
+    "perMonth": "per month",
+    "popular": "Popular",
+    "paymentMethods": "Payment Methods",
+    "paymentMethodsDescription": "We support multiple payment methods",
+    "lemonSqueezy": "Lemon Squeezy (International)",
+    "lemonSqueezyDesc": "International payment via Lemon Squeezy with credit/debit card.",
+    "bankTransfer": "Bank Transfer (Vietnam)",
+    "bankTransferDesc": "Bank transfer via Sepay. Automatic confirmation and account top-up."
+  },
+  "payment": {
+    "history": "Payment History",
+    "historyDescription": "Review all your transactions and payments",
+    "transactionId": "Transaction ID",
+    "amount": "Amount",
+    "type": "Type",
+    "method": "Method",
+    "status": "Status",
+    "date": "Date",
+    "note": "Note",
+    "noTransactions": "No transactions yet",
+    "noTransactionsDesc": "You haven't made any transactions yet. Upgrade your plan or add funds to your account.",
+    "types": {
+      "deposit": "Deposit",
+      "plan_upgrade": "Plan Upgrade",
+      "plan_renewal": "Plan Renewal",
+      "refund": "Refund"
+    },
+    "methods": {
+      "lemon_squeezy": "Lemon Squeezy",
+      "sepay": "Sepay",
+      "manual": "Account Balance"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "completed": "Completed",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "balance": "Account Balance",
+    "currentBalance": "Current Balance",
+    "previousBalance": "Previous Balance",
+    "newBalance": "New Balance",
+    "upgradeModal": {
+      "title": "Upgrade to Pro Plan",
+      "selectMethod": "Select payment method to upgrade to Pro plan for 200,000 VND/month",
+      "useBalance": "Account Balance",
+      "continue": "Continue",
+      "processing": "Processing...",
+      "success": "Upgrade successful!",
+      "successDesc": "Your account has been upgraded to PRO plan.",
+      "error": "Upgrade error",
+      "insufficientBalance": "Insufficient balance"
+    },
+    "success": "Payment successful",
+    "failed": "Payment failed"
+  },
+  "email": {
+    "greeting": "Hello",
+    "regards": "Best regards",
+    "team": "Headless Sentry Team",
+    "footer": "This email was sent automatically from Headless Sentry system.",
+    "noReply": "Please do not reply to this email.",
+    "support": "Support",
+    "documentation": "Documentation",
+    "unsubscribe": "Unsubscribe",
+    "payment": {
+      "success": {
+        "subject": "[Headless Sentry] Payment Successful",
+        "title": "Payment Successful",
+        "description": "Your transaction has been processed successfully",
+        "thankYou": "Thank you for your payment!",
+        "transactionDetails": "Transaction Details",
+        "planUpgraded": "Your plan has been successfully upgraded",
+        "enjoyFeatures": "You can now access all features of the {plan} plan.",
+        "validUntil": "Valid until"
+      },
+      "failed": {
+        "subject": "[Headless Sentry] Payment Failed",
+        "title": "Payment Failed",
+        "description": "Unfortunately, your transaction could not be completed",
+        "reason": "Reason",
+        "tryAgain": "Please try again or use a different payment method.",
+        "contactSupport": "If the problem persists, please contact support."
+      }
+    }
+  },
+  "project": {
+    "name": "Project Name",
+    "description": "Description",
+    "members": "Members",
+    "monitoring": "Monitoring",
+    "reports": "Reports",
+    "settings": "Project Settings",
+    "maintenance": "Maintenance"
+  }
+}

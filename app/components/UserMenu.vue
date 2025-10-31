@@ -23,6 +23,10 @@ const items = computed<DropdownMenuItem[][]>(() => ([
     icon: 'i-heroicons-cog-8-tooth',
     to: '/profile' // Link đến trang profile
   }, {
+    label: 'Lịch sử thanh toán',
+    icon: 'i-lucide-receipt',
+    to: '/payment-history'
+  }, {
     label: 'Bảng giá',
     icon: 'i-lucide-credit-card',
     to: '/pricing'

@@ -2,13 +2,24 @@
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Header -->
-      <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          Bảng Giá Gói Dịch Vụ
-        </h1>
-        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Chọn gói phù hợp với nhu cầu giám sát của bạn. Nâng cấp hoặc hạ cấp bất cứ lúc nào.
-        </p>
+      <div class="mb-12">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex-1 text-center">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              {{ t('pricing.title') }}
+            </h1>
+            <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              {{ t('pricing.description') }}
+            </p>
+          </div>
+          <UButton
+            :label="t('payment.history')"
+            icon="i-lucide-receipt"
+            variant="outline"
+            to="/payment-history"
+            class="absolute top-4 right-4"
+          />
+        </div>
       </div>
 
       <!-- Pricing Cards -->
@@ -369,6 +380,7 @@
 <script setup lang="ts">
 import { PLAN_FEATURES } from '~~/shared/constants/plans'
 
+const { t } = useI18n()
 const { user, fetch: refreshSession } = useUserSession()
 const toast = useToast()
 
