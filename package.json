@@ -16,6 +16,7 @@
     "@nuxt/ui": "^4.1.0",
     "nodemailer": "^7.0.10",
     "nuxt": "^4.1.2",
+    "ping": "^0.4.4",
     "zod": "^4.1.12"
   },
   "devDependencies": {

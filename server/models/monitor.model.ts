@@ -3,15 +3,18 @@ import type { Schema } from 'mongoose'
 
 const httpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
 const frequencies = [60, 300, 600, 1800, 3600] // 1m, 5m, 10m, 30m, 1h
+const monitorTypes = ['http', 'keyword', 'ping']
 
 export const Monitor = defineMongooseModel('Monitor', {
   projectId: { type: 'ObjectId' as unknown as Schema.Types.ObjectId, ref: 'Project', required: true, index: true },
   userId: { type: 'ObjectId' as unknown as Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   name: { type: String, required: true },
+  type: { type: String, default: 'http', enum: monitorTypes }, // Loại monitor: http, keyword, ping
   endpoint: { type: String, required: true },
   method: { type: String, default: 'GET', enum: httpMethods },
   frequency: { type: Number, default: 60, enum: frequencies }, // Tần suất (giây)
   status: { type: String, default: 'ACTIVE', enum: ['ACTIVE', 'PAUSED'] },
+  keyword: { type: String, default: null }, // Từ khóa để kiểm tra (cho loại 'keyword')
 
   isPublic: { type: Boolean, default: false }, // Mặc định là không công khai
 
@@ -46,7 +49,7 @@ export const Monitor = defineMongooseModel('Monitor', {
     daysRemaining: { type: Number, default: null }, // Số ngày còn lại
     errorMessage: { type: String, default: null },
     lastCheckedAt: { type: Date, default: null } // Lần cuối kiểm tra SSL
-  },
+  }
 
 }, {
   timestamps: true
