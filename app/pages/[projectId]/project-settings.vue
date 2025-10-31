@@ -191,7 +191,7 @@
   </UDashboardPanel>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { z } from 'zod'
 
 const route = useRoute()
@@ -285,7 +285,7 @@ async function handleUpdateProject() {
     toast.add({
       title: 'Lỗi',
       description: getErrorMessage(error),
-      color: 'red',
+      color: 'error',
       icon: 'i-lucide-alert-circle'
     })
   } finally {
@@ -465,7 +465,7 @@ async function handleRemoveMember(memberId) {
     toast.add({ title: 'Đã xóa thành viên', icon: 'i-lucide-check-circle' })
     await refreshLists()
   } catch (error) {
-    toast.add({ title: 'Lỗi', description: getErrorMessage(error), color: 'red', icon: 'i-lucide-alert-circle' })
+    toast.add({ title: 'Lỗi', description: getErrorMessage(error), color: 'error', icon: 'i-lucide-alert-circle' })
   }
 }
 
@@ -478,7 +478,7 @@ async function handleCancelInvite(inviteId) {
     toast.add({ title: 'Đã hủy lời mời', icon: 'i-lucide-check-circle' })
     await refreshLists()
   } catch (error) {
-    toast.add({ title: 'Lỗi', description: getErrorMessage(error), color: 'red', icon: 'i-lucide-alert-circle' })
+    toast.add({ title: 'Lỗi', description: getErrorMessage(error), color: 'error', icon: 'i-lucide-alert-circle' })
   }
 }
 </script>
