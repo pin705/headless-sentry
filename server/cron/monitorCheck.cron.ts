@@ -1,5 +1,6 @@
 import { defineCronHandler } from '#nuxt/cron'
 import { canSendAlert, sendAlerts, updateLastAlertedAt } from '~~/server/utils/alerts'
+import { isInMaintenanceWindow } from '~~/server/utils/maintenanceWindow'
 import ping from 'ping'
 
 export default defineCronHandler(
@@ -222,10 +223,23 @@ export default defineCronHandler(
     }
     console.log(`[Cron] Hoàn thành kiểm tra ${monitorsToRun.length} monitors. Đã ghi ${resultsToInsert.length} kết quả.`)
 
-    // --- GỬI CÁC CẢNH BÁO ---
+    // --- GỬI CÁC CẢNH BÁO (Kiểm tra Maintenance Window) ---
     if (alertsToSend.length > 0) {
-      await sendAlerts(alertsToSend)
-      await updateLastAlertedAt(monitorsToUpdateLastAlerted)
+      // Lọc alerts: không gửi nếu project đang trong maintenance window
+      const alertsToSendFiltered = []
+      for (const alert of alertsToSend) {
+        const inMaintenance = await isInMaintenanceWindow(alert.monitor.projectId)
+        if (!inMaintenance) {
+          alertsToSendFiltered.push(alert)
+        } else {
+          console.log(`[Cron] Bỏ qua cảnh báo cho monitor "${alert.monitor.name}" vì project đang trong maintenance window.`)
+        }
+      }
+
+      if (alertsToSendFiltered.length > 0) {
+        await sendAlerts(alertsToSendFiltered)
+        await updateLastAlertedAt(monitorsToUpdateLastAlerted)
+      }
     }
   }
 )

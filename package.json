@@ -14,6 +14,7 @@
     "@iconify-json/lucide": "^1.2.68",
     "@iconify-json/simple-icons": "^1.2.54",
     "@nuxt/ui": "^4.1.0",
+    "cron-parser": "^5.4.0",
     "nodemailer": "^7.0.10",
     "nuxt": "^4.1.2",
     "ping": "^0.4.4",
