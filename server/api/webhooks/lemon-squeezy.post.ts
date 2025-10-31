@@ -72,13 +72,18 @@ export default defineEventHandler(async (event) => {
         try {
           const config = useRuntimeConfig()
           const { createPaymentSuccessTemplate, sendMail } = await import('~~/server/utils/sendMail')
+          const { getLanguageForUser } = await import('~~/server/utils/i18n')
+          
+          // Get user's preferred language, default to English for Lemon Squeezy
+          const userLang = await getLanguageForUser(user._id.toString(), userEmail)
+          
           const emailTemplate = createPaymentSuccessTemplate(
             userEmail,
             transaction.amount,
             transaction._id.toString(),
             'pro',
             expirationDate,
-            'en' // Default to English for international payments
+            userLang
           )
 
           await sendMail(

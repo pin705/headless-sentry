@@ -47,7 +47,10 @@ const links = computed(() => [
       </template>
 
       <template #right>
-        <UserMenu />
+        <div class="flex items-center gap-2">
+          <LanguageSwitcher />
+          <UserMenu />
+        </div>
       </template>
     </UDashboardToolbar>
 

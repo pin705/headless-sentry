@@ -60,13 +60,18 @@ export default defineEventHandler(async (event) => {
     try {
       const config = useRuntimeConfig()
       const { createPaymentSuccessTemplate, sendMail } = await import('~~/server/utils/sendMail')
+      const { getLanguageForUser } = await import('~~/server/utils/i18n')
+      
+      // Get user's preferred language
+      const userLang = await getLanguageForUser(user._id.toString(), userEmail)
+      
       const emailTemplate = createPaymentSuccessTemplate(
         userEmail,
         transaction.amount,
         transaction._id.toString(),
         user.plan || 'free',
         user.planExpiresAt || new Date(),
-        'vi' // Default to Vietnamese for Sepay
+        userLang
       )
 
       await sendMail(
