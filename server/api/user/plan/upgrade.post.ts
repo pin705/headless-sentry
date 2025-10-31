@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import { getRequireUserSession, handleValidationError } from '~~/server/utils/validation'
-import { getPlanLimits } from '~~/shared/constants/plans'
 
 // Models (User, Transaction) are auto-imported by nuxt-mongoose
 
@@ -123,6 +122,14 @@ export default defineEventHandler(async (event) => {
           console.error('Failed to send payment email:', emailError)
           // Don't throw error as the payment was successful
         }
+        
+        await replaceUserSession(event, {
+          ...session,
+          user: {
+            ...session.user,
+            ...user.toObject()
+          }
+        })
 
         return {
           success: true,
@@ -135,6 +142,7 @@ export default defineEventHandler(async (event) => {
       case 'lemon_squeezy':
         // Return checkout information for Lemon Squeezy
         // In production, you would create a checkout session via Lemon Squeezy API
+
         return {
           success: true,
           paymentMethod: 'lemon_squeezy',
