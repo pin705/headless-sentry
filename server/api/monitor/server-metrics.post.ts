@@ -112,17 +112,22 @@ export default defineEventHandler(async (event) => {
       if (canSendAlert(monitor.alertConfig?.lastAlertedAt)) {
         const alertDetails = []
         if (metrics.cpuUsage >= cpuThreshold) {
-          alertDetails.push(`CPU: ${metrics.cpuUsage}% (ngưỡng: ${cpuThreshold}%)`)
+          alertDetails.push(`CPU: ${metrics.cpuUsage}% (threshold: ${cpuThreshold}%)`)
         }
         if (metrics.memoryUsage >= memoryThreshold) {
-          alertDetails.push(`RAM: ${metrics.memoryUsage}% (ngưỡng: ${memoryThreshold}%)`)
+          alertDetails.push(`RAM: ${metrics.memoryUsage}% (threshold: ${memoryThreshold}%)`)
         }
         if (metrics.diskUsage >= diskThreshold) {
-          alertDetails.push(`Disk: ${metrics.diskUsage}% (ngưỡng: ${diskThreshold}%)`)
+          alertDetails.push(`Disk: ${metrics.diskUsage}% (threshold: ${diskThreshold}%)`)
         }
 
         await sendAlerts([{
-          monitor: monitor as any,
+          monitor: {
+            _id: monitor._id,
+            name: monitor.name,
+            endpoint: monitor.endpoint,
+            alertConfig: monitor.alertConfig
+          },
           type: 'Server Resource Alert',
           details: alertDetails.join(', ')
         }])

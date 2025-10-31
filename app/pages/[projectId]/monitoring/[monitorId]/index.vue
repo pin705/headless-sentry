@@ -461,11 +461,13 @@ const statusCodeOptions = [
 ]
 
 const queryParams = computed(() => {
-  const params: Record<string, string | number | undefined> = {
+  const params = {
     page: page.value,
     limit: limit.value,
     status: selectedStatus.value === 'all' ? undefined : selectedStatus.value,
-    statusCode: selectedStatusCode.value === 'all' ? undefined : selectedStatusCode.value
+    statusCode: selectedStatusCode.value === 'all' ? undefined : selectedStatusCode.value,
+    startDate: undefined as string | undefined,
+    endDate: undefined as string | undefined
   }
 
   // (Mới) Thêm ngày tùy chỉnh nếu range là 'custom'
@@ -658,8 +660,7 @@ const historyColumns = computed(() => {
     { accessorKey: 'timestamp', header: 'Thời gian',
       cell: ({ row }: RowData) => {
         const resultId = row.original._id
-        const monitorId = route.params.id
-        const linkTo = `/monitoring/${monitorId}/results/${resultId}`
+        const linkTo = `/${projectId}/monitoring/${monitorId}/results/${resultId}`
         const timeAgo = formatTimeAgo(new Date(row.original.timestamp))
 
         return h(resolveComponent('NuxtLink'), {
