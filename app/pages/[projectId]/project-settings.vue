@@ -200,6 +200,14 @@ const projectId = computed(() => route.params.projectId)
 
 const roleOptions = ['admin', 'member']
 
+// --- Utility Functions ---
+function getErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object' && 'data' in error) {
+    return ((error as { data?: { message?: string } }).data?.message) || 'Đã xảy ra lỗi'
+  }
+  return 'Đã xảy ra lỗi'
+}
+
 // --- Schema và State cho Form Mời ---
 const inviteSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
@@ -275,7 +283,7 @@ async function handleUpdateProject() {
     console.error('Lỗi cập nhật:', error)
     toast.add({
       title: 'Lỗi',
-      description: error.data?.message || 'Không thể cập nhật',
+      description: getErrorMessage(error),
       color: 'red',
       icon: 'i-lucide-alert-circle'
     })
@@ -427,7 +435,7 @@ async function handleInvite() {
     form.value.role = 'member'
     await refreshLists()
   } catch (error) {
-    toast.add({ title: 'Lỗi', description: error.data?.message, color: 'red', icon: 'i-lucide-alert-circle' })
+    toast.add({ title: 'Lỗi', description: getErrorMessage(error), color: 'red', icon: 'i-lucide-alert-circle' })
   } finally {
     isInviting.value = false
   }
@@ -442,7 +450,7 @@ async function handleChangeRole(memberId, newRole) {
     toast.add({ title: 'Đã cập nhật vai trò', icon: 'i-lucide-check-circle' })
     await refreshLists()
   } catch (error) {
-    toast.add({ title: 'Lỗi', description: error.data?.message, color: 'red', icon: 'i-lucide-alert-circle' })
+    toast.add({ title: 'Lỗi', description: getErrorMessage(error), color: 'red', icon: 'i-lucide-alert-circle' })
     await refreshLists() // Tải lại để reset dropdown nếu lỗi
   }
 }
@@ -456,7 +464,7 @@ async function handleRemoveMember(memberId) {
     toast.add({ title: 'Đã xóa thành viên', icon: 'i-lucide-check-circle' })
     await refreshLists()
   } catch (error) {
-    toast.add({ title: 'Lỗi', description: error.data?.message, color: 'red', icon: 'i-lucide-alert-circle' })
+    toast.add({ title: 'Lỗi', description: getErrorMessage(error), color: 'red', icon: 'i-lucide-alert-circle' })
   }
 }
 
@@ -469,7 +477,7 @@ async function handleCancelInvite(inviteId) {
     toast.add({ title: 'Đã hủy lời mời', icon: 'i-lucide-check-circle' })
     await refreshLists()
   } catch (error) {
-    toast.add({ title: 'Lỗi', description: error.data?.message, color: 'red', icon: 'i-lucide-alert-circle' })
+    toast.add({ title: 'Lỗi', description: getErrorMessage(error), color: 'red', icon: 'i-lucide-alert-circle' })
   }
 }
 </script>

@@ -221,12 +221,30 @@ const tabItems = [
   { slot: 'security', label: 'Bảo mật', icon: 'i-lucide-shield' }
 ]
 
-// --- 1. Logic cho Profile (Đã cập nhật) ---
+// --- Validation Schemas ---
 const profileSchema = z.object({
   name: z.string().min(2, 'Tên phải có ít nhất 2 ký tự').max(50, 'Tên quá dài'),
   email: z.string().email()
 })
 
+const securitySchema = z.object({
+  currentPassword: z.string().min(1, 'Vui lòng nhập mật khẩu hiện tại'),
+  newPassword: z.string().min(6, 'Mật khẩu mới phải có ít nhất 6 ký tự'),
+  confirmPassword: z.string().min(1, 'Vui lòng xác nhận mật khẩu')
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: 'Mật khẩu xác nhận không khớp',
+  path: ['confirmPassword']
+})
+
+// --- Utility Functions ---
+function getErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object' && 'data' in error) {
+    return ((error as { data?: { message?: string } }).data?.message) || 'Đã xảy ra lỗi'
+  }
+  return 'Đã xảy ra lỗi'
+}
+
+// --- 1. Logic cho Profile ---
 const profileState = ref({
   email: '',
   name: '',
@@ -325,12 +343,9 @@ async function handleUpdateProfile() {
     })
   } catch (error: unknown) {
     console.error(error)
-    const errorMessage = error && typeof error === 'object' && 'data' in error
-      ? ((error as { data?: { message?: string } }).data?.message)
-      : undefined
     toast.add({
       title: 'Lỗi',
-      description: errorMessage || 'Không thể cập nhật',
+      description: getErrorMessage(error),
       color: 'error',
       icon: 'i-lucide-alert-circle'
     })
@@ -340,15 +355,6 @@ async function handleUpdateProfile() {
 }
 
 // --- 2. Logic cho Security (Bảo mật) ---
-const securitySchema = z.object({
-  currentPassword: z.string().min(1, 'Vui lòng nhập mật khẩu hiện tại'),
-  newPassword: z.string().min(6, 'Mật khẩu mới phải có ít nhất 6 ký tự'),
-  confirmPassword: z.string().min(1, 'Vui lòng xác nhận mật khẩu')
-}).refine(data => data.newPassword === data.confirmPassword, {
-  message: 'Mật khẩu xác nhận không khớp',
-  path: ['confirmPassword']
-})
-
 const securityState = ref({
   currentPassword: '',
   newPassword: '',
@@ -379,12 +385,9 @@ async function handleChangePassword() {
     securityState.value.newPassword = ''
     securityState.value.confirmPassword = ''
   } catch (error: unknown) {
-    const errorMessage = error && typeof error === 'object' && 'data' in error
-      ? ((error as { data?: { message?: string } }).data?.message)
-      : undefined
     toast.add({
       title: 'Lỗi',
-      description: errorMessage || 'Không thể đổi mật khẩu',
+      description: getErrorMessage(error),
       color: 'error',
       icon: 'i-lucide-alert-circle'
     })
