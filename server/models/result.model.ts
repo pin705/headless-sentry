@@ -16,7 +16,7 @@ export const Result = defineMongooseModel('Result', {
   statusCode: { type: Number, required: true }, // Mã trạng thái HTTP
   isUp: { type: Boolean, required: true }, // True nếu statusCode < 400
   errorMessage: { type: String, default: null, trim: true },
-  
+
   // Server monitoring metrics (only for server type monitors)
   serverMetrics: {
     cpuUsage: { type: Number, default: null }, // CPU usage percentage

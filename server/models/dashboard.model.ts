@@ -6,16 +6,16 @@ export const Dashboard = defineMongooseModel('Dashboard', {
   projectId: { type: 'ObjectId' as unknown as Schema.Types.ObjectId, ref: 'Project', required: true, index: true },
   name: { type: String, required: true },
   isDefault: { type: Boolean, default: false },
-  
+
   // Layout configuration for widgets
   layoutConfig: [{
     i: { type: String, required: true }, // Widget ID
     x: { type: Number, required: true },
     y: { type: Number, required: true },
     w: { type: Number, required: true }, // Width
-    h: { type: Number, required: true }  // Height
+    h: { type: Number, required: true } // Height
   }],
-  
+
   // Widget configurations
   widgetConfigs: [{
     id: { type: String, required: true },
