@@ -1,9 +1,6 @@
 import { defineCronHandler } from '#nuxt/cron'
-import { ofetch } from 'ofetch'
-import mongoose from 'mongoose'
-import { subMinutes } from 'date-fns' // Cần hàm này
-
-const ALERT_COOLDOWN = 5 * 60 * 1000 // 5 phút
+import { subMinutes } from 'date-fns'
+import { canSendAlert, sendAlerts, updateLastAlertedAt } from '~~/server/utils/alerts'
 
 // Khoảng thời gian để tính tỷ lệ lỗi (ví dụ: 10 phút)
 const ERROR_RATE_WINDOW_MINUTES = 10
@@ -27,7 +24,7 @@ export default defineCronHandler(
       return
     }
 
-    const alertsToSend: Array<{ monitor: any, details: string }> = []
+    const alertsToSend: Array<{ monitor: any, type: string, details: string }> = []
     const monitorsToUpdateLastAlerted: string[] = []
     const now = new Date() // Thời gian hiện tại
 
@@ -37,10 +34,7 @@ export default defineCronHandler(
       if (threshold === null || threshold === undefined) continue // Bỏ qua nếu không có ngưỡng
 
       // Kiểm tra cooldown
-      const lastAlertTime = monitor.alertConfig.lastAlertedAt ? new Date(monitor.alertConfig.lastAlertedAt).getTime() : 0
-      const canAlert = !lastAlertTime || (now.getTime() - lastAlertTime > ALERT_COOLDOWN)
-
-      if (!canAlert) {
+      if (!canSendAlert(monitor.alertConfig.lastAlertedAt)) {
         // console.log(`[Cron ErrorRate] Bỏ qua ${monitor.name} do đang trong cooldown.`);
         continue // Bỏ qua monitor này nếu đang cooldown
       }
@@ -76,9 +70,9 @@ export default defineCronHandler(
 
         // 4. So sánh tỷ lệ lỗi với ngưỡng
         if (errorRate > threshold) {
-          // (MỚI) Thêm vào danh sách cảnh báo
+          // Thêm vào danh sách cảnh báo
           const details = `Tỷ lệ lỗi là ${errorRate.toFixed(1)}% (vượt ngưỡng ${threshold}%) trong ${ERROR_RATE_WINDOW_MINUTES} phút qua (${stats.totalDown}/${stats.totalChecks} lần lỗi).`
-          alertsToSend.push({ monitor, details })
+          alertsToSend.push({ monitor, type: 'Tỷ lệ lỗi cao', details })
 
           // Đánh dấu monitor này cần cập nhật lastAlertedAt
           if (!monitorsToUpdateLastAlerted.includes(monitor._id.toString())) {
@@ -95,38 +89,8 @@ export default defineCronHandler(
 
     // --- GỬI CÁC CẢNH BÁO TỶ LỆ LỖI ---
     if (alertsToSend.length > 0) {
-      console.log(`[Cron ErrorRate] Đang gửi ${alertsToSend.length} cảnh báo tỷ lệ lỗi...`)
-      const alertPromises = alertsToSend.map(async (alert) => {
-        const { monitor, details } = alert
-        const channels = monitor.alertConfig?.channels || []
-        const type = 'Tỷ lệ lỗi cao' // Loại cảnh báo cố định
-
-        for (const channel of channels) {
-          try {
-            const payload = {
-              text: `🚨 Cảnh báo Headless Sentry: [${monitor.name}] ${type}\nChi tiết: ${details}\nURL: ${monitor.endpoint}`
-            }
-            await ofetch(channel.url, { method: 'POST', body: payload, headers: { 'Content-Type': 'application/json' }, retry: 0 })
-            console.log(`[Cron ErrorRate] Đã gửi cảnh báo "${type}" cho "${monitor.name}" tới ${new URL(channel.url).hostname}`)
-          } catch (webhookError: any) {
-            console.error(`[Cron ErrorRate] Lỗi gửi webhook tới ${channel.url} cho "${monitor.name}":`, webhookError.message)
-          }
-        }
-      })
-      await Promise.allSettled(alertPromises)
-
-      // --- Cập nhật lastAlertedAt ---
-      if (monitorsToUpdateLastAlerted.length > 0) {
-        try {
-          await Monitor.updateMany(
-            { _id: { $in: monitorsToUpdateLastAlerted.map(id => new mongoose.Types.ObjectId(id)) } },
-            { $set: { 'alertConfig.lastAlertedAt': new Date() } } // Cập nhật cùng trường lastAlertedAt
-          )
-          console.log(`[Cron ErrorRate] Đã cập nhật lastAlertedAt cho ${monitorsToUpdateLastAlerted.length} monitors.`)
-        } catch (updateError) {
-          console.error('[Cron ErrorRate] Lỗi cập nhật lastAlertedAt:', updateError)
-        }
-      }
+      await sendAlerts(alertsToSend)
+      await updateLastAlertedAt(monitorsToUpdateLastAlerted)
     } else {
       console.log('[Cron ErrorRate] Không có cảnh báo tỷ lệ lỗi nào cần gửi.')
     }

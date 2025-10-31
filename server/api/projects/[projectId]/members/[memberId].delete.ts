@@ -1,14 +1,11 @@
 import mongoose from 'mongoose'
+import { requireUserSession, validateObjectId } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig() // <-- THÊM MỚI
-  const session = await getUserSession(event)
-  const currentUserId = new mongoose.Types.ObjectId(session.user.userId)
+  const config = useRuntimeConfig()
+  const { userId: currentUserId } = await requireUserSession(event)
   const memberIdToDelete = getRouterParam(event, 'memberId')
-
-  if (!memberIdToDelete || !mongoose.Types.ObjectId.isValid(memberIdToDelete)) {
-    throw createError({ statusCode: 400, message: 'Member ID không hợp lệ' })
-  }
+  validateObjectId(memberIdToDelete, 'Member ID')
 
   const project = await requireProjectMembership(event, { lean: false })
   requireProjectRole(project, currentUserId, ['owner', 'admin'])

@@ -1,9 +1,5 @@
 import { defineCronHandler } from '#nuxt/cron'
-import { ofetch } from 'ofetch'
-import mongoose from 'mongoose'
-
-// Thời gian cooldown giữa các cảnh báo (tính bằng mili giây)
-const ALERT_COOLDOWN = 5 * 60 * 1000 // 5 phút
+import { canSendAlert, sendAlerts, updateLastAlertedAt } from '~~/server/utils/alerts'
 
 export default defineCronHandler(
   () => '*/1 * * * *', // Chạy mỗi phút
@@ -75,11 +71,8 @@ export default defineCronHandler(
 
           // === KIỂM TRA ĐIỀU KIỆN CẢNH BÁO ===
           const alertConfig = monitor.alertConfig
-          const now = Date.now()
-          const lastAlertTime = monitor.lastAlertedAt ? new Date(monitor.lastAlertedAt).getTime() : 0
-          const canAlert = !lastAlertTime || (now - lastAlertTime > ALERT_COOLDOWN)
 
-          if (alertConfig && canAlert) {
+          if (alertConfig && canSendAlert(monitor.lastAlertedAt)) {
             if (!isUp) { // Downtime (HTTP)
               alertsToSend.push({ monitor, type: 'Downtime', details: `Dịch vụ không hoạt động (Status ${statusCode}). Lỗi: ${errorMessage?.substring(0, 100) || 'N/A'}` })
             } else if (alertConfig.latencyThreshold != null && latency > alertConfig.latencyThreshold) { // Latency (Kiểm tra != null)
@@ -102,11 +95,8 @@ export default defineCronHandler(
 
           // === KIỂM TRA CẢNH BÁO DOWNTIME (Do Lỗi Network) ===
           const alertConfig = monitor.alertConfig
-          const now = Date.now()
-          const lastAlertTime = monitor.lastAlertedAt ? new Date(monitor.lastAlertedAt).getTime() : 0
-          const canAlert = !lastAlertTime || (now - lastAlertTime > ALERT_COOLDOWN)
 
-          if (alertConfig && canAlert) {
+          if (alertConfig && canSendAlert(monitor.lastAlertedAt)) {
             alertsToSend.push({ monitor, type: 'Downtime', details: `Không thể kết nối dịch vụ (Lỗi Network). ${errorMessage}` })
           }
           // =========================================================
@@ -180,37 +170,8 @@ export default defineCronHandler(
 
     // --- GỬI CÁC CẢNH BÁO ---
     if (alertsToSend.length > 0) {
-      console.log(`[Cron] Đang gửi ${alertsToSend.length} cảnh báo...`)
-      const alertPromises = alertsToSend.map(async (alert) => {
-        const { monitor, type, details } = alert
-        const channels = monitor.alertConfig?.channels || []
-
-        for (const channel of channels) {
-          try {
-            const payload = {
-              text: `🚨 Cảnh báo Headless Sentry: [${monitor.name}] ${type}\nChi tiết: ${details}\nURL: ${monitor.endpoint}`
-            }
-            await ofetch(channel.url, { method: 'POST', body: payload, headers: { 'Content-Type': 'application/json' }, retry: 0 })
-            console.log(`[Cron] Đã gửi cảnh báo "${type}" cho "${monitor.name}" tới ${new URL(channel.url).hostname}`)
-          } catch (webhookError: any) {
-            console.error(`[Cron] Lỗi gửi webhook tới ${channel.url} cho "${monitor.name}":`, webhookError.message)
-          }
-        }
-      })
-      await Promise.allSettled(alertPromises)
-
-      // --- Cập nhật lastAlertedAt ---
-      if (monitorsToUpdateLastAlerted.length > 0) {
-        try {
-          await Monitor.updateMany(
-            { _id: { $in: monitorsToUpdateLastAlerted.map(id => new mongoose.Types.ObjectId(id)) } },
-            { $set: { 'alertConfig.lastAlertedAt': new Date() } }
-          )
-          console.log(`[Cron] Đã cập nhật lastAlertedAt cho ${monitorsToUpdateLastAlerted.length} monitors.`)
-        } catch (updateError) {
-          console.error('[Cron] Lỗi cập nhật lastAlertedAt:', updateError)
-        }
-      }
+      await sendAlerts(alertsToSend)
+      await updateLastAlertedAt(monitorsToUpdateLastAlerted)
     }
   }
 )

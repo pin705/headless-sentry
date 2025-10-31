@@ -1,14 +1,11 @@
-import mongoose from 'mongoose'
+import { validateObjectId } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
   await requireProjectMembership(event)
 
   const monitorId = getRouterParam(event, 'monitorId')
   const projectId = getRouterParam(event, 'projectId')
-
-  if (!monitorId || !mongoose.Types.ObjectId.isValid(monitorId)) {
-    throw createError({ statusCode: 400, message: 'Monitor ID không hợp lệ' })
-  }
+  validateObjectId(monitorId, 'Monitor ID')
 
   try {
     // 1. Lấy thông tin chi tiết Monitor
