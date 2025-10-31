@@ -8,7 +8,6 @@ defineProps<{
 const { user, clear } = useUserSession()
 const colorMode = useColorMode()
 const appConfig = useAppConfig()
-const locale = ref('vi')
 
 const colors = ['neutral', 'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
@@ -23,6 +22,10 @@ const items = computed<DropdownMenuItem[][]>(() => ([
     label: 'Cài đặt tài khoản',
     icon: 'i-heroicons-cog-8-tooth',
     to: '/profile' // Link đến trang profile
+  }, {
+    label: 'Bảng giá',
+    icon: 'i-lucide-credit-card',
+    to: '/pricing'
   }],
   [
     {
