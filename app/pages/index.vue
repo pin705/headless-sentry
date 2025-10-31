@@ -137,7 +137,7 @@ import { useDateFormat } from '@vueuse/core' // Import để định dạng ngà
 const toast = useToast()
 const { user: currentUser } = useUserSession()
 const { userProjects, loadingProjects, fetchUserProjects, selectProject, selectedProject } = useProjectState()
-
+console.log('currentUser', currentUser.value)
 // Fetch projects on mount
 onMounted(() => {
   fetchUserProjects()

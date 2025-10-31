@@ -59,7 +59,7 @@
             label="Đăng nhập với Google"
             color="neutral"
             variant="outline"
-            @click="() => toast.add({ title: 'Chức năng đang phát triển...', color: 'info' })"
+            @click="openInPopup('/auth/google')"
           />
           <UButton
             block
@@ -67,11 +67,14 @@
             label="Đăng nhập với Github"
             color="neutral"
             variant="outline"
-            @click="() => toast.add({ title: 'Chức năng đang phát triển...', color: 'info' })"
+           @click="openInPopup('/auth/github')"
           />
         </div>
 
-        <USeparator label="HOẶC" class="my-6" />
+        <USeparator
+          label="HOẶC"
+          class="my-6"
+        />
 
         <UForm
           :state="state"
@@ -79,7 +82,11 @@
           class="space-y-4"
           @submit="submit"
         >
-          <UFormField label="Email" name="email" required>
+          <UFormField
+            label="Email"
+            name="email"
+            required
+          >
             <UInput
               v-model="state.email"
               placeholder="you@example.com"
@@ -87,7 +94,11 @@
               class="w-full"
             />
           </UFormField>
-          <UFormField label="Mật khẩu" name="password" required>
+          <UFormField
+            label="Mật khẩu"
+            name="password"
+            required
+          >
             <UInput
               v-model="state.password"
               type="password"
@@ -95,8 +106,11 @@
               icon="i-heroicons-lock-closed"
               class="w-full"
             />
-             <template #hint>
-              <NuxtLink to="/quen-mat-khau" class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary">Quên mật khẩu?</NuxtLink>
+            <template #hint>
+              <NuxtLink
+                to="/quen-mat-khau"
+                class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary"
+              >Quên mật khẩu?</NuxtLink>
             </template>
           </UFormField>
           <UButton
@@ -112,7 +126,10 @@
           <div class="text-center">
             <p class="text-sm text-gray-500 dark:text-gray-400">
               Chưa có tài khoản?
-              <NuxtLink to="/register" class="text-primary font-medium hover:underline">Đăng ký ngay</NuxtLink>
+              <NuxtLink
+                to="/register"
+                class="text-primary font-medium hover:underline"
+              >Đăng ký ngay</NuxtLink>
             </p>
           </div>
         </template>
@@ -129,7 +146,7 @@ definePageMeta({
   layout: 'auth'
 })
 
-const { fetch } = useUserSession()
+const { fetch, openInPopup } = useUserSession()
 const toast = useToast()
 const isLoading = ref(false)
 

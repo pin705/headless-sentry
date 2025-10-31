@@ -6,6 +6,8 @@ export const User = defineMongooseModel(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
 
+    name: { type: String, required: true },
+
     avatar: { type: String, default: '' },
 
     lastKnownIP: { type: String, default: '' },
