@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { getRequireUserSession, handleValidationError } from '~~/server/utils/validation'
 
 const bodySchema = z.object({
-  name: z.string().min(1, 'Tên Project không được để trống').max(100, 'Tên Project quá dài'),
+  name: z.string().min(1, 'Tên Project không được để trống').max(100, 'Tên Project quá dài')
 })
 
 export default defineEventHandler(async (event) => {
@@ -14,6 +14,17 @@ export default defineEventHandler(async (event) => {
   try {
     const body = await readValidatedBody(event, bodySchema.parse)
 
+    // Check plan limits before creating project
+    const { canCreateProject } = await import('~~/server/utils/plan-limits')
+    const limitCheck = await canCreateProject(userId)
+
+    if (!limitCheck.allowed) {
+      throw createError({
+        statusCode: 403,
+        message: limitCheck.reason || 'Không thể tạo dự án mới'
+      })
+    }
+
     // Tạo Project mới
     const newProject = await Project.create({
       name: body.name,
@@ -22,7 +33,7 @@ export default defineEventHandler(async (event) => {
         userId: userId,
         email: session.user.email, // Lấy email từ session
         role: 'owner'
-      }],
+      }]
       // Cấu hình statusPage sẽ lấy giá trị mặc định từ model
     })
 
@@ -30,7 +41,6 @@ export default defineEventHandler(async (event) => {
     // await User.findByIdAndUpdate(userId, { $addToSet: { projectIds: newProject._id } });
 
     return newProject.toObject()
-
   } catch (error) {
     handleValidationError(error)
     console.error('Lỗi tạo project:', error)

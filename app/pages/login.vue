@@ -12,7 +12,10 @@
         <div class="mb-8">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-              <UIcon name="i-lucide-activity" class="w-7 h-7 text-white" />
+              <UIcon
+                name="i-lucide-activity"
+                class="w-7 h-7 text-white"
+              />
             </div>
             <h1 class="text-4xl font-bold tracking-tight">
               Headless Sentry
@@ -26,7 +29,10 @@
         <div class="mt-12 space-y-6">
           <div class="flex gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all">
             <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-              <UIcon name="i-lucide-zap" class="w-5 h-5 text-primary" />
+              <UIcon
+                name="i-lucide-zap"
+                class="w-5 h-5 text-primary"
+              />
             </div>
             <div>
               <h3 class="font-semibold text-white mb-1">
@@ -40,7 +46,10 @@
 
           <div class="flex gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all">
             <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-              <UIcon name="i-lucide-bell" class="w-5 h-5 text-primary" />
+              <UIcon
+                name="i-lucide-bell"
+                class="w-5 h-5 text-primary"
+              />
             </div>
             <div>
               <h3 class="font-semibold text-white mb-1">
@@ -54,7 +63,10 @@
 
           <div class="flex gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all">
             <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-              <UIcon name="i-lucide-shield-check" class="w-5 h-5 text-primary" />
+              <UIcon
+                name="i-lucide-shield-check"
+                class="w-5 h-5 text-primary"
+              />
             </div>
             <div>
               <h3 class="font-semibold text-white mb-1">
@@ -109,7 +121,7 @@
             size="lg"
             color="neutral"
             variant="outline"
-           @click="openInPopup('/auth/github')"
+            @click="openInPopup('/auth/github')"
           />
         </div>
 

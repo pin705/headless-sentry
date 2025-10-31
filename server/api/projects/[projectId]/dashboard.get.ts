@@ -91,7 +91,7 @@ export default defineEventHandler(async (event) => {
     const stats24h = stats24hArr[0] || { totalChecks: 0, totalUp: 0, avgLatency: 0 }
     const uptimePercent24h = (stats24h.totalChecks > 0) ? (stats24h.totalUp / stats24h.totalChecks) * 100 : 100
     let totalMonitors = 0, totalUp = 0, totalDown = 0, totalPaused = 0
-    
+
     // Đếm monitors theo loại trong cùng một vòng lặp
     const monitorsByType: Record<string, number> = {}
     latestStates.forEach((m) => {
@@ -99,7 +99,7 @@ export default defineEventHandler(async (event) => {
       if (m.status === 'PAUSED') totalPaused++
       else if (m.isUp === true) totalUp++
       else totalDown++
-      
+
       // Đếm theo type
       const type = m.type || 'http'
       monitorsByType[type] = (monitorsByType[type] || 0) + 1

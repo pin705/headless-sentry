@@ -224,30 +224,217 @@
         </UCard>
       </div>
     </div>
+
+    <!-- Payment Modal -->
+    <UModal v-model="showPaymentModal">
+      <UCard>
+        <template #header>
+          <h3 class="text-lg font-semibold">
+            Nâng cấp lên gói Pro
+          </h3>
+        </template>
+
+        <div
+          v-if="!paymentInfo"
+          class="space-y-6"
+        >
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            Chọn phương thức thanh toán để nâng cấp lên gói Pro với giá 200.000 VNĐ/tháng
+          </p>
+
+          <!-- Payment Method Selection -->
+          <div class="space-y-3">
+            <label
+              class="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              :class="{ 'border-primary-500 bg-primary-50 dark:bg-primary-950': selectedPaymentMethod === 'balance' }"
+            >
+              <input
+                v-model="selectedPaymentMethod"
+                type="radio"
+                value="balance"
+                class="mt-1"
+              >
+              <div class="flex-1">
+                <div class="font-semibold">Số dư tài khoản</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                  Số dư hiện tại: {{ (user?.balance || 0).toLocaleString('vi-VN') }} VNĐ
+                </div>
+              </div>
+            </label>
+
+            <label
+              class="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              :class="{ 'border-primary-500 bg-primary-50 dark:bg-primary-950': selectedPaymentMethod === 'sepay' }"
+            >
+              <input
+                v-model="selectedPaymentMethod"
+                type="radio"
+                value="sepay"
+                class="mt-1"
+              >
+              <div class="flex-1">
+                <div class="font-semibold">Chuyển khoản ngân hàng</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                  Chuyển khoản qua Sepay (Việt Nam)
+                </div>
+              </div>
+            </label>
+
+            <label
+              class="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              :class="{ 'border-primary-500 bg-primary-50 dark:bg-primary-950': selectedPaymentMethod === 'lemon_squeezy' }"
+            >
+              <input
+                v-model="selectedPaymentMethod"
+                type="radio"
+                value="lemon_squeezy"
+                class="mt-1"
+              >
+              <div class="flex-1">
+                <div class="font-semibold">Lemon Squeezy</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                  Thanh toán quốc tế bằng thẻ tín dụng
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Payment Instructions (Sepay) -->
+        <div
+          v-else-if="paymentInfo.paymentMethod === 'sepay'"
+          class="space-y-4"
+        >
+          <UAlert
+            color="primary"
+            title="Thông tin chuyển khoản"
+            description="Vui lòng chuyển khoản theo thông tin dưới đây"
+          />
+
+          <div class="space-y-2 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Ngân hàng:</span>
+              <span class="font-semibold">{{ paymentInfo.bankInfo.bankName }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Số tài khoản:</span>
+              <span class="font-semibold">{{ paymentInfo.bankInfo.accountNumber }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Chủ tài khoản:</span>
+              <span class="font-semibold">{{ paymentInfo.bankInfo.accountName }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Số tiền:</span>
+              <span class="font-semibold text-primary">{{ paymentInfo.price.toLocaleString('vi-VN') }} VNĐ</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Nội dung:</span>
+              <span class="font-semibold">{{ paymentInfo.bankInfo.transferContent }}</span>
+            </div>
+          </div>
+
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            {{ paymentInfo.instructions }}
+          </p>
+        </div>
+
+        <template #footer>
+          <div class="flex justify-end gap-3">
+            <UButton
+              v-if="!paymentInfo"
+              label="Hủy"
+              color="neutral"
+              variant="outline"
+              @click="showPaymentModal = false"
+            />
+            <UButton
+              v-if="!paymentInfo"
+              :label="loading ? 'Đang xử lý...' : 'Tiếp tục'"
+              :loading="loading"
+              @click="processUpgrade"
+            />
+            <UButton
+              v-else
+              label="Đóng"
+              @click="showPaymentModal = false; paymentInfo = null"
+            />
+          </div>
+        </template>
+      </UCard>
+    </UModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { PLAN_FEATURES } from '~~/shared/constants/plans'
 
-const { user } = useUserSession()
+const { user, fetch: refreshSession } = useUserSession()
 const toast = useToast()
 
 const currentPlan = computed(() => user.value?.plan || 'free')
+const showPaymentModal = ref(false)
+const selectedPaymentMethod = ref<'lemon_squeezy' | 'sepay' | 'balance'>('balance')
+const loading = ref(false)
+const paymentInfo = ref<any>(null)
 
 async function upgradeToPro() {
-  toast.add({
-    title: 'Nâng cấp gói Pro',
-    description: 'Tính năng thanh toán đang được phát triển. Vui lòng liên hệ support để nâng cấp.',
-    color: 'info',
-    timeout: 5000
-  })
+  showPaymentModal.value = true
+}
+
+async function processUpgrade() {
+  if (loading.value) return
+
+  loading.value = true
+
+  try {
+    const response = await $fetch('/api/user/plan/upgrade', {
+      method: 'POST',
+      body: {
+        targetPlan: 'pro',
+        paymentMethod: selectedPaymentMethod.value,
+        useBalance: selectedPaymentMethod.value === 'balance',
+        returnUrl: window.location.origin + '/pricing'
+      }
+    })
+
+    if (selectedPaymentMethod.value === 'balance') {
+      // Direct upgrade with balance
+      toast.add({
+        title: 'Nâng cấp thành công!',
+        description: 'Tài khoản của bạn đã được nâng cấp lên gói PRO.',
+        color: 'success',
+        timeout: 5000
+      })
+
+      // Refresh session to get updated plan
+      await refreshSession()
+      showPaymentModal.value = false
+    } else {
+      // Show payment instructions
+      paymentInfo.value = response
+
+      if (selectedPaymentMethod.value === 'lemon_squeezy' && response.checkoutUrl) {
+        // Redirect to Lemon Squeezy checkout
+        window.location.href = response.checkoutUrl
+      }
+    }
+  } catch (error: any) {
+    toast.add({
+      title: 'Lỗi nâng cấp',
+      description: error.data?.message || 'Có lỗi xảy ra khi nâng cấp gói.',
+      color: 'error',
+      timeout: 5000
+    })
+  } finally {
+    loading.value = false
+  }
 }
 
 async function changePlan(plan: string) {
   toast.add({
     title: 'Thay đổi gói',
-    description: 'Tính năng này đang được phát triển.',
+    description: 'Tính năng hạ cấp đang được phát triển. Vui lòng liên hệ support.',
     color: 'info'
   })
 }
