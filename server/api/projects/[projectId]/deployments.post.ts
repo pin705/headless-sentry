@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import crypto from 'crypto'
+import { hashApiKey } from '~~/server/utils/crypto'
 
 const deploymentSchema = z.object({
   version: z.string().min(1).max(100),
@@ -9,11 +9,6 @@ const deploymentSchema = z.object({
   status: z.enum(['success', 'failed', 'rollback']).optional(),
   metadata: z.record(z.any()).optional()
 })
-
-// Helper to hash API key
-function hashApiKey(key: string): string {
-  return crypto.createHash('sha256').update(key).digest('hex')
-}
 
 export default defineEventHandler(async (event) => {
   const projectId = getRouterParam(event, 'projectId')

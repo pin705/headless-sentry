@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import crypto from 'crypto'
+import { hashApiKey } from '~~/server/utils/crypto'
 
 const logSchema = z.object({
   level: z.enum(['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL']),
@@ -14,11 +14,6 @@ const logSchema = z.object({
 const batchLogSchema = z.object({
   logs: z.array(logSchema).min(1).max(100)
 })
-
-// Helper to hash API key
-function hashApiKey(key: string): string {
-  return crypto.createHash('sha256').update(key).digest('hex')
-}
 
 export default defineEventHandler(async (event) => {
   // Get API key from header
@@ -101,17 +96,22 @@ export default defineEventHandler(async (event) => {
 
 // Helper function to check error log threshold
 async function checkErrorLogThreshold(projectId: any) {
-  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
-  
+  // TODO: Make these configurable per project in project settings
+  const ERROR_THRESHOLD = 10 // errors
+  const TIME_WINDOW = 5 * 60 * 1000 // 5 minutes in milliseconds
+
+  const windowStart = new Date(Date.now() - TIME_WINDOW)
+
   const errorCount = await Log.countDocuments({
     projectId,
     level: 'ERROR',
-    timestamp: { $gte: fiveMinutesAgo }
+    timestamp: { $gte: windowStart }
   })
 
-  // If more than 10 errors in 5 minutes, trigger alert
-  if (errorCount > 10) {
+  // If errors exceed threshold, trigger alert
+  if (errorCount > ERROR_THRESHOLD) {
     // TODO: Implement alert logic (send notification to project members)
-    console.log(`[ALERT] Project ${projectId} has ${errorCount} ERROR logs in the last 5 minutes`)
+    // Consider integrating with existing alert system in server/utils/sendMail.ts
+    console.log(`[ALERT] Project ${projectId} has ${errorCount} ERROR logs in the last ${TIME_WINDOW / 60000} minutes`)
   }
 }

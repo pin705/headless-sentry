@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import crypto from 'crypto'
+import { hashApiKey } from '~~/server/utils/crypto'
 
 const serverMetricsSchema = z.object({
   monitorId: z.string(),
@@ -15,11 +15,6 @@ const serverMetricsSchema = z.object({
   loadAverage: z.array(z.number()).length(3).optional(),
   timestamp: z.string().datetime().optional()
 })
-
-// Helper to hash API key
-function hashApiKey(key: string): string {
-  return crypto.createHash('sha256').update(key).digest('hex')
-}
 
 export default defineEventHandler(async (event) => {
   // Get API key from header

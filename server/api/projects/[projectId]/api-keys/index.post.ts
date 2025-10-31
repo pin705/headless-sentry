@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import crypto from 'crypto'
+import { hashApiKey, generateApiKey, generateRandomString } from '~~/server/utils/crypto'
 
 const apiKeySchema = z.object({
   name: z.string().min(1).max(100),
@@ -7,27 +7,17 @@ const apiKeySchema = z.object({
   expiresAt: z.string().datetime().optional()
 })
 
-// Generate a secure random API key
-function generateApiKey(prefix: string): string {
-  const randomPart = crypto.randomBytes(32).toString('hex')
-  return `${prefix}${randomPart}`
-}
-
-// Hash API key for storage
-function hashApiKey(key: string): string {
-  return crypto.createHash('sha256').update(key).digest('hex')
-}
-
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
   const project = await requireProjectMembership(event)
-  
+
   const body = await readBody(event)
   const data = apiKeySchema.parse(body)
 
   try {
-    // Generate API key with project-specific prefix
-    const keyPrefix = `hs_${project._id.toString().substring(0, 8)}_`
+    // Generate API key with secure random prefix
+    const randomPrefix = generateRandomString(8)
+    const keyPrefix = `hs_${randomPrefix}_`
     const apiKey = generateApiKey(keyPrefix)
     const keyHash = hashApiKey(apiKey)
 

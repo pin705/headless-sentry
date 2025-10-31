@@ -78,12 +78,21 @@ function getMemoryUsage() {
   }
 }
 
-// Get disk usage (simple estimation - works on Linux)
+// Get disk usage
 function getDiskUsage() {
-  // For a more accurate implementation, you would need to use native modules
-  // or execute shell commands. This is a simplified version.
-  
-  // Fallback values if we can't determine actual disk usage
+  // NOTE: This is a simplified implementation that returns placeholder values.
+  // For production use, consider:
+  // 1. Using a native module like 'diskusage' or 'systeminformation'
+  // 2. Executing shell commands: 'df -h /' on Linux/Mac or 'wmic logicaldisk' on Windows
+  // 3. Using the Python agent (coming soon) which has better cross-platform support
+
+  // Example with shell command (Linux/Mac):
+  // const { execSync } = require('child_process')
+  // const output = execSync('df -BG / | tail -1').toString()
+  // const [_, totalGB, usedGB] = output.match(/\d+/g).map(Number)
+  // return { usage: (usedGB / totalGB) * 100, usedGB, totalGB }
+
+  // Fallback values - disk monitoring not currently active
   return {
     usage: 0,
     usedGB: 0,

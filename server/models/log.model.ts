@@ -11,11 +11,12 @@ export const Log = defineMongooseModel('Log', {
   source: { type: String, default: 'application' }, // application, system, agent
   tags: [{ type: String }]
 }, {
-  timestamps: true,
-  // Optionally enable TTL for automatic log cleanup
-  expireAfterSeconds: 60 * 60 * 24 * 90 // 90 days retention
+  timestamps: true
 })
 
 // Create indexes for efficient querying
 Log.schema.index({ projectId: 1, timestamp: -1 })
 Log.schema.index({ projectId: 1, level: 1, timestamp: -1 })
+
+// TTL index for automatic log cleanup after 90 days
+Log.schema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 })
