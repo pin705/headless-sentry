@@ -7,7 +7,10 @@ export default defineOAuthGoogleEventHandler({
   async onSuccess(event, { user }) {
     await setUserSession(event, {
       user: {
-        google: user.email
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        avatar: user?.picture
       },
       loggedInAt: Date.now()
     })

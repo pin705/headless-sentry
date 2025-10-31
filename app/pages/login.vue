@@ -142,13 +142,15 @@
 import { z } from 'zod'
 import type { FormSubmitEvent } from '#ui/types'
 
-definePageMeta({
-  layout: 'auth'
-})
-
-const { fetch, openInPopup } = useUserSession()
+const { fetch, openInPopup, user } = useUserSession()
 const toast = useToast()
 const isLoading = ref(false)
+
+watchEffect(() => {
+  if (user.value) {
+    navigateTo('/')
+  }
+})
 
 // Định nghĩa schema validation bằng Zod
 const schema = z.object({

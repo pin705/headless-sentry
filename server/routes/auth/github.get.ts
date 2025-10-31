@@ -3,9 +3,13 @@ export default defineOAuthGitHubEventHandler({
     emailRequired: true
   },
   async onSuccess(event, { user, tokens }) {
+    console.log('GitHub OAuth tokens:', user)
     await setUserSession(event, {
       user: {
-        githubId: user.id
+        userId: user.id,
+        avatar: user?.avatar_url,
+        email: user?.email,
+        name: user?.name
       }
     })
     return sendRedirect(event, '/')
