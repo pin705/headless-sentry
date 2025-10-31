@@ -1,8 +1,8 @@
 <template>
   <UDashboardPanel id="status-page-settings">
-    <template #header>
+    <!-- <template #header>
       <UDashboardNavbar title="Cấu hình Trang" />
-    </template>
+    </template> -->
 
     <template #body>
       <div class="p-4 grid grid-cols-1 gap-6">

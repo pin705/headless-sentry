@@ -1,79 +1,107 @@
 <template>
   <UDashboardPanel>
-    <template #header>
-      <UDashboardNavbar title="Cấu hình Thành viên" />
-    </template>
     <template #body>
-      <UCard class="mb-6">
-        <template #header>
-          <h3 class="text-lg font-semibold">
-            Mời thành viên mới
-          </h3>
+      <UTabs
+        :items="configTabs"
+        orientation="vertical"
+      >
+        <template #members>
+          <UCard>
+            <UForm
+              :schema="schema"
+              :state="state"
+              class="space-y-4"
+              @submit="handleUpdateProject"
+            >
+              <UFormField
+                label="Tên dự án"
+                name="name"
+              >
+                <UInput v-model="state.name" />
+              </UFormField>
+
+              <UButton
+                type="submit"
+                :loading="isUpdating"
+              >
+                Lưu thay đổi
+              </UButton>
+            </UForm>
+          </UCard>
         </template>
+        <template #invites>
+          <UCard class="mb-6">
+            <template #header>
+              <h3 class="text-lg font-semibold">
+                Mời thành viên mới
+              </h3>
+            </template>
 
-        <UForm
-          :schema="inviteSchema"
-          :state="form"
-          class="flex items-end gap-4"
-          @submit="handleInvite"
-        >
-          <UFormField
-            label="Email"
-            name="email"
-            class="flex-1"
-          >
-            <UInput
-              v-model="form.email"
-              placeholder="email@example.com"
-            />
-          </UFormField>
+            <UForm
+              :schema="inviteSchema"
+              :state="form"
+              class="flex items-end gap-4"
+              @submit="handleInvite"
+            >
+              <UFormField
+                label="Email"
+                name="email"
+                class="flex-1"
+              >
+                <UInput
+                  v-model="form.email"
+                  placeholder="email@example.com"
+                />
+              </UFormField>
 
-          <UFormField
-            label="Vai trò"
-            name="role"
-          >
-            <USelectMenu
-              v-model="form.role"
-              :items="roleOptions"
-            />
-          </UFormField>
+              <UFormField
+                label="Vai trò"
+                name="role"
+              >
+                <USelectMenu
+                  v-model="form.role"
+                  :items="roleOptions"
+                />
+              </UFormField>
 
-          <UButton
-            type="submit"
-            :loading="isInviting"
-            icon="i-heroicons-paper-airplane"
-          >
-            Gửi lời mời
-          </UButton>
-        </UForm>
-      </UCard>
+              <UButton
+                type="submit"
+                :loading="isInviting"
+                icon="i-heroicons-paper-airplane"
+              >
+                Gửi lời mời
+              </UButton>
+            </UForm>
+          </UCard>
 
-      <UCard>
-        <UTabs
-          :items="tabItems"
-          class="w-full"
-        >
-          <template #members>
-            <UTable
-              :columns="memberColumns"
-              :data="data?.members"
-              :loading="pending"
-              :empty-state="{ icon: 'i-heroicons-users', label: 'Chưa có thành viên.' }"
-              class="mt-4"
-            />
-          </template>
+          <UCard>
+            <UTabs
+              :items="tabItems"
+              class="w-full"
+            >
+              <template #members>
+                <UTable
+                  :columns="memberColumns"
+                  :data="data?.members"
+                  :loading="pending"
+                  :empty-state="{ icon: 'i-heroicons-users', label: 'Chưa có thành viên.' }"
+                  class="mt-4"
+                />
+              </template>
 
-          <template #invites>
-            <UTable
-              :columns="inviteColumns"
-              :data="data?.pendingInvites"
-              :loading="pending"
-              :empty-state="{ icon: 'i-heroicons-envelope', label: 'Không có lời mời nào đang chờ.' }"
-              class="mt-4"
-            />
-          </template>
-        </UTabs>
-      </UCard>
+              <template #invites>
+                <UTable
+                  :columns="inviteColumns"
+                  :data="data?.pendingInvites"
+                  :loading="pending"
+                  :empty-state="{ icon: 'i-heroicons-envelope', label: 'Không có lời mời nào đang chờ.' }"
+                  class="mt-4"
+                />
+              </template>
+            </UTabs>
+          </UCard>
+        </template>
+      </UTabs>
     </template>
   </UDashboardPanel>
 </template>
@@ -103,6 +131,78 @@ const UButton = resolveComponent('UButton')
 const { data, pending, refresh: refreshLists } = await useFetch(
   () => `/api/projects/${projectId.value}/members`
 )
+
+// Sửa lại để sử dụng đúng tên từ composable
+const { selectedProject, selectProject } = useProjectState()
+
+// Validation schema
+const schema = z.object({
+  name: z.string().min(3, 'Tên phải có ít nhất 3 ký tự')
+})
+
+const state = ref({
+  name: ''
+})
+
+const isUpdating = ref(false)
+
+// --- PHẦN BỔ SUNG: Lấy dữ liệu dự án khi tải trang ---
+// Sử dụng API GET /api/projects/[projectId]/index.get.ts]
+await useFetch(
+  () => `/api/projects/${projectId.value}`,
+  {
+    onSuccess: (data) => {
+      if (data) {
+        state.value.name = data.name
+        // Cập nhật trạng thái toàn cục
+        selectProject(data)
+      }
+    },
+    // Nếu selectedProject đã có, dùng nó làm giá trị ban đầu
+    // watch ở dưới sẽ cập nhật state.name
+    default: () => selectedProject.value
+  }
+)
+
+// Đồng bộ state với data từ composable (nếu nó thay đổi)
+watch(selectedProject, (newProject) => {
+  if (newProject && newProject.name !== state.value.name) {
+    state.value.name = newProject.name
+  }
+}, { immediate: true })
+
+// Logic cập nhật
+async function handleUpdateProject() {
+  isUpdating.value = true
+  try {
+    // Gọi API PUT /api/projects/[projectId]/index.put.ts]
+    const updatedProject = await $fetch(`/api/projects/${projectId.value}`, {
+      method: 'PUT',
+      body: state.value
+    })
+
+    toast.add({ title: 'Cập nhật thành công!', icon: 'i-heroicons-check-circle' })
+
+    // Cập nhật lại state toàn cục
+    selectProject(updatedProject)
+    // Bạn cũng có thể gọi refreshFetchedProject() nếu cần
+  } catch (error) {
+    console.error('Lỗi cập nhật:', error)
+    toast.add({
+      title: 'Lỗi',
+      description: error.data?.message || 'Không thể cập nhật',
+      color: 'red',
+      icon: 'i-heroicons-exclamation-circle'
+    })
+  } finally {
+    isUpdating.value = false
+  }
+}
+
+const configTabs = [
+  { slot: 'members', label: 'Thành viên' },
+  { slot: 'invites', label: 'Lời mời đang chờ' }
+]
 
 // --- Cấu hình Tabs ---
 const tabItems = computed(() => [
