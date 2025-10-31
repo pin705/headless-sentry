@@ -314,7 +314,7 @@ async function handleUpdateProfile() {
 
     // --- BƯỚC 2: TẠO BODY VÀ GỌI API PROFILE ---
     // API này bây giờ nhận JSON, KHÔNG phải FormData
-    const profileBody: Record<string, unknown> = {
+    const profileBody: { name: string, avatarUrl?: string, removeAvatar?: boolean } = {
       name: profileState.value.name
     }
 
@@ -355,6 +355,7 @@ async function handleUpdateProfile() {
 }
 
 // --- 2. Logic cho Security (Bảo mật) ---
+
 const securityState = ref({
   currentPassword: '',
   newPassword: '',

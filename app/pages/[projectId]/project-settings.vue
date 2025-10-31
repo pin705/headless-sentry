@@ -198,8 +198,6 @@ const route = useRoute()
 const toast = useToast()
 const projectId = computed(() => route.params.projectId)
 
-const roleOptions = ['admin', 'member']
-
 // --- Utility Functions ---
 function getErrorMessage(error: unknown): string {
   if (error && typeof error === 'object' && 'data' in error) {
@@ -207,6 +205,9 @@ function getErrorMessage(error: unknown): string {
   }
   return 'Đã xảy ra lỗi'
 }
+
+// --- Constants ---
+const roleOptions = ['admin', 'member']
 
 // --- Schema và State cho Form Mời ---
 const inviteSchema = z.object({
