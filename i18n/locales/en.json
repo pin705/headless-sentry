@@ -147,5 +147,44 @@
     "reports": "Reports",
     "settings": "Project Settings",
     "maintenance": "Maintenance"
+  },
+  "status": {
+    "title": "Service Status",
+    "allOperational": "All services are operational",
+    "someOutage": "Some services are experiencing issues",
+    "someMaintenance": "Some services are under maintenance",
+    "lastUpdated": "Last updated",
+    "poweredBy": "Powered by",
+    "loading": "Loading",
+    "error": "Unable to load status page",
+    "uptimeStats": "Uptime Statistics",
+    "responseTime": "Response Time",
+    "averageResponseTime": "Average",
+    "uptime": "Uptime",
+    "last24h": "Last 24 hours",
+    "last7d": "Last 7 days",
+    "last30d": "Last 30 days",
+    "status": {
+      "operational": "Operational",
+      "outage": "Outage",
+      "maintenance": "Maintenance",
+      "unknown": "Unknown"
+    }
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{count} minutes ago",
+    "hoursAgo": "{count} hours ago",
+    "daysAgo": "{count} days ago",
+    "monthsAgo": "{count} months ago",
+    "yearsAgo": "{count} years ago"
+  },
+  "monitor": {
+    "status": {
+      "paused": "Paused",
+      "up": "Up",
+      "down": "Down",
+      "na": "N/A"
+    }
   }
 }

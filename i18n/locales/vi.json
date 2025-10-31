@@ -173,5 +173,44 @@
     "reports": "Báo cáo",
     "settings": "Cài đặt dự án",
     "maintenance": "Bảo trì"
+  },
+  "status": {
+    "title": "Trạng thái Dịch vụ",
+    "allOperational": "Tất cả dịch vụ đang hoạt động",
+    "someOutage": "Một số dịch vụ đang gặp sự cố",
+    "someMaintenance": "Một số dịch vụ đang bảo trì",
+    "lastUpdated": "Cập nhật lần cuối",
+    "poweredBy": "Cung cấp bởi",
+    "loading": "Đang tải",
+    "error": "Không thể tải trang trạng thái",
+    "uptimeStats": "Thống kê uptime",
+    "responseTime": "Thời gian phản hồi",
+    "averageResponseTime": "Trung bình",
+    "uptime": "Uptime",
+    "last24h": "24 giờ qua",
+    "last7d": "7 ngày qua",
+    "last30d": "30 ngày qua",
+    "status": {
+      "operational": "Hoạt động",
+      "outage": "Gián đoạn",
+      "maintenance": "Bảo trì",
+      "unknown": "Không rõ"
+    }
+  },
+  "time": {
+    "justNow": "Vừa xong",
+    "minutesAgo": "{count} phút trước",
+    "hoursAgo": "{count} giờ trước",
+    "daysAgo": "{count} ngày trước",
+    "monthsAgo": "{count} tháng trước",
+    "yearsAgo": "{count} năm trước"
+  },
+  "monitor": {
+    "status": {
+      "paused": "Tạm dừng",
+      "up": "Hoạt động",
+      "down": "Ngưng",
+      "na": "N/A"
+    }
   }
 }
