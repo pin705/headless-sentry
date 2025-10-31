@@ -3,7 +3,7 @@ import type { Schema } from 'mongoose'
 
 const httpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
 const frequencies = [60, 300, 600, 1800, 3600] // 1m, 5m, 10m, 30m, 1h
-const monitorTypes = ['http', 'keyword', 'ping']
+const monitorTypes = ['http', 'keyword', 'ping', 'heartbeat']
 
 export const Monitor = defineMongooseModel('Monitor', {
   projectId: { type: 'ObjectId' as unknown as Schema.Types.ObjectId, ref: 'Project', required: true, index: true },
@@ -15,6 +15,11 @@ export const Monitor = defineMongooseModel('Monitor', {
   frequency: { type: Number, default: 60, enum: frequencies }, // Tần suất (giây)
   status: { type: String, default: 'ACTIVE', enum: ['ACTIVE', 'PAUSED'] },
   keyword: { type: String, default: null }, // Từ khóa để kiểm tra (cho loại 'keyword')
+
+  // Heartbeat monitoring fields
+  expectedInterval: { type: Number, default: null }, // Khoảng thời gian dự kiến giữa các heartbeat (giây)
+  gracePeriod: { type: Number, default: 300 }, // Thời gian ân hạn sau expectedInterval (giây, mặc định 5 phút)
+  lastHeartbeat: { type: Date, default: null }, // Lần cuối nhận heartbeat
 
   isPublic: { type: Boolean, default: false }, // Mặc định là không công khai
 

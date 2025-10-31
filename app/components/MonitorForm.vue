@@ -44,16 +44,22 @@
                 />
               </UFormField>
               <UFormField
-                label="Endpoint URL"
+                :label="formState.type === 'heartbeat' ? 'Tên monitor (không cần URL)' : 'Endpoint URL'"
                 name="endpoint"
                 required
               >
                 <UInput
                   v-model="formState.endpoint"
-                  type="url"
-                  placeholder="https://your-api.com/endpoint"
+                  :type="formState.type === 'heartbeat' ? 'text' : 'url'"
+                  :placeholder="formState.type === 'heartbeat' ? 'backup-job' : 'https://your-api.com/endpoint'"
                   class="w-full"
                 />
+                <template
+                  v-if="formState.type === 'heartbeat'"
+                  #help
+                >
+                  URL ping sẽ được tạo tự động sau khi tạo monitor.
+                </template>
               </UFormField>
               <UFormField
                 v-if="formState.type === 'keyword'"
@@ -68,6 +74,39 @@
                 />
                 <template #help>
                   Hệ thống sẽ kiểm tra xem nội dung trang có chứa từ khóa này hay không.
+                </template>
+              </UFormField>
+              <UFormField
+                v-if="formState.type === 'heartbeat'"
+                label="Khoảng thời gian dự kiến (giây)"
+                name="expectedInterval"
+                required
+              >
+                <UInput
+                  v-model.number="formState.expectedInterval"
+                  type="number"
+                  :min="60"
+                  placeholder="86400"
+                  class="w-full"
+                />
+                <template #help>
+                  Khoảng thời gian dự kiến giữa các lần ping (ví dụ: 86400 = 24 giờ).
+                </template>
+              </UFormField>
+              <UFormField
+                v-if="formState.type === 'heartbeat'"
+                label="Thời gian ân hạn (giây)"
+                name="gracePeriod"
+              >
+                <UInput
+                  v-model.number="formState.gracePeriod"
+                  type="number"
+                  :min="0"
+                  placeholder="300"
+                  class="w-full"
+                />
+                <template #help>
+                  Thời gian ân hạn sau khoảng dự kiến trước khi gửi cảnh báo (mặc định: 300 giây = 5 phút).
                 </template>
               </UFormField>
               <div class="grid grid-cols-2 gap-4">
@@ -325,7 +364,8 @@ const methodOptions = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS
 const typeOptions = [
   { label: 'HTTP', value: 'http' },
   { label: 'Keyword', value: 'keyword' },
-  { label: 'Ping', value: 'ping' }
+  { label: 'Ping', value: 'ping' },
+  { label: 'Heartbeat', value: 'heartbeat' }
 ]
 const frequencyOptions = [
   { label: 'Mỗi 1 phút', value: 60 },
@@ -340,14 +380,16 @@ const bodyTypeOptions = [
   { key: 'raw', label: 'Raw Text (text/plain)' }
 ]
 
-// (Nâng cấp) Zod Schema (Thêm alertConfig và type, keyword)
+// (Nâng cấp) Zod Schema (Thêm alertConfig và type, keyword, heartbeat)
 const formSchema = z.object({
   name: z.string().min(1, 'Tên không được để trống'),
-  type: z.enum(['http', 'keyword', 'ping']).default('http'),
+  type: z.enum(['http', 'keyword', 'ping', 'heartbeat']).default('http'),
   endpoint: z.string().url('URL không hợp lệ'),
   method: z.enum(methodOptions as [string, ...string[]]).default('GET'),
   frequency: z.number().default(60),
   keyword: z.string().nullable().default(null),
+  expectedInterval: z.number().min(60).nullable().default(null),
+  gracePeriod: z.number().min(0).nullable().default(300),
 
   httpConfig: z.object({
     headers: z.array(z.object({ key: z.string().min(1), value: z.string() })).default([]),
@@ -374,6 +416,8 @@ const defaultFormState: Schema = {
   method: 'GET',
   frequency: 60,
   keyword: null,
+  expectedInterval: null,
+  gracePeriod: 300,
   httpConfig: { headers: [], body: null, bodyType: 'none' },
   alertConfig: { latencyThreshold: null, responseBodyCheck: null, errorRateThreshold: null, channels: [] }
 }
@@ -389,6 +433,8 @@ watch(() => props.monitor, (newMonitor) => {
     formState.method = newMonitor.method
     formState.frequency = newMonitor.frequency
     formState.keyword = newMonitor.keyword || null
+    formState.expectedInterval = newMonitor.expectedInterval || null
+    formState.gracePeriod = newMonitor.gracePeriod || 300
     formState.httpConfig = JSON.parse(JSON.stringify(newMonitor.httpConfig || defaultFormState.httpConfig))
     // (MỚI) Điền dữ liệu alertConfig
     formState.alertConfig = JSON.parse(JSON.stringify(newMonitor.alertConfig || defaultFormState.alertConfig))
