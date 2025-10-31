@@ -228,7 +228,7 @@
 </template>
 
 <script setup lang="ts">
-import { PLAN_FEATURES } from '~/shared/constants/plans'
+import { PLAN_FEATURES } from '~~/shared/constants/plans'
 
 const { user } = useUserSession()
 const toast = useToast()
