@@ -3,7 +3,6 @@ export default defineOAuthGitHubEventHandler({
     emailRequired: true
   },
   async onSuccess(event, { user, tokens }) {
-    console.log('GitHub OAuth tokens:', user)
     await setUserSession(event, {
       user: {
         userId: user.id,

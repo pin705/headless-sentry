@@ -230,7 +230,7 @@
               label="Trạng thái"
               name="isActive"
             >
-              <UToggle v-model="formState.isActive" />
+              <USwitch v-model="formState.isActive" />
               <template #help>
                 {{ formState.isActive ? 'Đang hoạt động' : 'Tạm dừng' }}
               </template>
