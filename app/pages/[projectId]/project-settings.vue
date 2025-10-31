@@ -1,105 +1,190 @@
 <template>
   <UDashboardPanel>
+    <template #header>
+      <UDashboardNavbar title="Cài đặt Dự án">
+        <template #description>
+          Quản lý thông tin dự án và thành viên
+        </template>
+      </UDashboardNavbar>
+    </template>
+
     <template #body>
       <UTabs
         :items="configTabs"
         orientation="vertical"
       >
-        <template #members>
-          <UCard>
+        <template #general>
+          <UCard
+            :ui="{
+              body: { padding: 'p-6' },
+              ring: 'ring-1 ring-gray-200 dark:ring-gray-800'
+            }"
+          >
+            <template #header>
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+                  <UIcon
+                    name="i-lucide-settings"
+                    class="w-5 h-5 text-primary-600 dark:text-primary-400"
+                  />
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    Thông tin chung
+                  </h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Cập nhật thông tin cơ bản của dự án
+                  </p>
+                </div>
+              </div>
+            </template>
+
             <UForm
               :schema="schema"
               :state="state"
-              class="space-y-4"
+              class="space-y-6"
               @submit="handleUpdateProject"
             >
               <UFormField
                 label="Tên dự án"
                 name="name"
+                class="max-w-lg"
               >
-                <UInput v-model="state.name" />
+                <UInput
+                  v-model="state.name"
+                  icon="i-lucide-folder"
+                />
               </UFormField>
 
-              <UButton
-                type="submit"
-                :loading="isUpdating"
-              >
-                Lưu thay đổi
-              </UButton>
+              <div class="flex items-center gap-3 pt-4">
+                <UButton
+                  type="submit"
+                  icon="i-lucide-save"
+                  :loading="isUpdating"
+                  color="primary"
+                >
+                  Lưu thay đổi
+                </UButton>
+              </div>
             </UForm>
           </UCard>
         </template>
-        <template #invites>
-          <UCard class="mb-6">
-            <template #header>
-              <h3 class="text-lg font-semibold">
-                Mời thành viên mới
-              </h3>
-            </template>
-
-            <UForm
-              :schema="inviteSchema"
-              :state="form"
-              class="flex items-end gap-4"
-              @submit="handleInvite"
+        <template #members>
+          <div class="space-y-6">
+            <UCard
+              :ui="{
+                body: { padding: 'p-6' },
+                ring: 'ring-1 ring-gray-200 dark:ring-gray-800'
+              }"
             >
-              <UFormField
-                label="Email"
-                name="email"
-                class="flex-1"
-              >
-                <UInput
-                  v-model="form.email"
-                  placeholder="email@example.com"
-                />
-              </UFormField>
-
-              <UFormField
-                label="Vai trò"
-                name="role"
-              >
-                <USelectMenu
-                  v-model="form.role"
-                  :items="roleOptions"
-                />
-              </UFormField>
-
-              <UButton
-                type="submit"
-                :loading="isInviting"
-                icon="i-heroicons-paper-airplane"
-              >
-                Gửi lời mời
-              </UButton>
-            </UForm>
-          </UCard>
-
-          <UCard>
-            <UTabs
-              :items="tabItems"
-              class="w-full"
-            >
-              <template #members>
-                <UTable
-                  :columns="memberColumns"
-                  :data="data?.members"
-                  :loading="pending"
-                  :empty-state="{ icon: 'i-heroicons-users', label: 'Chưa có thành viên.' }"
-                  class="mt-4"
-                />
+              <template #header>
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-success-100 dark:bg-success-900 flex items-center justify-center">
+                    <UIcon
+                      name="i-lucide-user-plus"
+                      class="w-5 h-5 text-success-600 dark:text-success-400"
+                    />
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                      Mời thành viên mới
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                      Thêm người dùng vào dự án của bạn
+                    </p>
+                  </div>
+                </div>
               </template>
 
-              <template #invites>
-                <UTable
-                  :columns="inviteColumns"
-                  :data="data?.pendingInvites"
-                  :loading="pending"
-                  :empty-state="{ icon: 'i-heroicons-envelope', label: 'Không có lời mời nào đang chờ.' }"
-                  class="mt-4"
-                />
+              <UForm
+                :schema="inviteSchema"
+                :state="form"
+                class="flex flex-col sm:flex-row items-end gap-4"
+                @submit="handleInvite"
+              >
+                <UFormField
+                  label="Email"
+                  name="email"
+                  class="flex-1 w-full"
+                >
+                  <UInput
+                    v-model="form.email"
+                    placeholder="email@example.com"
+                    icon="i-lucide-mail"
+                  />
+                </UFormField>
+
+                <UFormField
+                  label="Vai trò"
+                  name="role"
+                  class="w-full sm:w-40"
+                >
+                  <USelectMenu
+                    v-model="form.role"
+                    :items="roleOptions"
+                  />
+                </UFormField>
+
+                <UButton
+                  type="submit"
+                  :loading="isInviting"
+                  icon="i-lucide-send"
+                  color="primary"
+                >
+                  Gửi lời mời
+                </UButton>
+              </UForm>
+            </UCard>
+
+            <UCard
+              :ui="{
+                body: { padding: 'p-0' },
+                ring: 'ring-1 ring-gray-200 dark:ring-gray-800'
+              }"
+            >
+              <template #header>
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-info-100 dark:bg-info-900 flex items-center justify-center">
+                    <UIcon
+                      name="i-lucide-users"
+                      class="w-5 h-5 text-info-600 dark:text-info-400"
+                    />
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                      Quản lý thành viên
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                      Xem và quản lý người dùng trong dự án
+                    </p>
+                  </div>
+                </div>
               </template>
-            </UTabs>
-          </UCard>
+
+              <UTabs
+                :items="tabItems"
+                class="w-full"
+              >
+                <template #members>
+                  <UTable
+                    :columns="memberColumns"
+                    :data="data?.members"
+                    :loading="pending"
+                    :empty-state="{ icon: 'i-lucide-users', label: 'Chưa có thành viên.' }"
+                  />
+                </template>
+
+                <template #invites>
+                  <UTable
+                    :columns="inviteColumns"
+                    :data="data?.pendingInvites"
+                    :loading="pending"
+                    :empty-state="{ icon: 'i-lucide-mail', label: 'Không có lời mời nào đang chờ.' }"
+                  />
+                </template>
+              </UTabs>
+            </UCard>
+          </div>
         </template>
       </UTabs>
     </template>
@@ -113,6 +198,15 @@ const route = useRoute()
 const toast = useToast()
 const projectId = computed(() => route.params.projectId)
 
+// --- Utility Functions ---
+function getErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object' && 'data' in error) {
+    return ((error as { data?: { message?: string } }).data?.message) || 'Đã xảy ra lỗi'
+  }
+  return 'Đã xảy ra lỗi'
+}
+
+// --- Constants ---
 const roleOptions = ['admin', 'member']
 
 // --- Schema và State cho Form Mời ---
@@ -181,7 +275,7 @@ async function handleUpdateProject() {
       body: state.value
     })
 
-    toast.add({ title: 'Cập nhật thành công!', icon: 'i-heroicons-check-circle' })
+    toast.add({ title: 'Cập nhật thành công!', icon: 'i-lucide-check-circle' })
 
     // Cập nhật lại state toàn cục
     selectProject(updatedProject)
@@ -190,9 +284,9 @@ async function handleUpdateProject() {
     console.error('Lỗi cập nhật:', error)
     toast.add({
       title: 'Lỗi',
-      description: error.data?.message || 'Không thể cập nhật',
+      description: getErrorMessage(error),
       color: 'red',
-      icon: 'i-heroicons-exclamation-circle'
+      icon: 'i-lucide-alert-circle'
     })
   } finally {
     isUpdating.value = false
@@ -200,8 +294,8 @@ async function handleUpdateProject() {
 }
 
 const configTabs = [
-  { slot: 'members', label: 'Thành viên' },
-  { slot: 'invites', label: 'Lời mời đang chờ' }
+  { slot: 'general', label: 'Thông tin chung', icon: 'i-lucide-settings' },
+  { slot: 'members', label: 'Thành viên & Lời mời', icon: 'i-lucide-users' }
 ]
 
 // --- Cấu hình Tabs ---
@@ -209,14 +303,14 @@ const tabItems = computed(() => [
   {
     slot: 'members',
     label: 'Thành viên',
-    icon: 'i-heroicons-users',
+    icon: 'i-lucide-users',
     // Hiển thị số lượng thành viên
     badge: data.value?.members?.length || 0
   },
   {
     slot: 'invites',
     label: 'Lời mời đang chờ',
-    icon: 'i-heroicons-envelope',
+    icon: 'i-lucide-mail',
     // Hiển thị số lượng lời mời
     badge: data.value?.pendingInvites?.length || 0
   }
@@ -265,7 +359,7 @@ const memberColumns = [
 
       // Render component UButton
       return h(UButton, {
-        icon: 'i-heroicons-trash',
+        icon: 'i-lucide-trash-2',
         size: 'sm',
         color: 'red',
         variant: 'ghost',
@@ -294,7 +388,7 @@ const inviteColumns = [
     cell: ({ row }) => {
       // Render 2 nút bấm
       const copyButton = h(UButton, {
-        icon: 'i-heroicons-clipboard-document',
+        icon: 'i-lucide-copy',
         size: 'sm',
         color: 'gray',
         variant: 'ghost',
@@ -302,7 +396,7 @@ const inviteColumns = [
         onClick: () => copyInviteLink(row.original.token)
       })
       const cancelButton = h(UButton, {
-        icon: 'i-heroicons-x-circle',
+        icon: 'i-lucide-x-circle',
         size: 'sm',
         color: 'gray',
         variant: 'ghost',
@@ -324,7 +418,7 @@ function getInviteLink(token) {
 function copyInviteLink(token) {
   const link = getInviteLink(token)
   navigator.clipboard.writeText(link).then(() => {
-    toast.add({ title: 'Đã copy link mời!', icon: 'i-heroicons-check-circle' })
+    toast.add({ title: 'Đã copy link mời!', icon: 'i-lucide-check-circle' })
   }).catch(() => {
     toast.add({ title: 'Lỗi', description: 'Không thể tự động copy', color: 'red' })
   })
@@ -337,12 +431,12 @@ async function handleInvite() {
       method: 'POST',
       body: { ...form.value }
     })
-    toast.add({ title: res.message, icon: 'i-heroicons-check-circle' })
+    toast.add({ title: res.message, icon: 'i-lucide-check-circle' })
     form.value.email = ''
     form.value.role = 'member'
     await refreshLists()
   } catch (error) {
-    toast.add({ title: 'Lỗi', description: error.data?.message, color: 'red', icon: 'i-heroicons-exclamation-circle' })
+    toast.add({ title: 'Lỗi', description: getErrorMessage(error), color: 'red', icon: 'i-lucide-alert-circle' })
   } finally {
     isInviting.value = false
   }
@@ -354,10 +448,10 @@ async function handleChangeRole(memberId, newRole) {
       method: 'PUT',
       body: { role: newRole }
     })
-    toast.add({ title: 'Đã cập nhật vai trò', icon: 'i-heroicons-check-circle' })
+    toast.add({ title: 'Đã cập nhật vai trò', icon: 'i-lucide-check-circle' })
     await refreshLists()
   } catch (error) {
-    toast.add({ title: 'Lỗi', description: error.data?.message, color: 'red', icon: 'i-heroicons-exclamation-circle' })
+    toast.add({ title: 'Lỗi', description: getErrorMessage(error), color: 'red', icon: 'i-lucide-alert-circle' })
     await refreshLists() // Tải lại để reset dropdown nếu lỗi
   }
 }
@@ -368,10 +462,10 @@ async function handleRemoveMember(memberId) {
     await $fetch(`/api/projects/${projectId.value}/members/${memberId}`, {
       method: 'DELETE'
     })
-    toast.add({ title: 'Đã xóa thành viên', icon: 'i-heroicons-check-circle' })
+    toast.add({ title: 'Đã xóa thành viên', icon: 'i-lucide-check-circle' })
     await refreshLists()
   } catch (error) {
-    toast.add({ title: 'Lỗi', description: error.data?.message, color: 'red', icon: 'i-heroicons-exclamation-circle' })
+    toast.add({ title: 'Lỗi', description: getErrorMessage(error), color: 'red', icon: 'i-lucide-alert-circle' })
   }
 }
 
@@ -381,10 +475,10 @@ async function handleCancelInvite(inviteId) {
     await $fetch(`/api/projects/${projectId.value}/invites/${inviteId}`, {
       method: 'DELETE'
     })
-    toast.add({ title: 'Đã hủy lời mời', icon: 'i-heroicons-check-circle' })
+    toast.add({ title: 'Đã hủy lời mời', icon: 'i-lucide-check-circle' })
     await refreshLists()
   } catch (error) {
-    toast.add({ title: 'Lỗi', description: error.data?.message, color: 'red', icon: 'i-heroicons-exclamation-circle' })
+    toast.add({ title: 'Lỗi', description: getErrorMessage(error), color: 'red', icon: 'i-lucide-alert-circle' })
   }
 }
 </script>
