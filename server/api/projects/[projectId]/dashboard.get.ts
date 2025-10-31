@@ -98,6 +98,14 @@ export default defineEventHandler(async (event) => {
       else totalDown++
     })
 
+    // === (MỚI) 6. Đếm monitors theo loại ===
+    const monitorsByType: Record<string, number> = {}
+    const monitors = await Monitor.find({ projectId: projectIdObjectId }).select('type').lean()
+    monitors.forEach((m) => {
+      const type = m.type || 'http'
+      monitorsByType[type] = (monitorsByType[type] || 0) + 1
+    })
+
     return {
       // Dữ liệu cũ
       totalMonitors, totalUp, totalDown, totalPaused,
@@ -107,7 +115,8 @@ export default defineEventHandler(async (event) => {
       // (MỚI) Dữ liệu mới
       latencyChartData, // Dữ liệu cho biểu đồ latency
       recentErrors, // Danh sách lỗi
-      recentAlerts // Danh sách cảnh báo (ước tính)
+      recentAlerts, // Danh sách cảnh báo (ước tính)
+      monitorsByType // Phân loại monitors theo loại
     }
   } catch (error: any) {
     console.error('Lỗi lấy stats dashboard:', error)
