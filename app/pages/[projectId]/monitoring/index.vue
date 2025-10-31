@@ -3,9 +3,9 @@
     <template #header>
       <UDashboardNavbar title="Giám sát Dịch vụ">
         <template #right>
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3">
             <UButton
-              :icon="pending ? 'i-heroicons-arrow-path-solid' : 'i-heroicons-arrow-path'"
+              icon="i-lucide-refresh-cw"
               :loading="pending"
               variant="ghost"
               color="neutral"
@@ -13,7 +13,7 @@
               @click="refresh()"
             />
             <UButton
-              icon="i-heroicons-plus-solid"
+              icon="i-lucide-plus"
               label="Thêm mới"
               color="primary"
               @click="openFormModal(null)"
@@ -26,58 +26,64 @@
     <template #body>
       <div
         v-if="pending"
-        class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
         <USkeleton
-          v-for="i in 3"
+          v-for="i in 6"
           :key="i"
-          class="h-44 rounded-lg"
+          class="h-56 rounded-xl"
         />
       </div>
 
       <div
         v-else-if="monitors.length === 0"
-        class="p-4 flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 min-h-[300px]"
+        class="p-6 flex flex-col items-center justify-center text-center min-h-[400px]"
       >
-        <UIcon
-          name="i-heroicons-circle-stack-20-solid"
-          class="w-12 h-12 mx-auto mb-2"
-        />
-        <h3 class="text-lg font-semibold">
-          Chưa có dịch vụ nào
+        <div
+          class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4"
+        >
+          <UIcon
+            name="i-lucide-activity"
+            class="w-8 h-8 text-gray-400 dark:text-gray-600"
+          />
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          Chưa có dịch vụ giám sát
         </h3>
-        <p class="text-sm">
-          Hãy bắt đầu bằng cách thêm dịch vụ giám sát đầu tiên của bạn.
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+          Hãy bắt đầu bằng cách thêm dịch vụ giám sát đầu tiên. Chúng tôi sẽ theo dõi uptime và hiệu suất cho bạn.
         </p>
         <UButton
           label="Thêm dịch vụ mới"
-          icon="i-heroicons-plus"
+          icon="i-lucide-plus"
           color="primary"
-          variant="soft"
-          class="mt-4"
+          size="lg"
           @click="openFormModal(null)"
         />
       </div>
 
       <div
         v-else
-        class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
         <UCard
           v-for="monitor in monitors"
           :key="monitor._id"
-          :ui="{ body: { padding: 'p-4' }, ring: 'ring-1 ring-gray-200 dark:ring-gray-800', divide: 'divide-y divide-gray-200 dark:divide-gray-800' }"
+          :ui="{
+            body: { padding: 'p-5' },
+            ring: 'ring-1 ring-gray-200 dark:ring-gray-800 hover:ring-gray-300 dark:hover:ring-gray-700',
+            divide: 'divide-y divide-gray-200 dark:divide-gray-800'
+          }"
+          class="transition-all duration-200"
         >
           <div class="flex justify-between items-start mb-3">
-            <div class="flex items-center gap-1.5 min-w-0">
-              <span class="text-base font-semibold truncate">
-                <NuxtLink
-                  :to="`/${projectId}/monitoring/${monitor._id}`"
-                  class="hover:underline"
-                >
-                  {{ monitor.name }}
-                </NuxtLink>
-              </span>
+            <div class="flex items-center gap-2 min-w-0 flex-1">
+              <NuxtLink
+                :to="`/${projectId}/monitoring/${monitor._id}`"
+                class="text-base font-semibold truncate hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              >
+                {{ monitor.name }}
+              </NuxtLink>
               <component :is="createSslIcon({ original: monitor })" />
             </div>
             <UDropdownMenu
@@ -85,7 +91,7 @@
               :popper="{ placement: 'bottom-end' }"
             >
               <UButton
-                icon="i-heroicons-ellipsis-horizontal-20-solid"
+                icon="i-lucide-more-vertical"
                 color="neutral"
                 variant="ghost"
                 size="sm"
@@ -95,14 +101,14 @@
             </UDropdownMenu>
           </div>
 
-          <div class="flex items-center gap-2 text-sm mt-1">
+          <div class="flex items-center gap-2 mb-3">
             <component :is="renderStatusBadge(monitor)" />
-            <span class="text-gray-500 dark:text-gray-400 text-xs">
+            <span class="text-xs text-gray-500 dark:text-gray-400">
               {{ monitor.latestCheckedAt ? formatTimeAgo(new Date(monitor.latestCheckedAt)) : 'Chưa chạy' }}
             </span>
           </div>
 
-          <div class="flex items-center gap-1.5 text-sm mt-2 text-gray-500 dark:text-gray-400">
+          <div class="flex items-center gap-2 text-sm mb-3 text-gray-500 dark:text-gray-400">
             <UBadge
               :label="monitor.method"
               color="neutral"
@@ -112,40 +118,45 @@
             <span class="truncate font-mono text-xs">{{ monitor.endpoint }}</span>
           </div>
 
-          <div class="text-xs text-gray-500 dark:text-gray-400 mt-3 space-y-1">
+          <div class="space-y-2 mb-3">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600 dark:text-gray-400">Latency</span>
+              <span class="font-semibold text-gray-900 dark:text-gray-100">
+                {{ monitor.latestLatency ?? '--' }} ms
+              </span>
+            </div>
+          </div>
+
+          <div
+            v-if="monitor.publicPageUrl || monitor.creator"
+            class="pt-3 border-t border-gray-200 dark:border-gray-800 space-y-2"
+          >
             <div
               v-if="monitor.publicPageUrl"
-              class="flex items-center gap-1"
+              class="flex items-center gap-1.5 text-xs"
             >
               <UIcon
-                name="i-heroicons-globe-alt"
-                class="w-3.5 h-3.5"
+                name="i-lucide-globe"
+                class="w-3.5 h-3.5 text-gray-400"
               />
               <NuxtLink
                 :to="monitor.publicPageUrl"
                 target="_blank"
-                class="hover:underline text-primary-500 dark:text-primary-400"
+                class="hover:underline text-primary-600 dark:text-primary-400"
               >
-                Trang trạng thái công khai
+                Trang công khai
               </NuxtLink>
             </div>
             <div
               v-if="monitor.creator"
-              class="flex items-center gap-1.5"
+              class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400"
             >
               <UAvatar
                 :src="monitor.creator.avatar || 'https://www.gravatar.com/avatar/?d=mp'"
                 :alt="monitor.creator.email"
                 size="3xs"
               />
-              <span>Tạo bởi {{ monitor.creator.email }}</span>
-            </div>
-          </div>
-
-          <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-800">
-            <span class="text-xs text-gray-500 dark:text-gray-400">ĐỘ TRỄ (LATENCY)</span>
-            <div class="text-2xl font-semibold font-mono">
-              {{ monitor.latestLatency ?? '--' }} <span class="text-lg text-gray-500 dark:text-gray-400">ms</span>
+              <span>{{ monitor.creator.email }}</span>
             </div>
           </div>
         </UCard>
