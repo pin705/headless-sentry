@@ -90,10 +90,10 @@
             <UCard class="shadow-sm">
               <div class="text-center">
                 <div class="text-2xl font-bold text-success-500">
-                  {{ calculateUptime(data.monitors) }}%
+                  {{ calculateOperationalPercentage(data.monitors) }}%
                 </div>
                 <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  {{ t('status.last30d') }}
+                  {{ t('status.status.operational') }}
                 </div>
               </div>
             </UCard>
@@ -154,8 +154,8 @@ const operationalCount = computed(() => {
   return data.value.monitors.filter(m => m.currentStatus === 'OPERATIONAL').length
 })
 
-// Calculate uptime percentage (simplified - assumes operational = uptime)
-const calculateUptime = (monitors: typeof data.value.monitors) => {
+// Calculate current operational percentage (not historical uptime)
+const calculateOperationalPercentage = (monitors: typeof data.value.monitors) => {
   if (!monitors || monitors.length === 0) return 100
   const operational = monitors.filter(m => m.currentStatus === 'OPERATIONAL').length
   return ((operational / monitors.length) * 100).toFixed(1)

@@ -75,20 +75,20 @@ export const useStatusPage = (slug: string) => {
       return {
         text: t('status.someOutage'),
         colorClass: 'text-error-500',
-        icon: statusMap.value.OUTAGE?.icon || 'i-heroicons-exclamation-triangle-solid'
+        icon: statusMap.value.OUTAGE.icon
       }
     }
     if (hasMaintenance) {
       return {
         text: t('status.someMaintenance'),
         colorClass: 'text-warning-500',
-        icon: statusMap.value.MAINTENANCE?.icon || 'i-heroicons-wrench-solid'
+        icon: statusMap.value.MAINTENANCE.icon
       }
     }
     return {
       text: t('status.allOperational'),
       colorClass: 'text-success-500',
-      icon: statusMap.value.OPERATIONAL?.icon || 'i-heroicons-check-circle-solid'
+      icon: statusMap.value.OPERATIONAL.icon
     }
   })
 
