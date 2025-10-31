@@ -40,21 +40,37 @@
         class="p-6 flex flex-col items-center justify-center text-center min-h-[400px]"
       >
         <div
-          class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4"
+          class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4"
         >
           <UIcon
-            name="i-lucide-folder"
-            class="w-8 h-8 text-gray-400 dark:text-gray-600"
+            name="i-lucide-folder-plus"
+            class="w-8 h-8 text-primary"
           />
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-          Chưa có dự án nào
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          Chào mừng bạn đến với Headless Sentry!
         </h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-          Tạo dự án đầu tiên để bắt đầu giám sát các dịch vụ của bạn.
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 max-w-md">
+          Tạo dự án đầu tiên để bắt đầu giám sát uptime, hiệu năng API và SSL của các dịch vụ web.
         </p>
+        <div class="mb-6 max-w-md">
+          <div class="text-left space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <div class="flex items-start gap-2">
+              <UIcon name="i-lucide-check-circle" class="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+              <span>Theo dõi trạng thái hoạt động 24/7</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <UIcon name="i-lucide-check-circle" class="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+              <span>Nhận cảnh báo ngay khi có sự cố</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <UIcon name="i-lucide-check-circle" class="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+              <span>Tạo status page công khai cho khách hàng</span>
+            </div>
+          </div>
+        </div>
         <UButton
-          label="Tạo Project Mới"
+          label="Tạo Project Đầu Tiên"
           icon="i-lucide-plus"
           color="primary"
           size="lg"
@@ -286,6 +302,13 @@ async function refreshProjects() {
 }
 
 useHead({
-  title: 'Quản lý Projects'
+  title: 'Quản lý Projects - Headless Sentry',
+  meta: [
+    { name: 'description', content: 'Quản lý các dự án giám sát uptime và hiệu năng của bạn. Tạo project mới, theo dõi monitors và xem báo cáo chi tiết.' },
+    { property: 'og:title', content: 'Quản lý Projects - Headless Sentry' },
+    { property: 'og:description', content: 'Dashboard quản lý dự án giám sát uptime và hiệu năng website, API.' },
+    { property: 'og:type', content: 'website' },
+    { name: 'robots', content: 'noindex, nofollow' } // Private dashboard
+  ]
 })
 </script>

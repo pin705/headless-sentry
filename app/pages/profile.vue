@@ -208,8 +208,15 @@ import { z } from 'zod'
 
 const { session, fetch: refreshSession } = useUserSession()
 const toast = useToast()
+
+// SEO Metadata
 useHead({
-  title: 'Cài đặt tài khoản'
+  title: 'Cài đặt tài khoản - Headless Sentry',
+  meta: [
+    { name: 'description', content: 'Quản lý thông tin tài khoản, đổi mật khẩu và cài đặt cá nhân trên Headless Sentry.' },
+    { property: 'og:title', content: 'Cài đặt tài khoản - Headless Sentry' },
+    { name: 'robots', content: 'noindex, nofollow' } // Private page
+  ]
 })
 
 // Ảnh avatar mặc định nếu user chưa có

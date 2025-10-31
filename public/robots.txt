@@ -1,0 +1,15 @@
+# Robots.txt for Headless Sentry
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /pricing
+Allow: /status/*
+
+# Disallow private pages
+Disallow: /profile
+Disallow: /payment-history
+Disallow: /api/
+
+# Sitemap (to be added in future)
+# Sitemap: https://headless-sentry.com/sitemap.xml

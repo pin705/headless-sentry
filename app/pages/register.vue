@@ -21,8 +21,12 @@
               Headless Sentry
             </h1>
           </div>
-          <p class="text-xl text-gray-300 leading-relaxed">
+          <p class="text-xl text-gray-300 leading-relaxed mb-4">
             Giám sát Uptime, Hiệu năng API & SSL cho các dịch vụ Web hiện đại.
+          </p>
+          <p class="text-base text-gray-400">
+            Đăng ký ngay để bắt đầu theo dõi trạng thái website và API của bạn. 
+            Miễn phí mãi mãi cho gói cơ bản.
           </p>
         </div>
 
@@ -57,6 +61,7 @@
               </h3>
               <p class="text-sm text-gray-400">
                 Giao diện đơn giản, dễ sử dụng. Bắt đầu giám sát ngay lập tức.
+                Không cần kiến thức kỹ thuật phức tạp.
               </p>
             </div>
           </div>
@@ -74,6 +79,25 @@
               </h3>
               <p class="text-sm text-gray-400">
                 Nâng cấp lên gói Pro khi cần nhiều tính năng hơn.
+                Hỗ trợ team với nhiều thành viên và tích hợp nâng cao.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all">
+            <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+              <UIcon
+                name="i-lucide-users"
+                class="w-5 h-5 text-primary"
+              />
+            </div>
+            <div>
+              <h3 class="font-semibold text-white mb-1">
+                Làm việc Nhóm
+              </h3>
+              <p class="text-sm text-gray-400">
+                Mời thành viên vào dự án, phân quyền linh hoạt.
+                Cùng team theo dõi và quản lý hệ thống hiệu quả.
               </p>
             </div>
           </div>
@@ -212,6 +236,20 @@ import type { FormSubmitEvent } from '#ui/types'
 
 definePageMeta({
   layout: 'auth'
+})
+
+// SEO Metadata
+useHead({
+  title: 'Đăng ký - Headless Sentry',
+  meta: [
+    { name: 'description', content: 'Đăng ký miễn phí Headless Sentry để bắt đầu giám sát uptime, hiệu năng API và SSL. Không cần thẻ tín dụng. Thiết lập trong 5 phút.' },
+    { property: 'og:title', content: 'Đăng ký miễn phí - Headless Sentry' },
+    { property: 'og:description', content: 'Bắt đầu giám sát dịch vụ web của bạn miễn phí. Không cần thẻ tín dụng.' },
+    { property: 'og:type', content: 'website' },
+    { name: 'twitter:card', content: 'summary' },
+    { name: 'twitter:title', content: 'Đăng ký miễn phí - Headless Sentry' },
+    { name: 'twitter:description', content: 'Bắt đầu giám sát dịch vụ web của bạn miễn phí.' }
+  ]
 })
 
 const toast = useToast()
