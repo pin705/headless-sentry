@@ -106,8 +106,29 @@ export default defineEventHandler(async (event) => {
 
     // Check if alerts should be triggered
     if (!isUp) {
-      // TODO: Implement alert logic
-      console.log(`[ALERT] Server monitor ${monitor._id} exceeded thresholds`)
+      const { canSendAlert, sendAlerts, updateLastAlertedAt } = await import('~/server/utils/alerts')
+
+      // Check if we can send alert (cooldown check)
+      if (canSendAlert(monitor.alertConfig?.lastAlertedAt)) {
+        const alertDetails = []
+        if (metrics.cpuUsage >= cpuThreshold) {
+          alertDetails.push(`CPU: ${metrics.cpuUsage}% (ngưỡng: ${cpuThreshold}%)`)
+        }
+        if (metrics.memoryUsage >= memoryThreshold) {
+          alertDetails.push(`RAM: ${metrics.memoryUsage}% (ngưỡng: ${memoryThreshold}%)`)
+        }
+        if (metrics.diskUsage >= diskThreshold) {
+          alertDetails.push(`Disk: ${metrics.diskUsage}% (ngưỡng: ${diskThreshold}%)`)
+        }
+
+        await sendAlerts([{
+          monitor: monitor as any,
+          type: 'Server Resource Alert',
+          details: alertDetails.join(', ')
+        }])
+
+        await updateLastAlertedAt([monitor._id.toString()])
+      }
     }
 
     return {
