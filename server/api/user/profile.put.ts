@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { requireUserSession, handleValidationError } from '~~/server/utils/validation'
 
 // Validation schema
 const schema = z.object({
@@ -6,22 +7,15 @@ const schema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
-  if (!session.user?.userId) {
-    throw createError({ statusCode: 401, message: 'Yêu cầu đăng nhập' })
-  }
+  const { session } = await requireUserSession(event)
 
-  const body = await readValidatedBody(event, schema.safeParse)
+  try {
+    const body = await readValidatedBody(event, schema.parse)
+    const { name } = body
 
-  if (!body.success) {
-    throw createError({ statusCode: 400, message: body.error.errors[0].message })
-  }
-
-  const { name } = body.data
-
-  // Tìm và cập nhật user
-  const updatedUser = await User.findByIdAndUpdate(
-    session.user.userId,
+    // Tìm và cập nhật user
+    const updatedUser = await User.findByIdAndUpdate(
+      session.user.userId,
     { $set: { name: name } },
     { new: true } // Trả về document đã cập nhật
   ).select('userId name email') // Chỉ lấy các trường public
@@ -30,11 +24,15 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Không tìm thấy người dùng' })
   }
 
-  // Cập nhật lại session để tên mới hiển thị ngay lập tức
-  await replaceUserSession(event, {
-    ...session.user,
-    name: updatedUser.name
-  })
+    // Cập nhật lại session để tên mới hiển thị ngay lập tức
+    await replaceUserSession(event, {
+      ...session.user,
+      name: updatedUser.name
+    })
 
-  return updatedUser
+    return updatedUser
+  } catch (error) {
+    handleValidationError(error)
+    throw createError({ statusCode: 500, message: 'Lỗi máy chủ' })
+  }
 })

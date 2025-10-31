@@ -1,19 +1,18 @@
 import { z } from 'zod'
-import mongoose from 'mongoose'
+import { requireUserSession, handleValidationError } from '~~/server/utils/validation'
 
 const bodySchema = z.object({
   name: z.string().min(1, 'Tên Project không được để trống').max(100, 'Tên Project quá dài'),
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
-  if (!session.user?.userId || !session.user?.email) {
-    throw createError({ statusCode: 401, message: 'Yêu cầu đăng nhập' })
+  const { session, userId } = await requireUserSession(event)
+  if (!session.user?.email) {
+    throw createError({ statusCode: 401, message: 'Email không hợp lệ' })
   }
 
   try {
     const body = await readValidatedBody(event, bodySchema.parse)
-    const userId = new mongoose.Types.ObjectId(session.user.userId)
 
     // Tạo Project mới
     const newProject = await Project.create({
@@ -32,10 +31,8 @@ export default defineEventHandler(async (event) => {
 
     return newProject.toObject()
 
-  } catch (error: any) {
-    if (error.issues) { // Lỗi Zod
-      throw createError({ statusCode: 400, message: error.issues[0].message })
-    }
+  } catch (error) {
+    handleValidationError(error)
     console.error('Lỗi tạo project:', error)
     throw createError({ statusCode: 500, message: 'Lỗi máy chủ' })
   }
