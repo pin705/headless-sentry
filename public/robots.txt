@@ -11,5 +11,5 @@ Disallow: /profile
 Disallow: /payment-history
 Disallow: /api/
 
-# Sitemap
-Sitemap: https://headless-sentry.com/sitemap.xml
+# Sitemap (to be added in future)
+# Sitemap: https://headless-sentry.com/sitemap.xml

@@ -44,7 +44,6 @@
               </h3>
               <p class="text-sm text-gray-400">
                 Không cần thẻ tín dụng. Gói Free với đầy đủ tính năng cơ bản.
-                Giám sát không giới hạn số lượng endpoints.
               </p>
             </div>
           </div>

@@ -47,23 +47,19 @@ useHead({
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'SoftwareApplication',
-        name: 'Headless Sentry',
-        applicationCategory: 'BusinessApplication',
-        operatingSystem: 'Web',
-        description: description,
-        offers: {
+        'name': 'Headless Sentry',
+        'applicationCategory': 'BusinessApplication',
+        'operatingSystem': 'Web',
+        'description': description,
+        'offers': {
           '@type': 'Offer',
-          price: '0',
-          priceCurrency: 'VND',
-          priceValidUntil: '2025-12-31',
-          availability: 'https://schema.org/InStock'
+          'price': '0',
+          'priceCurrency': 'VND',
+          'priceValidUntil': '2025-12-31',
+          'availability': 'https://schema.org/InStock'
         },
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: '4.8',
-          ratingCount: '150'
-        },
-        featureList: [
+
+        'featureList': [
           'Giám sát uptime 24/7',
           'Kiểm tra SSL tự động',
           'Cảnh báo realtime',

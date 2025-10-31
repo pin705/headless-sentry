@@ -39,9 +39,10 @@ const _useUserState = () => {
   const userPlan = computed(() => userData.value?.plan ?? 'free')
   const isProUser = computed(() => userData.value?.plan === 'pro')
   
-  // Format balance as VND currency
+  // Format balance as VND currency based on user language
   const formattedBalance = computed(() => {
-    return new Intl.NumberFormat('vi-VN', {
+    const locale = userData.value?.language === 'en' ? 'en-US' : 'vi-VN'
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: 'VND'
     }).format(userBalance.value)

@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
-    userId: user._id.toString(),
+    userId: String(user._id),
     email: user.email,
     name: user.name,
     avatarUrl: user.avatarUrl,
