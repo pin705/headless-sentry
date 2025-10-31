@@ -17,7 +17,11 @@ export default defineEventHandler(async (event) => {
     user: {
       email,
       userId: user._id,
-      ...user
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+      plan: user.plan || 'free',
+      balance: user.balance || 0,
+      planExpiresAt: user.planExpiresAt || null
     },
     loggedInAt: Date.now()
   })

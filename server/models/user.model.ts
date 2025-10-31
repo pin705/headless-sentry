@@ -12,7 +12,12 @@ export const User = defineMongooseModel(
 
     lastKnownIP: { type: String, default: '' },
     userAgent: { type: String, default: '' },
-    isBanned: { type: Boolean, default: false }
+    isBanned: { type: Boolean, default: false },
+
+    // Plan and billing fields
+    plan: { type: String, enum: ['free', 'pro'], default: 'free' },
+    balance: { type: Number, default: 0 }, // Balance in VND
+    planExpiresAt: { type: Date, default: null }
   },
   {
     timestamps: true

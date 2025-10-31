@@ -5,6 +5,9 @@ declare module '#auth-utils' {
     email: string
     name: string
     avatarUrl: string
+    plan?: string
+    balance?: number
+    planExpiresAt?: Date | null
   }
 
   interface UserSession {

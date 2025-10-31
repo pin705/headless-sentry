@@ -22,6 +22,9 @@ export default defineEventHandler(async (event) => {
   const user = new User({
     email: email.trim(),
     password: hashedPassword,
+    name: email.split('@')[0], // Default name from email
+    plan: 'free', // Default to free plan
+    balance: 0
   })
 
   await user.save()
@@ -29,7 +32,13 @@ export default defineEventHandler(async (event) => {
   // 7. Set session
   await setUserSession(event, {
     user: {
-      email
+      email,
+      userId: user._id,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+      plan: user.plan,
+      balance: user.balance,
+      planExpiresAt: user.planExpiresAt
     },
     loggedInAt: Date.now()
   })
