@@ -14,8 +14,9 @@ export function validateObjectId(id: string | undefined | null, fieldName: strin
 /**
  * Get and validate user session
  */
-export async function requireUserSession(event: H3Event) {
+export async function getRequireUserSession(event: H3Event) {
   const session = await getUserSession(event)
+  console.log('session', session)
   if (!session.user?.userId) {
     throw createError({ statusCode: 401, message: 'Yêu cầu đăng nhập' })
   }

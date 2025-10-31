@@ -1,9 +1,9 @@
 // server/api/projects/[projectId].get.ts
 import mongoose from 'mongoose'
-import { requireUserSession, validateObjectId } from '~~/server/utils/validation'
+import { getRequireUserSession, validateObjectId } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
-  const { userId } = await requireUserSession(event)
+  const { userId } = await getRequireUserSession(event)
   const projectId = getRouterParam(event, 'projectId')
   const projectIdObj = validateObjectId(projectId, 'Project ID')
 

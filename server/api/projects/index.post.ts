@@ -1,12 +1,12 @@
 import { z } from 'zod'
-import { requireUserSession, handleValidationError } from '~~/server/utils/validation'
+import { getRequireUserSession, handleValidationError } from '~~/server/utils/validation'
 
 const bodySchema = z.object({
   name: z.string().min(1, 'Tên Project không được để trống').max(100, 'Tên Project quá dài'),
 })
 
 export default defineEventHandler(async (event) => {
-  const { session, userId } = await requireUserSession(event)
+  const { session, userId } = await getRequireUserSession(event)
   if (!session.user?.email) {
     throw createError({ statusCode: 401, message: 'Email không hợp lệ' })
   }

@@ -3,7 +3,7 @@ import { validateObjectId } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
   // Verify user is authenticated (return value not needed here)
-  await requireUserSession(event)
+  await getRequireUserSession(event)
   const projectId = getRouterParam(event, 'projectId')
   const projectIdObjectId = validateObjectId(projectId, 'Project ID')
 

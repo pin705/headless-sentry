@@ -1,9 +1,9 @@
 import mongoose from 'mongoose'
-import { requireUserSession, validateObjectId } from '~~/server/utils/validation'
+import { getRequireUserSession, validateObjectId } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
-  const { userId: currentUserId } = await requireUserSession(event)
+  const { userId: currentUserId } = await getRequireUserSession(event)
   const memberIdToDelete = getRouterParam(event, 'memberId')
   validateObjectId(memberIdToDelete, 'Member ID')
 

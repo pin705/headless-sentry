@@ -3,7 +3,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { randomUUID } from 'crypto'
 
 export default defineEventHandler(async (event) => {
-  await requireUserSession(event)
+  await getRequireUserSession(event)
   const { fileName, fileType } = await readBody(event)
 
   if (!fileName || !fileType) {

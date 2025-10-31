@@ -1,14 +1,14 @@
 // server/api/projects/[projectId].put.ts
 import { z } from 'zod'
 import mongoose from 'mongoose'
-import { requireUserSession, validateObjectId, handleValidationError } from '~~/server/utils/validation'
+import { getRequireUserSession, validateObjectId, handleValidationError } from '~~/server/utils/validation'
 
 const bodySchema = z.object({
   name: z.string().min(1, 'Tên Project không được để trống').max(100, 'Tên Project quá dài')
 })
 
 export default defineEventHandler(async (event) => {
-  const { userId } = await requireUserSession(event)
+  const { userId } = await getRequireUserSession(event)
   const projectId = getRouterParam(event, 'projectId')
   const projectIdObj = validateObjectId(projectId, 'Project ID')
 

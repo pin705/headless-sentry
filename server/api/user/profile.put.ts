@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { requireUserSession, handleValidationError } from '~~/server/utils/validation'
+import { getRequireUserSession, handleValidationError } from '~~/server/utils/validation'
 
 // Validation schema
 const schema = z.object({
@@ -7,7 +7,7 @@ const schema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const { session } = await requireUserSession(event)
+  const { session } = await getRequireUserSession(event)
 
   try {
     const body = await readValidatedBody(event, schema.parse)

@@ -1,7 +1,7 @@
-import { requireUserSession } from '~~/server/utils/validation'
+import { getRequireUserSession } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
-  const { userId } = await requireUserSession(event)
+  const { userId } = await getRequireUserSession(event)
 
   // Sử dụng Aggregation để đếm số lượng member và monitor
   const projects = await Project.aggregate([

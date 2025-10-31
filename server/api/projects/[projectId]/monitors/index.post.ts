@@ -1,8 +1,8 @@
 import { monitorBodySchema } from '~~/server/utils/schemas'
-import { requireUserSession, handleValidationError } from '~~/server/utils/validation'
+import { getRequireUserSession, handleValidationError } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
-  const { session } = await requireUserSession(event)
+  const { session } = await getRequireUserSession(event)
 
   try {
     const body = await readValidatedBody(event, monitorBodySchema.parse)
