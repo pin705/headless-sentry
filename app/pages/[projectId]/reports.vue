@@ -24,6 +24,18 @@
       </template>
 
       <template #body>
+        <!-- Info Banner -->
+        <div class="p-6 pb-0">
+          <UAlert
+            icon="i-lucide-info"
+            color="primary"
+            variant="soft"
+            title="Báo cáo SLA & Uptime"
+            description="Xem thống kê chi tiết về uptime, downtime, và hiệu suất của các dịch vụ trong khoảng thời gian được chọn."
+            :close-button="{ icon: 'i-lucide-x', color: 'neutral', variant: 'ghost' }"
+          />
+        </div>
+
         <div class="p-6">
           <div
             v-if="pending"

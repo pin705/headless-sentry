@@ -14,6 +14,18 @@
       </template>
 
       <template #body>
+        <!-- Info Banner -->
+        <div class="p-6 pb-0">
+          <UAlert
+            icon="i-lucide-info"
+            color="primary"
+            variant="soft"
+            title="Cửa sổ Bảo trì"
+            description="Tạo cửa sổ bảo trì để tạm dừng cảnh báo trong thời gian bảo trì dịch vụ. Hỗ trợ cả bảo trì một lần và định kỳ."
+            :close-button="{ icon: 'i-lucide-x', color: 'neutral', variant: 'ghost' }"
+          />
+        </div>
+
         <div class="p-6">
           <div
             v-if="pending"

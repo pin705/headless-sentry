@@ -5,6 +5,18 @@
     </template> -->
 
     <template #body>
+      <!-- Info Banner -->
+      <div class="p-6 pb-0">
+        <UAlert
+          icon="i-lucide-info"
+          color="primary"
+          variant="soft"
+          title="Cài đặt Trang Trạng thái Công khai"
+          description="Tạo trang trạng thái công khai để khách hàng của bạn có thể theo dõi uptime của các dịch vụ. Bạn có thể tùy chỉnh slug, domain, logo và chọn dịch vụ nào được hiển thị."
+          :close-button="{ icon: 'i-lucide-x', color: 'neutral', variant: 'ghost' }"
+        />
+      </div>
+
       <div class="p-4 grid grid-cols-1 gap-6">
         <UCard>
           <template #header>
