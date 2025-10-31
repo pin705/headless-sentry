@@ -1,7 +1,11 @@
 <template>
   <UDashboardPanel>
     <template #header>
-      <UDashboardNavbar title="Cài đặt Tài khoản" />
+      <UDashboardNavbar title="Cài đặt Tài khoản">
+        <template #description>
+          Quản lý thông tin cá nhân và bảo mật tài khoản của bạn
+        </template>
+      </UDashboardNavbar>
     </template>
 
     <template #body>
@@ -10,14 +14,35 @@
         orientation="vertical"
       >
         <template #profile="{ item }">
-          <div class="p-4 space-y-6">
-            <h3 class="text-lg font-semibold">
-              {{ item.label }}
-            </h3>
+          <UCard
+            :ui="{
+              body: { padding: 'p-6' },
+              ring: 'ring-1 ring-gray-200 dark:ring-gray-800'
+            }"
+          >
+            <template #header>
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+                  <UIcon
+                    name="i-lucide-user"
+                    class="w-5 h-5 text-primary-600 dark:text-primary-400"
+                  />
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    {{ item.label }}
+                  </h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Cập nhật thông tin cá nhân của bạn
+                  </p>
+                </div>
+              </div>
+            </template>
+
             <UForm
               :schema="profileSchema"
               :state="profileState"
-              class="space-y-4"
+              class="space-y-6"
               @submit="handleUpdateProfile"
             >
               <UFormField
@@ -41,10 +66,14 @@
                   <div class="flex flex-col gap-2">
                     <UButton
                       label="Thay đổi"
+                      icon="i-lucide-upload"
+                      variant="outline"
+                      color="neutral"
                       @click="fileInputRef?.click()"
                     />
                     <UButton
                       label="Xoá"
+                      icon="i-lucide-trash-2"
                       color="error"
                       variant="outline"
                       :disabled="!profileState.avatarUrl && !previewUrl"
@@ -62,7 +91,7 @@
                 <UInput
                   v-model="profileState.email"
                   disabled
-                  icon="i-heroicons-envelope"
+                  icon="i-lucide-mail"
                 />
               </UFormField>
 
@@ -73,29 +102,54 @@
               >
                 <UInput
                   v-model="profileState.name"
-                  icon="i-heroicons-user"
+                  icon="i-lucide-user"
                 />
               </UFormField>
 
-              <UButton
-                type="submit"
-                :loading="isProfileLoading"
-              >
-                Lưu thay đổi
-              </UButton>
+              <div class="flex items-center gap-3 pt-4">
+                <UButton
+                  type="submit"
+                  icon="i-lucide-save"
+                  :loading="isProfileLoading"
+                  color="primary"
+                >
+                  Lưu thay đổi
+                </UButton>
+              </div>
             </UForm>
-          </div>
+          </UCard>
         </template>
 
         <template #security="{ item }">
-          <div class="p-4 space-y-6">
-            <h3 class="text-lg font-semibold">
-              {{ item.label }}
-            </h3>
+          <UCard
+            :ui="{
+              body: { padding: 'p-6' },
+              ring: 'ring-1 ring-gray-200 dark:ring-gray-800'
+            }"
+          >
+            <template #header>
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-warning-100 dark:bg-warning-900 flex items-center justify-center">
+                  <UIcon
+                    name="i-lucide-shield"
+                    class="w-5 h-5 text-warning-600 dark:text-warning-400"
+                  />
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    {{ item.label }}
+                  </h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Thay đổi mật khẩu và bảo vệ tài khoản
+                  </p>
+                </div>
+              </div>
+            </template>
+
             <UForm
               :schema="securitySchema"
               :state="securityState"
-              class="space-y-4 max-w-lg"
+              class="space-y-6 max-w-lg"
               @submit="handleChangePassword"
             >
               <UFormField
@@ -105,6 +159,7 @@
                 <UInput
                   v-model="securityState.currentPassword"
                   type="password"
+                  icon="i-lucide-lock"
                 />
               </UFormField>
 
@@ -115,6 +170,7 @@
                 <UInput
                   v-model="securityState.newPassword"
                   type="password"
+                  icon="i-lucide-key"
                 />
               </UFormField>
 
@@ -125,17 +181,22 @@
                 <UInput
                   v-model="securityState.confirmPassword"
                   type="password"
+                  icon="i-lucide-check"
                 />
               </UFormField>
 
-              <UButton
-                type="submit"
-                :loading="isSecurityLoading"
-              >
-                Đổi mật khẩu
-              </UButton>
+              <div class="flex items-center gap-3 pt-4">
+                <UButton
+                  type="submit"
+                  icon="i-lucide-shield-check"
+                  :loading="isSecurityLoading"
+                  color="primary"
+                >
+                  Đổi mật khẩu
+                </UButton>
+              </div>
             </UForm>
-          </div>
+          </UCard>
         </template>
       </UTabs>
     </template>
@@ -154,10 +215,10 @@ useHead({
 // Ảnh avatar mặc định nếu user chưa có
 const defaultAvatar = 'https://i.pravatar.cc/150'
 
-// Định nghĩa các tab cho UTabs (Giữ nguyên)
+// Định nghĩa các tab cho UTabs với icon
 const tabItems = [
-  { slot: 'profile', label: 'Hồ sơ cá nhân' },
-  { slot: 'security', label: 'Bảo mật' }
+  { slot: 'profile', label: 'Hồ sơ cá nhân', icon: 'i-lucide-user' },
+  { slot: 'security', label: 'Bảo mật', icon: 'i-lucide-shield' }
 ]
 
 // --- 1. Logic cho Profile (Đã cập nhật) ---
@@ -225,7 +286,7 @@ async function handleUpdateProfile() {
         method: 'PUT',
         body: selectedFile.value,
         headers: {
-          'Content-Type': selectedFile.value.type, // Phải có header này
+          'Content-Type': selectedFile.value.type // Phải có header này
         }
       })
 
@@ -235,7 +296,7 @@ async function handleUpdateProfile() {
 
     // --- BƯỚC 2: TẠO BODY VÀ GỌI API PROFILE ---
     // API này bây giờ nhận JSON, KHÔNG phải FormData
-    const profileBody: any = {
+    const profileBody: Record<string, unknown> = {
       name: profileState.value.name
     }
 
@@ -260,20 +321,33 @@ async function handleUpdateProfile() {
     toast.add({
       title: 'Thành công',
       description: 'Đã cập nhật thông tin của bạn.',
-      icon: 'i-heroicons-check-circle'
+      icon: 'i-lucide-check-circle'
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(error)
+    const errorMessage = error && typeof error === 'object' && 'data' in error
+      ? ((error as { data?: { message?: string } }).data?.message)
+      : undefined
     toast.add({
       title: 'Lỗi',
-      description: error.data?.message || 'Không thể cập nhật',
+      description: errorMessage || 'Không thể cập nhật',
       color: 'error',
-      icon: 'i-heroicons-exclamation-circle'
+      icon: 'i-lucide-alert-circle'
     })
   } finally {
     isProfileLoading.value = false
   }
 }
+
+// --- 2. Logic cho Security (Bảo mật) ---
+const securitySchema = z.object({
+  currentPassword: z.string().min(1, 'Vui lòng nhập mật khẩu hiện tại'),
+  newPassword: z.string().min(6, 'Mật khẩu mới phải có ít nhất 6 ký tự'),
+  confirmPassword: z.string().min(1, 'Vui lòng xác nhận mật khẩu')
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: 'Mật khẩu xác nhận không khớp',
+  path: ['confirmPassword']
+})
 
 const securityState = ref({
   currentPassword: '',
@@ -297,19 +371,22 @@ async function handleChangePassword() {
     toast.add({
       title: 'Thành công',
       description: 'Đã đổi mật khẩu.',
-      icon: 'i-heroicons-check-circle'
+      icon: 'i-lucide-check-circle'
     })
 
     // Reset form
     securityState.value.currentPassword = ''
     securityState.value.newPassword = ''
     securityState.value.confirmPassword = ''
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error && typeof error === 'object' && 'data' in error
+      ? ((error as { data?: { message?: string } }).data?.message)
+      : undefined
     toast.add({
       title: 'Lỗi',
-      description: error.data?.message || 'Không thể đổi mật khẩu',
+      description: errorMessage || 'Không thể đổi mật khẩu',
       color: 'error',
-      icon: 'i-heroicons-exclamation-circle'
+      icon: 'i-lucide-alert-circle'
     })
   } finally {
     isSecurityLoading.value = false
