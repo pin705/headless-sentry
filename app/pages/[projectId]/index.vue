@@ -42,6 +42,45 @@
         v-else-if="data"
         class="p-6 space-y-6"
       >
+        <!-- Helpful Tips Banner -->
+        <UAlert
+          v-if="data.totalMonitors === 0"
+          icon="i-lucide-lightbulb"
+          color="primary"
+          variant="soft"
+          title="Bắt đầu với Headless Sentry"
+          description="Thêm dịch vụ giám sát đầu tiên của bạn để theo dõi uptime, hiệu suất và nhận cảnh báo khi có sự cố."
+        >
+          <template #actions>
+            <UButton
+              color="primary"
+              variant="soft"
+              label="Thêm Dịch vụ"
+              icon="i-lucide-plus"
+              :to="`/${$route.params.projectId}/monitoring`"
+            />
+          </template>
+        </UAlert>
+
+        <UAlert
+          v-else-if="data.totalMonitors > 0 && data.totalDown > 0"
+          icon="i-lucide-alert-circle"
+          color="error"
+          variant="soft"
+          :title="`${data.totalDown} dịch vụ đang ngưng hoạt động`"
+          description="Một số dịch vụ của bạn đang gặp sự cố. Vui lòng kiểm tra và xử lý."
+        >
+          <template #actions>
+            <UButton
+              color="error"
+              variant="soft"
+              label="Xem chi tiết"
+              icon="i-lucide-external-link"
+              :to="`/${$route.params.projectId}/monitoring`"
+            />
+          </template>
+        </UAlert>
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatsCard
             label="Tổng số"
@@ -79,6 +118,42 @@
           empty-message="Không đủ dữ liệu để vẽ biểu đồ độ trễ."
         />
 
+        <!-- Monitor Types Overview -->
+        <UCard v-if="data.monitorsByType && Object.keys(data.monitorsByType).length > 0">
+          <template #header>
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold">
+                Phân loại Giám sát
+              </h3>
+              <UTooltip text="Xem phân bổ các loại giám sát trong dự án">
+                <UIcon
+                  name="i-lucide-info"
+                  class="w-4 h-4 text-gray-400 cursor-help"
+                />
+              </UTooltip>
+            </div>
+          </template>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div
+              v-for="(count, type) in data.monitorsByType"
+              :key="type"
+              class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded-lg"
+            >
+              <UIcon
+                :name="getMonitorTypeIcon(type)"
+                class="w-8 h-8 mb-2"
+                :class="getMonitorTypeColor(type)"
+              />
+              <div class="text-2xl font-bold">
+                {{ count }}
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 uppercase">
+                {{ getMonitorTypeLabel(type) }}
+              </div>
+            </div>
+          </div>
+        </UCard>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <AlertTable
             :data="data.recentErrors"
@@ -96,6 +171,41 @@
             empty-icon="i-lucide-bell-off"
           />
         </div>
+
+        <!-- Quick Actions Card -->
+        <UCard>
+          <template #header>
+            <h3 class="text-lg font-semibold">
+              Hành động nhanh
+            </h3>
+          </template>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <UButton
+              icon="i-lucide-plus-circle"
+              label="Thêm Giám sát"
+              color="primary"
+              variant="soft"
+              block
+              :to="`/${$route.params.projectId}/monitoring`"
+            />
+            <UButton
+              icon="i-lucide-wrench"
+              label="Bảo trì"
+              color="neutral"
+              variant="soft"
+              block
+              :to="`/${$route.params.projectId}/maintenance`"
+            />
+            <UButton
+              icon="i-lucide-chart-bar"
+              label="Báo cáo SLA"
+              color="neutral"
+              variant="soft"
+              block
+              :to="`/${$route.params.projectId}/reports`"
+            />
+          </div>
+        </UCard>
       </div>
     </template>
   </UDashboardPanel>
@@ -195,4 +305,7 @@ function getUptimeVariant(uptime: number): 'success' | 'warning' | 'error' {
   if (uptime >= 99) return 'warning'
   return 'error'
 }
+
+// Import shared monitor type utilities
+const { getMonitorTypeIcon, getMonitorTypeColor, getMonitorTypeLabel } = await import('~/utils/monitorTypes')
 </script>

@@ -30,6 +30,9 @@
                   placeholder="Ví dụ: API Sản phẩm Shopify"
                   class="w-full"
                 />
+                <template #help>
+                  Tên dễ nhớ cho dịch vụ giám sát của bạn
+                </template>
               </UFormField>
               <UFormField
                 label="Loại giám sát"
@@ -42,6 +45,14 @@
                   value-key="value"
                   class="w-full"
                 />
+                <template #help>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <strong>HTTP:</strong> Kiểm tra endpoint API/Web qua HTTP/HTTPS<br>
+                    <strong>Keyword:</strong> Kiểm tra xem trang web có chứa từ khóa cụ thể<br>
+                    <strong>Ping:</strong> Kiểm tra kết nối mạng đến server (ICMP)<br>
+                    <strong>Heartbeat:</strong> Nhận tín hiệu từ cronjob/service của bạn
+                  </div>
+                </template>
               </UFormField>
               <UFormField
                 :label="formState.type === 'heartbeat' ? 'Tên monitor (không cần URL)' : 'Endpoint URL'"
@@ -120,6 +131,9 @@
                     :items="methodOptions"
                     class="w-full"
                   />
+                  <template #help>
+                    Phương thức HTTP để kiểm tra endpoint
+                  </template>
                 </UFormField>
                 <UFormField
                   label="Tần suất"
@@ -132,6 +146,9 @@
                     value-key="value"
                     class="w-full"
                   />
+                  <template #help>
+                    Tần suất kiểm tra dịch vụ tự động
+                  </template>
                 </UFormField>
               </div>
             </div>
