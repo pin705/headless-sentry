@@ -3,9 +3,9 @@
     <template #header>
       <UDashboardNavbar title="Quản lý Projects">
         <template #right>
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3">
             <UButton
-              :icon="loadingProjects ? 'i-heroicons-arrow-path-solid' : 'i-heroicons-arrow-path'"
+              :icon="loadingProjects ? 'i-lucide-refresh-cw' : 'i-lucide-refresh-cw'"
               :loading="loadingProjects"
               variant="ghost"
               color="neutral"
@@ -13,7 +13,7 @@
               @click="refreshProjects"
             />
             <UButton
-              icon="i-heroicons-plus-solid"
+              icon="i-lucide-plus"
               label="Tạo Project Mới"
               color="primary"
               @click="isCreateModalOpen = true"
@@ -26,28 +26,54 @@
     <template #body>
       <div
         v-if="loadingProjects"
-        class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
         <USkeleton
-          v-for="i in 3"
+          v-for="i in 6"
           :key="i"
-          class="h-36" />
+          class="h-48 rounded-xl"
+        />
       </div>
 
       <div
         v-else-if="userProjects.length === 0"
-        class="p-4 text-center text-gray-500 dark:text-gray-400"
+        class="p-6 flex flex-col items-center justify-center text-center min-h-[400px]"
       >
+        <div
+          class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4"
+        >
+          <UIcon
+            name="i-lucide-folder"
+            class="w-8 h-8 text-gray-400 dark:text-gray-600"
+          />
         </div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          Chưa có dự án nào
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+          Tạo dự án đầu tiên để bắt đầu giám sát các dịch vụ của bạn.
+        </p>
+        <UButton
+          label="Tạo Project Mới"
+          icon="i-lucide-plus"
+          color="primary"
+          size="lg"
+          @click="isCreateModalOpen = true"
+        />
+      </div>
 
       <div
         v-else
-        class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
         <UCard
           v-for="project in userProjects"
           :key="project._id"
-          class="flex flex-col" :ui="{ body: { padding: 'p-4', class: 'flex-1 flex flex-col justify-between' }, ring: 'ring-1 ring-gray-200 dark:ring-gray-800' }"
+          class="flex flex-col transition-all duration-200"
+          :ui="{
+            body: { padding: 'p-5', class: 'flex-1 flex flex-col justify-between' },
+            ring: 'ring-1 ring-gray-200 dark:ring-gray-800 hover:ring-gray-300 dark:hover:ring-gray-700'
+          }"
         >
           <div>
             <div class="flex justify-between items-start mb-4">
@@ -73,7 +99,7 @@
                 :popper="{ placement: 'bottom-end' }"
               >
                 <UButton
-                  icon="i-heroicons-ellipsis-horizontal-20-solid"
+                  icon="i-lucide-more-vertical"
                   color="neutral"
                   variant="ghost"
                   size="sm"
@@ -86,22 +112,31 @@
             <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
               <div class="flex items-center gap-4">
                 <UTooltip text="Số thành viên">
-                  <div class="flex items-center gap-1">
-                    <UIcon name="i-heroicons-users" class="w-4 h-4" />
+                  <div class="flex items-center gap-1.5">
+                    <UIcon
+                      name="i-lucide-users"
+                      class="w-4 h-4"
+                    />
                     <span>{{ project.memberCount }}</span>
                   </div>
                 </UTooltip>
                 <UTooltip text="Số lượng Monitors">
-                  <div class="flex items-center gap-1">
-                    <UIcon name="i-heroicons-chart-bar" class="w-4 h-4" />
+                  <div class="flex items-center gap-1.5">
+                    <UIcon
+                      name="i-lucide-activity"
+                      class="w-4 h-4"
+                    />
                     <span>{{ project.monitorCount }}</span>
                   </div>
                 </UTooltip>
               </div>
 
               <UTooltip text="Ngày tạo">
-                <div class="flex items-center gap-1">
-                  <UIcon name="i-heroicons-calendar-days" class="w-4 h-4" />
+                <div class="flex items-center gap-1.5">
+                  <UIcon
+                    name="i-lucide-calendar"
+                    class="w-4 h-4"
+                  />
                   <span>{{ useDateFormat(project.createdAt, 'DD/MM/YYYY').value }}</span>
                 </div>
               </UTooltip>
@@ -109,15 +144,15 @@
           </div>
 
           <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-             <UButton
-                label="Xem tổng quan"
-                icon="i-heroicons-arrow-right"
-                trailing
-                variant="link"
-                :padded="false"
-                :to="`/${project._id}`"
-                @click.stop
-             />
+            <UButton
+              label="Xem tổng quan"
+              icon="i-lucide-arrow-right"
+              trailing
+              variant="link"
+              :padded="false"
+              :to="`/${project._id}`"
+              @click.stop
+            />
           </div>
         </UCard>
       </div>
