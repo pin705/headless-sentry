@@ -194,7 +194,6 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 
 const toast = useToast()
 
-// === Logic Bảng (Tuân thủ 7 Rules) ===
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -210,42 +209,35 @@ const apiUrl = computed(() => {
   return `/api/projects/${projectId}/monitors`
 })
 
-// (MỚI) State cho Modal Form
 const isFormModalOpen = ref(false)
 const monitorToEdit = ref<any>(null) // Lưu trữ *monitor.original*
 
-// (MỚI) Hàm mở Modal (chỉ set data)
 function openFormModal(monitorOriginal) {
   monitorToEdit.value = monitorOriginal
   isFormModalOpen.value = true
 }
 
-// (MỚI) Hàm callback khi Form lưu thành công
 function onFormSaved() {
   refresh() // Tải lại bảng
 }
 
-// (MỚI) Hàm helper tạo icon SSL (Trigger bằng Click)
 function createSslIcon(row) {
-  // (Tuân thủ Rule 3)
   const ssl = row.original.ssl
 
   // 1. Kiểm tra không có dữ liệu
   if (!ssl || ssl.daysRemaining === null) {
     const icon = h(UIcon, {
       name: 'i-heroicons-shield-exclamation',
-      // (Tuân thủ Rule 7)
       class: 'text-neutral-400 dark:text-neutral-500 cursor-pointer' // Thêm cursor-pointer
     })
     return h(UTooltip, {
       text: 'Chưa kiểm tra SSL (thường chạy 1 lần/ngày)',
-      // (MỚI) Thêm trigger click
       popper: { placement: 'top', arrow: true, show: 'click', hide: 'click' }
     }, () => icon)
   }
 
   let iconName: string
-  let colorClass: string // (Tuân thủ Rule 7)
+  let colorClass: string
   let tooltipText: string
 
   // 2. Xử lý Lỗi
@@ -269,19 +261,16 @@ function createSslIcon(row) {
     tooltipText = `SSL hợp lệ. Còn ${ssl.daysRemaining} ngày (hết hạn ${new Date(ssl.expiresAt).toLocaleDateString('vi-VN')}).`
   }
 
-  // 5. Tạo vnode
   const icon = h(UIcon, {
     name: iconName,
     class: `${colorClass} cursor-pointer` // Thêm cursor-pointer
   })
   return h(UTooltip, {
     text: tooltipText,
-    // (MỚI) Thêm trigger click
     popper: { placement: 'top', arrow: true, show: 'click', hide: 'click' }
   }, () => icon)
 }
 
-// (Tuân thủ Rule 5)
 const historyColumns = [
   { accessorKey: 'latestStatus', header: 'Trạng thái', class: 'w-24',
     cell: ({ row }) => {
@@ -331,7 +320,6 @@ const isDeleteModalOpen = ref(false)
 const deleteLoading = ref(false)
 const monitorToDelete = ref<any>(null)
 
-// (Tuân thủ Rule 6)
 const { data: monitors, pending, error, refresh } = await useFetch(apiUrl.value, {
   lazy: true,
   default: () => []
@@ -341,7 +329,6 @@ if (error.value) {
   toast.add({ title: 'Lỗi', description: 'Không thể tải danh sách giám sát.', color: 'error' })
 }
 
-// (Tuân thủ Rule 3)
 const getActionItems = (row): DropdownMenuItem[][] => [
   [{
     label: 'Xem chi tiết',

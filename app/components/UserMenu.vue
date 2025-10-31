@@ -8,19 +8,11 @@ defineProps<{
 const { user, clear } = useUserSession()
 const colorMode = useColorMode()
 const appConfig = useAppConfig()
-// (MỚI) Thêm logic I18n
 const locale = ref('vi')
 
 const colors = ['neutral', 'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 
-// const user = ref({
-//   name: 'Benjamin Canac',
-//   avatar: {
-//     src: 'https://github.com/benjamincanac.png',
-//     alt: 'Benjamin Canac'
-//   }
-// })
 const items = computed<DropdownMenuItem[][]>(() => ([
   [{
     type: 'label',

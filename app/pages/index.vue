@@ -150,13 +150,11 @@ const getActionItems = (project: any): DropdownMenuItem[][] => {
   const items: DropdownMenuItem[][] = [[
     {
       label: 'Cài đặt chung',
-      icon: 'i-heroicons-cog-6-tooth',
       // Sửa link trỏ đến trang chúng ta đã xây dựng
       to: `/${project._id}/general`
     },
     {
       label: 'Quản lý Thành viên',
-      icon: 'i-heroicons-users',
       // Sửa link trỏ đến trang chúng ta đã xây dựng
       to: `/${project._id}/members`
     }
