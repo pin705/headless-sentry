@@ -5,7 +5,7 @@
         <template #right>
           <div class="flex items-center gap-3">
             <UButton
-              :icon="loadingProjects ? 'i-lucide-refresh-cw' : 'i-lucide-refresh-cw'"
+              icon="i-lucide-refresh-cw"
               :loading="loadingProjects"
               variant="ghost"
               color="neutral"

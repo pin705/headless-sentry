@@ -8,7 +8,7 @@
 
         <template #right>
           <UButton
-            :icon="pending ? 'i-lucide-refresh-cw' : 'i-lucide-refresh-cw'"
+            icon="i-lucide-refresh-cw"
             :loading="pending"
             variant="ghost"
             color="neutral"
