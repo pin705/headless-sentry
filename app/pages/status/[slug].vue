@@ -105,6 +105,28 @@ const { data, pending, error } = await useFetch(`/api/public/status/${slug}`, {
   default: () => ({ config: null, monitors: [] })
 })
 
+// Dynamic SEO based on status page data
+watchEffect(() => {
+  if (data.value?.config) {
+    const title = `${data.value.config.title || 'Trạng thái Dịch vụ'} - Status Page`
+    const description = `Xem trạng thái hoạt động của ${data.value.config.title || 'dịch vụ'} theo thời gian thực. Kiểm tra uptime và hiệu năng của các dịch vụ.`
+    
+    useHead({
+      title,
+      meta: [
+        { name: 'description', content: description },
+        { property: 'og:title', content: title },
+        { property: 'og:description', content: description },
+        { property: 'og:type', content: 'website' },
+        { name: 'twitter:card', content: 'summary' },
+        { name: 'twitter:title', content: title },
+        { name: 'twitter:description', content: description },
+        { name: 'robots', content: 'index, follow' } // Public page
+      ]
+    })
+  }
+})
+
 // (Mới) Tính toán trạng thái tổng thể
 const overallStatus = computed(() => {
   if (!data.value?.monitors || data.value.monitors.length === 0) return null

@@ -217,6 +217,15 @@ import { h } from 'vue'
 const route = useRoute()
 const projectId = route.params.projectId as string
 
+// SEO Metadata
+useHead({
+  title: 'Tổng quan Project - Headless Sentry',
+  meta: [
+    { name: 'description', content: 'Dashboard tổng quan dự án giám sát. Xem uptime, latency, alerts và thống kê chi tiết.' },
+    { name: 'robots', content: 'noindex, nofollow' } // Private dashboard
+  ]
+})
+
 // === Data Fetching ===
 const { data, pending, error, refresh } = await useFetch(`/api/projects/${projectId}/dashboard`, {
   lazy: true,

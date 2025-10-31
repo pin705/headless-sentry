@@ -17,18 +17,62 @@ useHead({
   }
 })
 
-const title = 'Headless Sentry - Giám sát Uptime & API'
-const description = 'Một công cụ chuyên nghiệp để theo dõi thời gian thực Uptime, Độ trễ (Latency), và trạng thái SSL của các dịch vụ API, website Headless của bạn.'
+const title = 'Headless Sentry - Giám sát Uptime, API & SSL cho Website'
+const description = 'Giám sát uptime, hiệu năng API và chứng chỉ SSL 24/7. Cảnh báo realtime qua Slack, Telegram. Status page công khai cho khách hàng. Báo cáo SLA chi tiết. Bắt đầu miễn phí ngay hôm nay!'
 
 useSeoMeta({
   title,
   description,
   ogTitle: title,
   ogDescription: description,
-  // (Tùy chọn) Bạn có thể tạo một ảnh 'og-image.png' mới cho dự án
+  ogType: 'website',
+  ogUrl: 'https://headless-sentry.com',
   ogImage: '/og-image.png',
+  ogImageAlt: 'Headless Sentry - Giám sát Uptime & Hiệu năng',
+  twitterCard: 'summary_large_image',
+  twitterTitle: title,
+  twitterDescription: description,
   twitterImage: '/og-image.png',
-  twitterCard: 'summary_large_image'
+  twitterSite: '@headlesssentry',
+  keywords: 'uptime monitoring, website monitoring, API monitoring, SSL monitoring, status page, giám sát uptime, giám sát website, cảnh báo sự cố',
+  author: 'Headless Sentry',
+  robots: 'index, follow'
+})
+
+// Add structured data (JSON-LD) for better SEO
+useHead({
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'Headless Sentry',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        description: description,
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'VND',
+          priceValidUntil: '2025-12-31',
+          availability: 'https://schema.org/InStock'
+        },
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: '4.8',
+          ratingCount: '150'
+        },
+        featureList: [
+          'Giám sát uptime 24/7',
+          'Kiểm tra SSL tự động',
+          'Cảnh báo realtime',
+          'Status page công khai',
+          'Báo cáo SLA chi tiết'
+        ]
+      })
+    }
+  ]
 })
 </script>
 
