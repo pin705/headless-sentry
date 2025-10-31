@@ -1,4 +1,4 @@
-import { getPlanLimits, type PlanType } from '~/shared/constants/plans'
+import { getPlanLimits, type PlanType } from '~~/shared/constants/plans'
 
 // Models (User, Project, Monitor) are auto-imported by nuxt-mongoose
 // See: https://github.com/nuxt-modules/mongoose

@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
     // Validate frequency based on plan
     if (!isFrequencyAllowed(user.plan as any, body.frequency)) {
-      const { getPlanLimits } = await import('~/shared/constants/plans')
+      const { getPlanLimits } = await import('~~/shared/constants/plans')
       const limits = getPlanLimits(user.plan as any)
       throw createError({
         statusCode: 403,

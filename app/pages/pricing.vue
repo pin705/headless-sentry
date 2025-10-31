@@ -226,14 +226,14 @@
     </div>
 
     <!-- Payment Modal -->
-    <UModal v-model="showPaymentModal">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">
-            Nâng cấp lên gói Pro
-          </h3>
-        </template>
+    <UModal v-model:open="showPaymentModal">
+      <template #header>
+        <h3 class="text-lg font-semibold">
+          Nâng cấp lên gói Pro
+        </h3>
+      </template>
 
+      <template #body>
         <div
           v-if="!paymentInfo"
           class="space-y-6"
@@ -338,30 +338,30 @@
             {{ paymentInfo.instructions }}
           </p>
         </div>
+      </template>
 
-        <template #footer>
-          <div class="flex justify-end gap-3">
-            <UButton
-              v-if="!paymentInfo"
-              label="Hủy"
-              color="neutral"
-              variant="outline"
-              @click="showPaymentModal = false"
-            />
-            <UButton
-              v-if="!paymentInfo"
-              :label="loading ? 'Đang xử lý...' : 'Tiếp tục'"
-              :loading="loading"
-              @click="processUpgrade"
-            />
-            <UButton
-              v-else
-              label="Đóng"
-              @click="showPaymentModal = false; paymentInfo = null"
-            />
-          </div>
-        </template>
-      </UCard>
+      <template #footer>
+        <div class="flex justify-end gap-3">
+          <UButton
+            v-if="!paymentInfo"
+            label="Hủy"
+            color="neutral"
+            variant="outline"
+            @click="showPaymentModal = false"
+          />
+          <UButton
+            v-if="!paymentInfo"
+            :label="loading ? 'Đang xử lý...' : 'Tiếp tục'"
+            :loading="loading"
+            @click="processUpgrade"
+          />
+          <UButton
+            v-else
+            label="Đóng"
+            @click="showPaymentModal = false; paymentInfo = null"
+          />
+        </div>
+      </template>
     </UModal>
   </div>
 </template>

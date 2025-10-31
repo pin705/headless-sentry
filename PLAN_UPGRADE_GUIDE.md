@@ -219,7 +219,7 @@ All payments and plan changes are tracked in the `transactions` collection:
 ### Check if feature is available
 
 ```typescript
-import { hasFeature, getPlanLimits } from '~/shared/constants/plans'
+import { hasFeature, getPlanLimits } from '~~/shared/constants/plans'
 
 const user = await User.findById(userId)
 const limits = getPlanLimits(user.plan)

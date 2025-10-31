@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { getRequireUserSession, handleValidationError } from '~~/server/utils/validation'
-import { getPlanLimits } from '~/shared/constants/plans'
+import { getPlanLimits } from '~~/shared/constants/plans'
 
 // Models (User, Transaction) are auto-imported by nuxt-mongoose
 
