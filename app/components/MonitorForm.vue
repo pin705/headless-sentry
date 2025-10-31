@@ -384,7 +384,7 @@ const bodyTypeOptions = [
 const formSchema = z.object({
   name: z.string().min(1, 'Tên không được để trống'),
   type: z.enum(['http', 'keyword', 'ping', 'heartbeat']).default('http'),
-  endpoint: z.string().url('URL không hợp lệ'),
+  endpoint: z.string().min(1, 'Endpoint không được để trống'),
   method: z.enum(methodOptions as [string, ...string[]]).default('GET'),
   frequency: z.number().default(60),
   keyword: z.string().nullable().default(null),

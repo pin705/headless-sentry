@@ -1,3 +1,17 @@
+// Helper function to calculate average uptime
+function calculateAverageUptime(monitorReports: Array<{ uptimePercentage: string | number }>): string {
+  if (monitorReports.length === 0) {
+    return 'N/A'
+  }
+
+  const totalUptime = monitorReports.reduce((sum, m) => {
+    const uptime = typeof m.uptimePercentage === 'string' ? parseFloat(m.uptimePercentage) : m.uptimePercentage
+    return sum + (isNaN(uptime) ? 0 : uptime)
+  }, 0)
+
+  return (totalUptime / monitorReports.length).toFixed(2)
+}
+
 export default defineEventHandler(async (event) => {
   const project = await requireProjectMembership(event)
   const projectIdObj = project._id
@@ -86,9 +100,7 @@ export default defineEventHandler(async (event) => {
       monitors: monitorReports,
       summary: {
         totalMonitors: monitors.length,
-        avgUptimePercentage: monitorReports.length > 0
-          ? (monitorReports.reduce((sum, m) => sum + parseFloat(m.uptimePercentage as string || '0'), 0) / monitorReports.length).toFixed(2)
-          : 'N/A'
+        avgUptimePercentage: calculateAverageUptime(monitorReports)
       }
     }
   } catch (error) {

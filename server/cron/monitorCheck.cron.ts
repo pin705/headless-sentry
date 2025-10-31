@@ -10,7 +10,7 @@ export default defineCronHandler(
 
     // Lấy monitors đang active và các trường cần thiết
     const monitorsToRun = await Monitor.find({ status: 'ACTIVE' })
-      .select('endpoint method httpConfig projectId alertConfig name lastAlertedAt type keyword') // Thêm type và keyword
+      .select('endpoint method httpConfig projectId alertConfig name type keyword') // Thêm type và keyword
       .lean()
 
     if (monitorsToRun.length === 0) {
@@ -37,7 +37,7 @@ export default defineCronHandler(
           const latency = Math.round(res.time === 'unknown' ? 0 : parseFloat(res.time))
           const isUp = res.alive
 
-          if (monitor.alertConfig && canSendAlert(monitor.lastAlertedAt)) {
+          if (monitor.alertConfig && canSendAlert(monitor.alertConfig.lastAlertedAt)) {
             if (!isUp) {
               alertsToSend.push({ monitor, type: 'Downtime', details: `Không thể ping đến host ${hostname}` })
             }
@@ -52,7 +52,7 @@ export default defineCronHandler(
           const latency = Date.now() - startTime
           const errorMessage = error.message.substring(0, 500)
 
-          if (monitor.alertConfig && canSendAlert(monitor.lastAlertedAt)) {
+          if (monitor.alertConfig && canSendAlert(monitor.alertConfig.lastAlertedAt)) {
             alertsToSend.push({ monitor, type: 'Downtime', details: `Lỗi ping: ${errorMessage}` })
           }
 
@@ -125,7 +125,7 @@ export default defineCronHandler(
           // === KIỂM TRA ĐIỀU KIỆN CẢNH BÁO ===
           const alertConfig = monitor.alertConfig
 
-          if (alertConfig && canSendAlert(monitor.lastAlertedAt)) {
+          if (alertConfig && canSendAlert(monitor.alertConfig.lastAlertedAt)) {
             if (!isUp) { // Downtime (HTTP or Keyword failed)
               alertsToSend.push({ monitor, type: 'Downtime', details: `Dịch vụ không hoạt động (Status ${statusCode}). Lỗi: ${errorMessage?.substring(0, 100) || 'N/A'}` })
             } else if (alertConfig.latencyThreshold != null && latency > alertConfig.latencyThreshold) { // Latency (Kiểm tra != null)
@@ -149,7 +149,7 @@ export default defineCronHandler(
           // === KIỂM TRA CẢNH BÁO DOWNTIME (Do Lỗi Network) ===
           const alertConfig = monitor.alertConfig
 
-          if (alertConfig && canSendAlert(monitor.lastAlertedAt)) {
+          if (alertConfig && canSendAlert(monitor.alertConfig.lastAlertedAt)) {
             alertsToSend.push({ monitor, type: 'Downtime', details: `Không thể kết nối dịch vụ (Lỗi Network). ${errorMessage}` })
           }
           // =========================================================
