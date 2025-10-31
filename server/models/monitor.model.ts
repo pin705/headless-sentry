@@ -3,7 +3,7 @@ import type { Schema } from 'mongoose'
 
 const httpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
 const frequencies = [60, 300, 600, 1800, 3600] // 1m, 5m, 10m, 30m, 1h
-const monitorTypes = ['http', 'keyword', 'ping', 'heartbeat']
+const monitorTypes = ['http', 'keyword', 'ping', 'heartbeat', 'server']
 
 export const Monitor = defineMongooseModel('Monitor', {
   projectId: { type: 'ObjectId' as unknown as Schema.Types.ObjectId, ref: 'Project', required: true, index: true },
@@ -54,6 +54,15 @@ export const Monitor = defineMongooseModel('Monitor', {
     daysRemaining: { type: Number, default: null }, // Số ngày còn lại
     errorMessage: { type: String, default: null },
     lastCheckedAt: { type: Date, default: null } // Lần cuối kiểm tra SSL
+  },
+
+  // Server monitoring fields
+  serverConfig: {
+    agentVersion: { type: String, default: null },
+    hostname: { type: String, default: null },
+    cpuThreshold: { type: Number, default: 80 }, // Alert threshold for CPU usage (%)
+    memoryThreshold: { type: Number, default: 80 }, // Alert threshold for memory usage (%)
+    diskThreshold: { type: Number, default: 90 } // Alert threshold for disk usage (%)
   }
 
 }, {
