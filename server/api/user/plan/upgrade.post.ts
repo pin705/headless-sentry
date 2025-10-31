@@ -70,7 +70,7 @@ export default defineEventHandler(async (event) => {
         await user.save()
 
         // Create transaction record
-        await Transaction.create({
+        const transaction = await Transaction.create({
           userId,
           amount: price,
           type: 'plan_upgrade',
@@ -82,6 +82,42 @@ export default defineEventHandler(async (event) => {
           planAfter: body.targetPlan,
           note: `Nâng cấp lên gói ${body.targetPlan.toUpperCase()} bằng số dư tài khoản`
         })
+
+        // Send payment success email
+        try {
+          const config = useRuntimeConfig()
+          const { createPaymentSuccessTemplate, sendMail } = await import('~~/server/utils/sendMail')
+          const emailTemplate = createPaymentSuccessTemplate(
+            session.user.email,
+            transaction.amount,
+            transaction._id.toString(),
+            body.targetPlan,
+            user.planExpiresAt,
+            'vi' // Default to Vietnamese
+          )
+
+          await sendMail(
+            {
+              to: session.user.email,
+              from: config.email.from,
+              subject: emailTemplate.subject,
+              html: emailTemplate.html
+            },
+            {
+              host: config.email.host,
+              port: parseInt(config.email.port),
+              secure: config.email.secure,
+              auth: {
+                user: config.email.user,
+                pass: config.email.pass
+              }
+            }
+          )
+          console.log('Payment success email sent to:', session.user.email)
+        } catch (emailError) {
+          console.error('Failed to send payment email:', emailError)
+          // Don't throw error as the payment was successful
+        }
 
         return {
           success: true,

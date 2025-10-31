@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
         await user.save()
 
         // Create transaction record
-        await Transaction.create({
+        const transaction = await Transaction.create({
           userId: user._id,
           amount: amount * 25000, // Convert USD to VND (approximate)
           type: 'plan_upgrade',
@@ -67,6 +67,42 @@ export default defineEventHandler(async (event) => {
           externalData: data,
           note: 'Nâng cấp lên gói PRO qua Lemon Squeezy'
         })
+
+        // Send payment success email
+        try {
+          const config = useRuntimeConfig()
+          const { createPaymentSuccessTemplate, sendMail } = await import('~~/server/utils/sendMail')
+          const emailTemplate = createPaymentSuccessTemplate(
+            userEmail,
+            transaction.amount,
+            transaction._id.toString(),
+            'pro',
+            expirationDate,
+            'en' // Default to English for international payments
+          )
+
+          await sendMail(
+            {
+              to: userEmail,
+              from: config.email.from,
+              subject: emailTemplate.subject,
+              html: emailTemplate.html
+            },
+            {
+              host: config.email.host,
+              port: parseInt(config.email.port),
+              secure: config.email.secure,
+              auth: {
+                user: config.email.user,
+                pass: config.email.pass
+              }
+            }
+          )
+          console.log('Payment success email sent to:', userEmail)
+        } catch (emailError) {
+          console.error('Failed to send payment email:', emailError)
+          // Don't throw error as the payment was successful
+        }
 
         console.log('User upgraded to pro:', userEmail)
         break

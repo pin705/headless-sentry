@@ -8,7 +8,8 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     '@vite-pwa/nuxt',
     '@nuxt/ui',
-    'nuxt-cron'
+    'nuxt-cron',
+    '@nuxtjs/i18n'
   ],
 
   ssr: false,
@@ -71,5 +72,28 @@ export default defineNuxtConfig({
     uri: process.env.MONGODB_URI, // Chúng ta sẽ tạo file .env ngay sau đây
     // options: {},
     modelsDir: 'models'
+  },
+
+  i18n: {
+    locales: [
+      {
+        code: 'vi',
+        name: 'Tiếng Việt',
+        files: ['vi.json']
+      },
+      {
+        code: 'en',
+        name: 'English',
+        files: ['en.json']
+      }
+    ],
+    langDir: 'locales',
+    defaultLocale: 'vi',
+    strategy: 'no_prefix',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root'
+    }
   }
 })
