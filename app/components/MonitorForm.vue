@@ -50,26 +50,32 @@
                     <strong>HTTP:</strong> Kiểm tra endpoint API/Web qua HTTP/HTTPS<br>
                     <strong>Keyword:</strong> Kiểm tra xem trang web có chứa từ khóa cụ thể<br>
                     <strong>Ping:</strong> Kiểm tra kết nối mạng đến server (ICMP)<br>
-                    <strong>Heartbeat:</strong> Nhận tín hiệu từ cronjob/service của bạn
+                    <strong>Heartbeat:</strong> Nhận tín hiệu từ cronjob/service của bạn<br>
+                    <strong>Server:</strong> Giám sát tài nguyên server (CPU, RAM, Disk)
                   </div>
                 </template>
               </UFormField>
               <UFormField
-                :label="formState.type === 'heartbeat' ? 'Tên monitor (không cần URL)' : 'Endpoint URL'"
+                :label="formState.type === 'heartbeat' || formState.type === 'server' ? 'Tên monitor' : 'Endpoint URL'"
                 name="endpoint"
                 required
               >
                 <UInput
                   v-model="formState.endpoint"
-                  :type="formState.type === 'heartbeat' ? 'text' : 'url'"
-                  :placeholder="formState.type === 'heartbeat' ? 'backup-job' : 'https://your-api.com/endpoint'"
+                  :type="formState.type === 'heartbeat' || formState.type === 'server' ? 'text' : 'url'"
+                  :placeholder="formState.type === 'heartbeat' ? 'backup-job' : formState.type === 'server' ? 'production-server' : 'https://your-api.com/endpoint'"
                   class="w-full"
                 />
                 <template
-                  v-if="formState.type === 'heartbeat'"
+                  v-if="formState.type === 'heartbeat' || formState.type === 'server'"
                   #help
                 >
-                  URL ping sẽ được tạo tự động sau khi tạo monitor.
+                  <span v-if="formState.type === 'heartbeat'">
+                    URL ping sẽ được tạo tự động sau khi tạo monitor.
+                  </span>
+                  <span v-else-if="formState.type === 'server'">
+                    Tên server để dễ nhận diện. Agent sẽ được cấu hình để gửi metrics về monitor này.
+                  </span>
                 </template>
               </UFormField>
               <UFormField
@@ -120,6 +126,62 @@
                   Thời gian ân hạn sau khoảng dự kiến trước khi gửi cảnh báo (mặc định: 300 giây = 5 phút).
                 </template>
               </UFormField>
+              <div
+                v-if="formState.type === 'server'"
+                class="space-y-4"
+              >
+                <UAlert
+                  icon="i-lucide-info"
+                  color="primary"
+                  variant="soft"
+                  title="Cấu hình Agent"
+                  description="Sau khi tạo monitor, bạn cần cài đặt agent trên server của mình để gửi metrics. Xem hướng dẫn chi tiết trong tab 'Alerts'."
+                />
+                <div class="grid grid-cols-3 gap-4">
+                  <UFormField
+                    label="Ngưỡng CPU (%)"
+                    name="serverConfig.cpuThreshold"
+                  >
+                    <UInput
+                      v-model.number="formState.serverConfig.cpuThreshold"
+                      type="number"
+                      :min="1"
+                      :max="100"
+                      placeholder="80"
+                      class="w-full"
+                    />
+                  </UFormField>
+                  <UFormField
+                    label="Ngưỡng RAM (%)"
+                    name="serverConfig.memoryThreshold"
+                  >
+                    <UInput
+                      v-model.number="formState.serverConfig.memoryThreshold"
+                      type="number"
+                      :min="1"
+                      :max="100"
+                      placeholder="80"
+                      class="w-full"
+                    />
+                  </UFormField>
+                  <UFormField
+                    label="Ngưỡng Disk (%)"
+                    name="serverConfig.diskThreshold"
+                  >
+                    <UInput
+                      v-model.number="formState.serverConfig.diskThreshold"
+                      type="number"
+                      :min="1"
+                      :max="100"
+                      placeholder="90"
+                      class="w-full"
+                    />
+                  </UFormField>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  Cảnh báo sẽ được gửi khi bất kỳ metrics nào vượt quá ngưỡng đã cấu hình.
+                </p>
+              </div>
               <div class="grid grid-cols-2 gap-4">
                 <UFormField
                   v-if="formState.type === 'http'"
@@ -136,6 +198,7 @@
                   </template>
                 </UFormField>
                 <UFormField
+                  v-if="formState.type !== 'server'"
                   label="Tần suất"
                   name="frequency"
                   :class="formState.type === 'http' ? '' : 'col-span-2'"
@@ -150,6 +213,19 @@
                     Tần suất kiểm tra dịch vụ tự động
                   </template>
                 </UFormField>
+                <div
+                  v-if="formState.type === 'server'"
+                  class="col-span-2"
+                >
+                  <UAlert
+                    icon="i-lucide-info"
+                    color="neutral"
+                    variant="soft"
+                    title="Tần suất do Agent kiểm soát"
+                    description="Agent sẽ tự động gửi metrics theo khoảng thời gian được cấu hình trong biến môi trường REPORT_INTERVAL (mặc định: 60 giây)."
+                    :ui="{ description: 'text-xs' }"
+                  />
+                </div>
               </div>
             </div>
           </template>
@@ -382,7 +458,8 @@ const typeOptions = [
   { label: 'HTTP', value: 'http' },
   { label: 'Keyword', value: 'keyword' },
   { label: 'Ping', value: 'ping' },
-  { label: 'Heartbeat', value: 'heartbeat' }
+  { label: 'Heartbeat', value: 'heartbeat' },
+  { label: 'Server', value: 'server' }
 ]
 const frequencyOptions = [
   { label: 'Mỗi 1 phút', value: 60 },
@@ -397,10 +474,10 @@ const bodyTypeOptions = [
   { key: 'raw', label: 'Raw Text (text/plain)' }
 ]
 
-// (Nâng cấp) Zod Schema (Thêm alertConfig và type, keyword, heartbeat)
+// (Nâng cấp) Zod Schema (Thêm alertConfig và type, keyword, heartbeat, server)
 const formSchema = z.object({
   name: z.string().min(1, 'Tên không được để trống'),
-  type: z.enum(['http', 'keyword', 'ping', 'heartbeat']).default('http'),
+  type: z.enum(['http', 'keyword', 'ping', 'heartbeat', 'server']).default('http'),
   endpoint: z.string().min(1, 'Endpoint không được để trống'),
   method: z.enum(methodOptions as [string, ...string[]]).default('GET'),
   frequency: z.number().default(60),
@@ -413,6 +490,13 @@ const formSchema = z.object({
     body: z.string().nullable().default(null),
     bodyType: z.enum(['none', 'json', 'raw']).default('none')
   }).default({ headers: [], body: null, bodyType: 'none' }),
+
+  // Server monitoring configuration
+  serverConfig: z.object({
+    cpuThreshold: z.number().min(1).max(100).default(80),
+    memoryThreshold: z.number().min(1).max(100).default(80),
+    diskThreshold: z.number().min(1).max(100).default(90)
+  }).default({ cpuThreshold: 80, memoryThreshold: 80, diskThreshold: 90 }),
 
   // (MỚI) Zod Schema cho Cảnh báo
   alertConfig: z.object({
@@ -436,6 +520,7 @@ const defaultFormState: Schema = {
   expectedInterval: null,
   gracePeriod: 300,
   httpConfig: { headers: [], body: null, bodyType: 'none' },
+  serverConfig: { cpuThreshold: 80, memoryThreshold: 80, diskThreshold: 90 },
   alertConfig: { latencyThreshold: null, responseBodyCheck: null, errorRateThreshold: null, channels: [] }
 }
 const formState = reactive<Schema>({ ...JSON.parse(JSON.stringify(defaultFormState)) })
@@ -453,6 +538,7 @@ watch(() => props.monitor, (newMonitor) => {
     formState.expectedInterval = newMonitor.expectedInterval || null
     formState.gracePeriod = newMonitor.gracePeriod || 300
     formState.httpConfig = JSON.parse(JSON.stringify(newMonitor.httpConfig || defaultFormState.httpConfig))
+    formState.serverConfig = JSON.parse(JSON.stringify(newMonitor.serverConfig || defaultFormState.serverConfig))
     // (MỚI) Điền dữ liệu alertConfig
     formState.alertConfig = JSON.parse(JSON.stringify(newMonitor.alertConfig || defaultFormState.alertConfig))
   } else {

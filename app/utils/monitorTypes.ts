@@ -43,6 +43,14 @@ export const MONITOR_TYPES: Record<string, MonitorType> = {
     color: 'text-red-500',
     badgeColor: 'red',
     description: 'Nhận tín hiệu từ cronjob/service của bạn'
+  },
+  server: {
+    value: 'server',
+    label: 'Server',
+    icon: 'i-lucide-server',
+    color: 'text-orange-500',
+    badgeColor: 'orange',
+    description: 'Giám sát tài nguyên server (CPU, RAM, Disk)'
   }
 }
 
