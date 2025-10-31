@@ -6,6 +6,7 @@ defineProps<{
 }>()
 
 const { user, clear } = useUserSession()
+const { userData, formattedBalance, userPlan, isProUser } = useUserState()
 const colorMode = useColorMode()
 const appConfig = useAppConfig()
 
@@ -15,6 +16,10 @@ const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 const items = computed<DropdownMenuItem[][]>(() => ([
   [{
     slot: 'account' as const,
+    disabled: true
+  }],
+  [{
+    slot: 'balance' as const,
     disabled: true
   }],
   // --- PHẦN MỚI THÊM ---
@@ -155,12 +160,30 @@ const items = computed<DropdownMenuItem[][]>(() => ([
 
     <template #account>
       <div class="text-left">
-        <p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
           Đăng nhập với
         </p>
         <p class="truncate font-medium text-gray-900 dark:text-white">
           {{ user?.name || user?.email }}
         </p>
+      </div>
+    </template>
+
+    <template #balance>
+      <div class="px-2 py-3 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500 dark:text-gray-400">Số dư:</span>
+          <span class="font-semibold text-primary">{{ formattedBalance }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500 dark:text-gray-400">Gói:</span>
+          <UBadge 
+            :label="userPlan.toUpperCase()" 
+            :color="isProUser ? 'primary' : 'neutral'"
+            variant="soft"
+            size="xs"
+          />
+        </div>
       </div>
     </template>
 

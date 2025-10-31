@@ -195,6 +195,16 @@
 <script setup lang="ts">
 import { format } from 'date-fns'
 
+// SEO Metadata
+useHead({
+  title: 'Lịch sử thanh toán - Headless Sentry',
+  meta: [
+    { name: 'description', content: 'Xem lịch sử giao dịch và thanh toán của bạn trên Headless Sentry.' },
+    { property: 'og:title', content: 'Lịch sử thanh toán - Headless Sentry' },
+    { name: 'robots', content: 'noindex, nofollow' } // Private page
+  ]
+})
+
 const { t } = useI18n()
 const { user } = useUserSession()
 const route = useRoute()

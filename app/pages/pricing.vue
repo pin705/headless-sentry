@@ -380,6 +380,20 @@
 <script setup lang="ts">
 import { PLAN_FEATURES } from '~~/shared/constants/plans'
 
+// SEO Metadata
+useHead({
+  title: 'Bảng giá - Headless Sentry',
+  meta: [
+    { name: 'description', content: 'Xem bảng giá Headless Sentry. Gói miễn phí với tính năng cơ bản và gói Pro với tính năng nâng cao. Nâng cấp bất cứ lúc nào.' },
+    { property: 'og:title', content: 'Bảng giá - Headless Sentry' },
+    { property: 'og:description', content: 'Chọn gói phù hợp cho nhu cầu giám sát của bạn. Từ miễn phí đến Pro.' },
+    { property: 'og:type', content: 'website' },
+    { name: 'twitter:card', content: 'summary' },
+    { name: 'twitter:title', content: 'Bảng giá - Headless Sentry' },
+    { name: 'twitter:description', content: 'Gói miễn phí và Pro. Chọn gói phù hợp với bạn.' }
+  ]
+})
+
 const { t } = useI18n()
 const { user, fetch: refreshSession } = useUserSession()
 const toast = useToast()

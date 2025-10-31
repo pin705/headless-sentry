@@ -286,6 +286,13 @@ async function refreshProjects() {
 }
 
 useHead({
-  title: 'Quản lý Projects'
+  title: 'Quản lý Projects - Headless Sentry',
+  meta: [
+    { name: 'description', content: 'Quản lý các dự án giám sát uptime và hiệu năng của bạn. Tạo project mới, theo dõi monitors và xem báo cáo chi tiết.' },
+    { property: 'og:title', content: 'Quản lý Projects - Headless Sentry' },
+    { property: 'og:description', content: 'Dashboard quản lý dự án giám sát uptime và hiệu năng website, API.' },
+    { property: 'og:type', content: 'website' },
+    { name: 'robots', content: 'noindex, nofollow' } // Private dashboard
+  ]
 })
 </script>

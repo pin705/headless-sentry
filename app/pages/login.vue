@@ -21,8 +21,12 @@
               Headless Sentry
             </h1>
           </div>
-          <p class="text-xl text-gray-300 leading-relaxed">
+          <p class="text-xl text-gray-300 leading-relaxed mb-4">
             Giám sát Uptime, Hiệu năng API & SSL cho các dịch vụ Web hiện đại.
+          </p>
+          <p class="text-base text-gray-400">
+            Hệ thống giúp bạn theo dõi trạng thái hoạt động của website và API 24/7, 
+            phát hiện sự cố ngay lập tức, và cung cấp báo cáo chi tiết về hiệu năng.
           </p>
         </div>
 
@@ -39,7 +43,8 @@
                 Giám sát Thời gian thực
               </h3>
               <p class="text-sm text-gray-400">
-                Theo dõi Uptime, Latency và phát hiện lỗi ngay khi chúng xảy ra.
+                Theo dõi Uptime, Latency và phát hiện lỗi ngay khi chúng xảy ra. 
+                Nhận dữ liệu cập nhật mỗi phút để đảm bảo dịch vụ của bạn luôn hoạt động tốt.
               </p>
             </div>
           </div>
@@ -57,6 +62,7 @@
               </h3>
               <p class="text-sm text-gray-400">
                 Nhận thông báo qua Slack, Telegram, Webhook khi có sự cố hoặc hiệu năng giảm sút.
+                Không bỏ lỡ bất kỳ vấn đề quan trọng nào với hệ thống cảnh báo đa kênh.
               </p>
             </div>
           </div>
@@ -74,6 +80,25 @@
               </h3>
               <p class="text-sm text-gray-400">
                 Cảnh báo sớm khi chứng chỉ SSL sắp hết hạn hoặc gặp vấn đề.
+                Bảo vệ uy tín website và đảm bảo bảo mật cho người dùng của bạn.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all">
+            <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+              <UIcon
+                name="i-lucide-chart-line"
+                class="w-5 h-5 text-primary"
+              />
+            </div>
+            <div>
+              <h3 class="font-semibold text-white mb-1">
+                Báo cáo Chi tiết
+              </h3>
+              <p class="text-sm text-gray-400">
+                Xem báo cáo SLA, phân tích xu hướng hiệu năng và xuất dữ liệu để chia sẻ với team.
+                Dashboard trực quan giúp bạn hiểu rõ tình trạng hệ thống.
               </p>
             </div>
           </div>
@@ -196,6 +221,20 @@
 <script setup lang="ts">
 import { z } from 'zod'
 import type { FormSubmitEvent } from '#ui/types'
+
+// SEO Metadata
+useHead({
+  title: 'Đăng nhập - Headless Sentry',
+  meta: [
+    { name: 'description', content: 'Đăng nhập vào Headless Sentry để giám sát uptime, hiệu năng API và SSL của các dịch vụ web. Nhận cảnh báo realtime và theo dõi trạng thái hệ thống 24/7.' },
+    { property: 'og:title', content: 'Đăng nhập - Headless Sentry' },
+    { property: 'og:description', content: 'Đăng nhập vào Headless Sentry để giám sát uptime, hiệu năng API và SSL của các dịch vụ web.' },
+    { property: 'og:type', content: 'website' },
+    { name: 'twitter:card', content: 'summary' },
+    { name: 'twitter:title', content: 'Đăng nhập - Headless Sentry' },
+    { name: 'twitter:description', content: 'Đăng nhập để theo dõi uptime và hiệu năng dịch vụ web của bạn.' }
+  ]
+})
 
 const { fetch, openInPopup, user } = useUserSession()
 const toast = useToast()
