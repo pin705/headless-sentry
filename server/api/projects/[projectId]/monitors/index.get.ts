@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
         latestCheckedAt: '$latestResult.timestamp',
         creator: {
           email: '$creator.email',
-          avatar: '$creator.avatar'
+          avatarUrl: '$creator.avatarUrl'
         }
       } }
     ])

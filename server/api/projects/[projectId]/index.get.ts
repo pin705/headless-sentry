@@ -1,5 +1,3 @@
-// server/api/projects/[projectId].get.ts
-import mongoose from 'mongoose'
 import { getRequireUserSession, validateObjectId } from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
@@ -8,11 +6,8 @@ export default defineEventHandler(async (event) => {
   const projectIdObj = validateObjectId(projectId, 'Project ID')
 
   try {
-
     // Tìm project theo ID
     const project = await Project.findById(projectIdObj)
-      // Populate thông tin chi tiết owner (tùy chọn)
-      // .populate('ownerId', 'email avatar')
       .lean()
 
     if (!project) {

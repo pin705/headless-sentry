@@ -10,7 +10,7 @@ export default defineOAuthGoogleEventHandler({
         userId: user.id,
         email: user.email,
         name: user.name,
-        avatar: user?.picture
+        avatarUrl: user?.picture
       },
       loggedInAt: Date.now()
     })

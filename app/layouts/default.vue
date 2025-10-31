@@ -7,26 +7,22 @@ const links = computed(() => [
   [
     {
       label: 'Tổng quan',
-      icon: 'i-lucide-layout-dashboard',
       to: `/${selectedProject.value?._id || ''}`,
       exactActiveClass: 'text-primary-600 dark:text-primary-400'
     },
     {
       label: 'Giám sát',
-      icon: 'i-lucide-activity',
       to: `/${selectedProject.value?._id}/monitoring`,
       exactActiveClass: 'text-primary-600 dark:text-primary-400'
     },
     {
       label: 'Cấu hình Giám sát',
-      icon: 'i-lucide-settings',
       to: `/${selectedProject.value?._id}/monitoring/settings`,
       exactActiveClass: 'text-primary-600 dark:text-primary-400'
     },
     {
       label: 'Cấu hình Dự án',
-      icon: 'i-lucide-folder-cog',
-      to: `/${selectedProject.value?._id}/settings`,
+      to: `/${selectedProject.value?._id}/project-settings`,
       exactActiveClass: 'text-primary-600 dark:text-primary-400'
     }
   ]
@@ -35,7 +31,7 @@ const links = computed(() => [
 
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-950">
-    <UDashboardToolbar class="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+    <UDashboardToolbar class="border-none">
       <template #left>
         <ProjectSelector />
       </template>
@@ -45,7 +41,7 @@ const links = computed(() => [
       </template>
     </UDashboardToolbar>
 
-    <UDashboardToolbar class="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+    <UDashboardToolbar>
       <template #left>
         <UNavigationMenu
           :items="links"

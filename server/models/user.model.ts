@@ -8,7 +8,7 @@ export const User = defineMongooseModel(
 
     name: { type: String, required: true },
 
-    avatar: { type: String, default: '' },
+    avatarUrl: { type: String, default: '' },
 
     lastKnownIP: { type: String, default: '' },
     userAgent: { type: String, default: '' },

@@ -7,7 +7,7 @@ export interface User {
   id: number
   name: string
   email: string
-  avatar?: AvatarProps
+  avatarUrl?: AvatarProps
   status: UserStatus
   location: string
 }
@@ -25,7 +25,7 @@ export interface Member {
   name: string
   username: string
   role: 'member' | 'owner'
-  avatar: AvatarProps
+  avatarUrl: AvatarProps
 }
 
 export interface Stat {

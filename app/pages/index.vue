@@ -157,6 +157,42 @@
         </UCard>
       </div>
 
+      <UModal v-model:open="isDeleteModalOpen">
+        <template #header>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            Xác nhận Xóa Project
+          </h3>
+        </template>
+
+        <template #body>
+          <div class="space-y-2">
+            <p>
+              Bạn có chắc chắn muốn xóa Project <strong>{{ projectToDelete?.name }}</strong> không?
+            </p>
+            <p class="text-sm text-red-500 dark:text-red-400">
+              Tất cả Monitors và dữ liệu liên quan cũng sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác.
+            </p>
+          </div>
+        </template>
+
+        <template #footer>
+          <div class="flex justify-end gap-3">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              label="Hủy"
+              @click="isDeleteModalOpen = false"
+            />
+            <UButton
+              color="error"
+              label="Xác nhận"
+              :loading="deleteLoading"
+              @click="confirmDelete"
+            />
+          </div>
+        </template>
+      </UModal>
+
       <CreateProjectModal
         v-model="isCreateModalOpen"
         @created="onProjectCreated"
@@ -173,27 +209,18 @@ const toast = useToast()
 const { user: currentUser } = useUserSession()
 const { userProjects, loadingProjects, fetchUserProjects, selectProject, selectedProject } = useProjectState()
 console.log('currentUser', currentUser.value)
-// Fetch projects on mount
 onMounted(() => {
   fetchUserProjects()
 })
 
-// === CẬP NHẬT: Actions Logic (Dropdown) ===
 const getActionItems = (project: any): DropdownMenuItem[][] => {
   const isOwner = project.ownerId === currentUser.value?.userId
 
   const items: DropdownMenuItem[][] = [[
     {
-      label: 'Cài đặt chung',
-      // Sửa link trỏ đến trang chúng ta đã xây dựng
-      to: `/${project._id}/general`
-    },
-    {
-      label: 'Quản lý Thành viên',
-      // Sửa link trỏ đến trang chúng ta đã xây dựng
-      to: `/${project._id}/members`
+      label: 'Cấu hình Dự án',
+      to: `/${project._id}/project-settings`
     }
-    // Bạn có thể thêm link đến các trang setting khác ở đây
   ]]
 
   // Only Owner can delete
@@ -202,7 +229,7 @@ const getActionItems = (project: any): DropdownMenuItem[][] => {
       label: 'Xóa Project',
       icon: 'i-heroicons-trash-20-solid',
       labelClass: 'text-error-500 dark:text-error-400',
-      click: () => openDeleteModal(project)
+      onSelect: () => openDeleteModal(project)
     }])
   }
 

@@ -15,12 +15,14 @@ const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 
 const items = computed<DropdownMenuItem[][]>(() => ([
   [{
-    type: 'label',
-    label: user.value?.email,
-    avatar: {
-      src: user.value?.avatar || 'https://www.gravatar.com/avatar/?d=mp',
-      alt: 'User Avatar'
-    }
+    slot: 'account' as const,
+    disabled: true
+  }],
+  // --- PHẦN MỚI THÊM ---
+  [{
+    label: 'Cài đặt tài khoản',
+    icon: 'i-heroicons-cog-8-tooth',
+    to: '/profile' // Link đến trang profile
   }],
   [
     {
@@ -129,7 +131,6 @@ const items = computed<DropdownMenuItem[][]>(() => ([
     :items="items"
   >
     <UButton
-
       color="neutral"
       variant="ghost"
       block
@@ -139,11 +140,22 @@ const items = computed<DropdownMenuItem[][]>(() => ([
         trailingIcon: 'text-dimmed'
       }"
       :avatar="{
-        src: user?.avatar || 'https://www.gravatar.com/avatar/?d=mp',
+        src: user?.avatarUrl || 'https://i.pravatar.cc/150',
         alt: 'User Avatar',
         size: collapsed ? 'md' : 'sm'
       }"
     />
+
+    <template #account>
+      <div class="text-left">
+        <p>
+          Đăng nhập với
+        </p>
+        <p class="truncate font-medium text-gray-900 dark:text-white">
+          {{ user?.name || user?.email }}
+        </p>
+      </div>
+    </template>
 
     <!-- <template #locale>
       <div class="p-2">
