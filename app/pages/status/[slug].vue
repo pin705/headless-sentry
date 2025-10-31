@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-950 p-4 sm:p-8">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-4xl mx-auto">
       <header class="mb-8 text-center">
         <img
           v-if="data?.config?.logoUrl"
@@ -9,7 +9,7 @@
           class="h-12 mx-auto mb-4"
         >
         <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">
-          {{ data?.config?.title || 'Trạng thái Dịch vụ' }}
+          {{ data?.config?.title || t('status.title') }}
         </h1>
         <p
           v-if="overallStatus"
@@ -26,7 +26,7 @@
           v-if="lastUpdated"
           class="text-xs text-gray-500 dark:text-gray-400 mt-1"
         >
-          Cập nhật lần cuối: {{ lastUpdated }}
+          {{ t('status.lastUpdated') }}: {{ lastUpdated }}
         </p>
       </header>
 
@@ -44,39 +44,86 @@
         class="text-center py-10"
       >
         <p class="text-error-500">
-          {{ error.data?.message || 'Không thể tải trang trạng thái.' }}
+          {{ error.data?.message || t('status.error') }}
         </p>
       </div>
 
       <div
         v-else-if="data?.monitors"
-        class="space-y-3"
+        class="space-y-6"
       >
-        <UCard
-          v-for="monitor in data.monitors"
-          :key="monitor._id"
-          class="shadow-sm"
+        <!-- Monitor Status Cards -->
+        <div class="space-y-3">
+          <UCard
+            v-for="monitor in data.monitors"
+            :key="monitor._id"
+            class="shadow-sm"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <span class="font-medium text-gray-800 dark:text-gray-100">{{ monitor.name }}</span>
+              </div>
+              <UBadge
+                :color="statusMap[monitor.currentStatus]?.color || 'gray'"
+                variant="soft"
+                size="lg"
+              >
+                <UIcon
+                  :name="statusMap[monitor.currentStatus]?.icon || 'i-heroicons-question-mark-circle'"
+                  class="w-4 h-4 mr-1"
+                />
+                {{ statusMap[monitor.currentStatus]?.label || t('status.status.unknown') }}
+              </UBadge>
+            </div>
+          </UCard>
+        </div>
+
+        <!-- Additional Information Section -->
+        <div
+          v-if="data.monitors.length > 0"
+          class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800"
         >
-          <div class="flex items-center justify-between">
-            <span class="font-medium text-gray-800 dark:text-gray-100">{{ monitor.name }}</span>
-            <UBadge
-              :color="statusMap[monitor.currentStatus]?.color || 'gray'"
-              variant="soft"
-              size="lg"
-            >
-              <UIcon
-                :name="statusMap[monitor.currentStatus]?.icon || 'i-heroicons-question-mark-circle'"
-                class="w-4 h-4 mr-1"
-              />
-              {{ statusMap[monitor.currentStatus]?.label || 'Không rõ' }}
-            </UBadge>
+          <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+            {{ t('status.uptimeStats') }}
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <UCard class="shadow-sm">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-success-500">
+                  {{ calculateUptime(data.monitors) }}%
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {{ t('status.last30d') }}
+                </div>
+              </div>
+            </UCard>
+            <UCard class="shadow-sm">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-primary-500">
+                  {{ operationalCount }}/{{ data.monitors.length }}
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {{ t('status.status.operational') }}
+                </div>
+              </div>
+            </UCard>
+            <UCard class="shadow-sm">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                  {{ data.monitors.length }}
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {{ t('project.monitoring') }}
+                </div>
+              </div>
+            </UCard>
           </div>
-        </UCard>
+        </div>
       </div>
     </div>
 
     <footer class="mt-12 text-center text-xs text-gray-400">
-      Cung cấp bởi <a
+      {{ t('status.poweredBy') }} <a
         href="/"
         target="_blank"
         class="hover:underline text-primary-500"
@@ -86,31 +133,40 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-
-// (Mới) Định nghĩa map trạng thái
-const statusMap: Record<string, { label: string, color: string, icon: string }> = {
-  OPERATIONAL: { label: 'Hoạt động', color: 'success', icon: 'i-heroicons-check-circle-solid' },
-  OUTAGE: { label: 'Gián đoạn', color: 'error', icon: 'i-heroicons-exclamation-triangle-solid' },
-  MAINTENANCE: { label: 'Bảo trì', color: 'warning', icon: 'i-heroicons-wrench-solid' },
-  UNKNOWN: { label: 'Không rõ', color: 'neutral', icon: 'i-heroicons-question-mark-circle-solid' }
-}
-
 const route = useRoute()
 const slug = route.params.slug as string
+const { t } = useI18n()
 
-// API Call công khai
-const { data, pending, error } = await useFetch(`/api/public/status/${slug}`, {
-  lazy: true,
-  default: () => ({ config: null, monitors: [] })
+// Use the composable for status page logic
+const {
+  data,
+  pending,
+  error,
+  statusMap,
+  overallStatus,
+  lastUpdated,
+  pageTitle
+} = useStatusPage(slug)
+
+// Calculate operational count
+const operationalCount = computed(() => {
+  if (!data.value?.monitors) return 0
+  return data.value.monitors.filter(m => m.currentStatus === 'OPERATIONAL').length
 })
+
+// Calculate uptime percentage (simplified - assumes operational = uptime)
+const calculateUptime = (monitors: typeof data.value.monitors) => {
+  if (!monitors || monitors.length === 0) return 100
+  const operational = monitors.filter(m => m.currentStatus === 'OPERATIONAL').length
+  return ((operational / monitors.length) * 100).toFixed(1)
+}
 
 // Dynamic SEO based on status page data
 watchEffect(() => {
   if (data.value?.config) {
-    const title = `${data.value.config.title || 'Trạng thái Dịch vụ'} - Status Page`
-    const description = `Xem trạng thái hoạt động của ${data.value.config.title || 'dịch vụ'} theo thời gian thực. Kiểm tra uptime và hiệu năng của các dịch vụ.`
-    
+    const title = `${data.value.config.title || t('status.title')} - Status Page`
+    const description = `${t('status.title')} - ${data.value.config.title || t('common.appName')}`
+
     useHead({
       title,
       meta: [
@@ -121,41 +177,18 @@ watchEffect(() => {
         { name: 'twitter:card', content: 'summary' },
         { name: 'twitter:title', content: title },
         { name: 'twitter:description', content: description },
-        { name: 'robots', content: 'index, follow' } // Public page
+        { name: 'robots', content: 'index, follow' }
       ]
     })
   }
 })
 
-// (Mới) Tính toán trạng thái tổng thể
-const overallStatus = computed(() => {
-  if (!data.value?.monitors || data.value.monitors.length === 0) return null
-
-  const monitors = data.value.monitors
-  const hasOutage = monitors.some(m => m.currentStatus === 'OUTAGE')
-  const hasMaintenance = monitors.some(m => m.currentStatus === 'MAINTENANCE')
-
-  if (hasOutage) return { text: 'Một số dịch vụ đang gặp sự cố.', colorClass: 'text-error-500', icon: statusMap.OUTAGE.icon }
-  if (hasMaintenance) return { text: 'Một số dịch vụ đang bảo trì.', colorClass: 'text-warning-500', icon: statusMap.MAINTENANCE.icon }
-  return { text: 'Tất cả dịch vụ đang hoạt động.', colorClass: 'text-success-500', icon: statusMap.OPERATIONAL.icon }
-})
-
-// (Mới) Thời gian cập nhật cuối (dựa vào monitor mới nhất)
-const lastUpdated = computed(() => {
-  // Cần lấy timestamp mới nhất từ API /results hoặc /monitors
-  // Hiện tại chỉ là placeholder
-  return data.value?.monitors?.length > 0 ? formatTimeAgo(new Date()) : null
-})
-
-// Dùng layout trống
+// Use empty layout
 definePageMeta({
-  layout: false // Quan trọng: Không dùng layout mặc định có sidebar
+  layout: false
 })
 
 useHead({
-  // Cập nhật title khi có dữ liệu
-  title: computed(() => data.value?.config?.title || (pending.value ? 'Đang tải...' : 'Trang Trạng thái'))
-  // (Tùy chọn) Thêm link favicon từ config
-  // link: computed(() => data.value?.config?.logoUrl ? [{ rel: 'icon', href: data.value.config.logoUrl }] : []),
+  title: computed(() => pageTitle.value)
 })
 </script>
