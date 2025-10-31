@@ -68,12 +68,6 @@ export default defineNuxtConfig({
     }
   },
 
-  mongoose: {
-    uri: process.env.MONGODB_URI, // Chúng ta sẽ tạo file .env ngay sau đây
-    // options: {},
-    modelsDir: 'models'
-  },
-
   i18n: {
     locales: [
       {
@@ -87,7 +81,7 @@ export default defineNuxtConfig({
         files: ['en.json']
       }
     ],
-    langDir: 'locales',
+    // langDir: '/locales',
     defaultLocale: 'vi',
     strategy: 'no_prefix',
     detectBrowserLanguage: {
@@ -95,5 +89,11 @@ export default defineNuxtConfig({
       cookieKey: 'i18n_redirected',
       redirectOn: 'root'
     }
+  },
+
+  mongoose: {
+    uri: process.env.MONGODB_URI, // Chúng ta sẽ tạo file .env ngay sau đây
+    // options: {},
+    modelsDir: 'models'
   }
 })
