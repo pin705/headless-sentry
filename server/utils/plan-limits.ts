@@ -1,5 +1,8 @@
 import { getPlanLimits, type PlanType } from '~/shared/constants/plans'
 
+// Models (User, Project, Monitor) are auto-imported by nuxt-mongoose
+// See: https://github.com/nuxt-modules/mongoose
+
 /**
  * Check if user can create a new project based on their plan limits
  */

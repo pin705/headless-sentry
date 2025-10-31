@@ -2,6 +2,8 @@ import { z } from 'zod'
 import { getRequireUserSession, handleValidationError } from '~~/server/utils/validation'
 import { getPlanLimits } from '~/shared/constants/plans'
 
+// Models (User, Transaction) are auto-imported by nuxt-mongoose
+
 const upgradeSchema = z.object({
   targetPlan: z.enum(['pro']),
   paymentMethod: z.enum(['lemon_squeezy', 'sepay', 'balance']),

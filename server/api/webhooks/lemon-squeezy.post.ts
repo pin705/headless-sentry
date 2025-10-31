@@ -1,5 +1,6 @@
 // Webhook handler for Lemon Squeezy (International market)
 // Processes subscription and one-time payment events
+// Models (User, Transaction) are auto-imported by nuxt-mongoose
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

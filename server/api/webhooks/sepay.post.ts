@@ -1,5 +1,6 @@
 // Webhook handler for Sepay (Vietnam market)
 // Listens for bank account balance changes and processes recharge requests
+// Models (User, Transaction) are auto-imported by nuxt-mongoose
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
