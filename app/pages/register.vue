@@ -1,74 +1,103 @@
 <template>
   <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-    <div class="relative hidden lg:flex flex-col items-center justify-center p-12 bg-gray-900 text-white overflow-hidden">
+    <!-- Left side - Brand & Features -->
+    <div class="relative hidden lg:flex flex-col items-center justify-center p-12 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
+      <!-- Animated background elements -->
+      <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary rounded-full blur-3xl animate-pulse" />
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary-600 rounded-full blur-3xl animate-pulse delay-1000" />
+      </div>
+      
       <div class="relative z-10 w-full max-w-md">
-        <h1
-          class="text-5xl font-bold tracking-tighter text-primary"
-        >
-          Headless Sentry
-        </h1>
-        <p
-          class="mt-4 text-lg text-gray-300"
-        >
-          Giám sát Uptime, Hiệu năng API & SSL cho các dịch vụ Web hiện đại.
-        </p>
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
+              <UIcon name="i-lucide-activity" class="w-7 h-7 text-white" />
+            </div>
+            <h1 class="text-4xl font-bold tracking-tight">
+              Headless Sentry
+            </h1>
+          </div>
+          <p class="text-xl text-gray-300 leading-relaxed">
+            Giám sát Uptime, Hiệu năng API & SSL cho các dịch vụ Web hiện đại.
+          </p>
+        </div>
 
-        <div
-          class="mt-10 space-y-6 border-l-2 border-primary pl-6"
-        >
-          <div class="space-y-1">
-            <h3 class="font-semibold">
-              Giám sát Thời gian thực
-            </h3>
-            <p class="text-sm text-gray-400">
-              Theo dõi Uptime, Latency và phát hiện lỗi ngay khi chúng xảy ra.
-            </p>
+        <div class="mt-12 space-y-6">
+          <div class="flex gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all">
+            <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+              <UIcon name="i-lucide-zap" class="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 class="font-semibold text-white mb-1">
+                Bắt đầu Miễn phí
+              </h3>
+              <p class="text-sm text-gray-400">
+                Không cần thẻ tín dụng. Gói Free với đầy đủ tính năng cơ bản.
+              </p>
+            </div>
           </div>
-          <div class="space-y-1">
-            <h3 class="font-semibold">
-              Cảnh báo Thông minh
-            </h3>
-            <p class="text-sm text-gray-400">
-              Nhận thông báo qua Slack, Telegram..., Webhook khi có sự cố hoặc hiệu năng giảm sút.
-            </p>
+
+          <div class="flex gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all">
+            <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+              <UIcon name="i-lucide-gauge" class="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 class="font-semibold text-white mb-1">
+                Thiết lập trong 5 phút
+              </h3>
+              <p class="text-sm text-gray-400">
+                Giao diện đơn giản, dễ sử dụng. Bắt đầu giám sát ngay lập tức.
+              </p>
+            </div>
           </div>
-          <div class="space-y-1">
-            <h3 class="font-semibold">
-              Kiểm tra SSL Tự động
-            </h3>
-            <p class="text-sm text-gray-400">
-              Cảnh báo sớm khi chứng chỉ SSL sắp hết hạn hoặc gặp vấn đề.
-            </p>
+
+          <div class="flex gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all">
+            <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+              <UIcon name="i-lucide-trending-up" class="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 class="font-semibold text-white mb-1">
+                Nâng cấp Linh hoạt
+              </h3>
+              <p class="text-sm text-gray-400">
+                Nâng cấp lên gói Pro khi cần nhiều tính năng hơn.
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="flex items-center justify-center p-4 bg-white dark:bg-gray-950">
+    <!-- Right side - Register Form -->
+    <div class="flex items-center justify-center p-4 sm:p-8 bg-gray-50 dark:bg-gray-950">
       <UCard
-        class="w-full max-w-sm"
-        :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }"
+        class="w-full max-w-md shadow-xl"
+        :ui="{ 
+          ring: 'ring-1 ring-gray-200 dark:ring-gray-800', 
+          divide: 'divide-y divide-gray-100 dark:divide-gray-800',
+          body: { padding: 'p-6 sm:p-8' },
+          header: { padding: 'p-6 sm:p-8' },
+          footer: { padding: 'p-6 sm:p-8' }
+        }"
       >
         <template #header>
-          <h1
-            class="text-3xl font-bold"
-          >
-            Bắt đầu Giám sát
-          </h1>
-          <p
-            class="text-sm text-gray-500 dark:text-gray-400 mt-1"
-          >
-            Tạo tài khoản để theo dõi hiệu năng dịch vụ của bạn.
-          </p>
+          <div class="text-center lg:text-left">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+              Bắt đầu Miễn phí
+            </h1>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              Tạo tài khoản để theo dõi hiệu năng dịch vụ của bạn.
+            </p>
+          </div>
         </template>
 
-        <div
-          class="space-y-3"
-        >
+        <div class="space-y-3">
           <UButton
             block
             icon="i-simple-icons-google"
             label="Tiếp tục với Google"
+            size="lg"
             color="neutral"
             variant="outline"
             @click="() => {
@@ -79,6 +108,7 @@
             block
             icon="i-simple-icons-github"
             label="Tiếp tục với Github"
+            size="lg"
             color="neutral"
             variant="outline"
             @click="() => {
@@ -140,6 +170,7 @@
             type="submit"
             label="Tạo tài khoản"
             block
+            size="lg"
             :loading="isLoading"
             color="primary"
           />
