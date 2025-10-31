@@ -3,7 +3,7 @@
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  
+
   // TODO: Verify Lemon Squeezy webhook signature
   // const signature = getHeader(event, 'x-signature')
   // if (!verifyLemonSqueezySignature(signature, body)) {
@@ -30,41 +30,101 @@ export default defineEventHandler(async (event) => {
 
   try {
     const user = await User.findOne({ email: userEmail })
-    
+
     if (!user) {
       console.error('User not found:', userEmail)
       return { success: false, message: 'User not found' }
     }
 
+    const orderId = data.id
+    const amount = data.attributes?.total || 0
+
     switch (eventName) {
       case 'order_created':
-      case 'subscription_created':
+      case 'subscription_created': {
         // Upgrade user to pro plan
+        const previousPlan = user.plan
         user.plan = 'pro'
         // Set expiration date (e.g., 30 days from now)
         const expirationDate = new Date()
         expirationDate.setDate(expirationDate.getDate() + 30)
         user.planExpiresAt = expirationDate
         await user.save()
-        
+
+        // Create transaction record
+        await Transaction.create({
+          userId: user._id,
+          amount: amount * 25000, // Convert USD to VND (approximate)
+          type: 'plan_upgrade',
+          method: 'lemon_squeezy',
+          status: 'completed',
+          previousBalance: user.balance,
+          newBalance: user.balance,
+          planBefore: previousPlan,
+          planAfter: 'pro',
+          externalId: orderId,
+          externalData: data,
+          note: 'Nâng cấp lên gói PRO qua Lemon Squeezy'
+        })
+
         console.log('User upgraded to pro:', userEmail)
         break
-
+      }
       case 'subscription_cancelled':
-      case 'subscription_expired':
+      case 'subscription_expired': {
         // Downgrade user to free plan
+        const planBeforeDowngrade = user.plan
         user.plan = 'free'
         user.planExpiresAt = null
         await user.save()
-        
+
+        // Create transaction record for tracking
+        await Transaction.create({
+          userId: user._id,
+          amount: 0,
+          type: 'plan_upgrade',
+          method: 'lemon_squeezy',
+          status: 'completed',
+          previousBalance: user.balance,
+          newBalance: user.balance,
+          planBefore: planBeforeDowngrade,
+          planAfter: 'free',
+          externalId: orderId,
+          externalData: data,
+          note: eventName === 'subscription_cancelled'
+            ? 'Hủy đăng ký gói PRO'
+            : 'Gói PRO đã hết hạn'
+        })
+
         console.log('User downgraded to free:', userEmail)
         break
-
-      case 'subscription_updated':
+      }
+      case 'subscription_updated': {
         // Handle subscription updates (renewal, etc.)
-        // Update expiration date if needed
-        break
+        if (user.plan === 'pro' && user.planExpiresAt) {
+          // Extend expiration date by 30 days
+          const newExpiration = new Date(user.planExpiresAt)
+          newExpiration.setDate(newExpiration.getDate() + 30)
+          user.planExpiresAt = newExpiration
+          await user.save()
 
+          await Transaction.create({
+            userId: user._id,
+            amount: amount * 25000,
+            type: 'plan_renewal',
+            method: 'lemon_squeezy',
+            status: 'completed',
+            previousBalance: user.balance,
+            newBalance: user.balance,
+            planBefore: 'pro',
+            planAfter: 'pro',
+            externalId: orderId,
+            externalData: data,
+            note: 'Gia hạn gói PRO'
+          })
+        }
+        break
+      }
       default:
         console.log('Unhandled Lemon Squeezy event:', eventName)
     }

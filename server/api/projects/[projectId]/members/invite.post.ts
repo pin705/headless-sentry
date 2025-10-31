@@ -27,6 +27,17 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 409, message: 'Người dùng này đã là thành viên' })
   }
 
+  // Check plan limits before inviting member
+  const { canAddMember } = await import('~~/server/utils/plan-limits')
+  const limitCheck = await canAddMember(project._id.toString())
+
+  if (!limitCheck.allowed) {
+    throw createError({
+      statusCode: 403,
+      message: limitCheck.reason || 'Không thể mời thêm thành viên'
+    })
+  }
+
   // 3. Kiểm tra xem đã mời user này chưa (và xóa lời mời cũ nếu có)
   await Invitation.deleteMany({ projectId: project._id, email })
 
