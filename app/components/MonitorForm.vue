@@ -18,7 +18,7 @@
         @submit="onFormSubmit"
       >
         <UTabs :items="formTabs">
-          <template #basic="{ item }">
+          <template #basic>
             <div class="space-y-4 pt-4">
               <UFormField
                 label="Dịch Vụ"
@@ -32,19 +32,86 @@
                 />
               </UFormField>
               <UFormField
-                label="Endpoint URL"
+                label="Loại giám sát"
+                name="type"
+                required
+              >
+                <USelectMenu
+                  v-model="formState.type"
+                  :items="typeOptions"
+                  value-key="value"
+                  class="w-full"
+                />
+              </UFormField>
+              <UFormField
+                :label="formState.type === 'heartbeat' ? 'Tên monitor (không cần URL)' : 'Endpoint URL'"
                 name="endpoint"
                 required
               >
                 <UInput
                   v-model="formState.endpoint"
-                  type="url"
-                  placeholder="https://your-api.com/endpoint"
+                  :type="formState.type === 'heartbeat' ? 'text' : 'url'"
+                  :placeholder="formState.type === 'heartbeat' ? 'backup-job' : 'https://your-api.com/endpoint'"
                   class="w-full"
                 />
+                <template
+                  v-if="formState.type === 'heartbeat'"
+                  #help
+                >
+                  URL ping sẽ được tạo tự động sau khi tạo monitor.
+                </template>
+              </UFormField>
+              <UFormField
+                v-if="formState.type === 'keyword'"
+                label="Từ khóa"
+                name="keyword"
+                required
+              >
+                <UInput
+                  v-model="formState.keyword"
+                  placeholder="Nhập từ khóa cần tìm trong response"
+                  class="w-full"
+                />
+                <template #help>
+                  Hệ thống sẽ kiểm tra xem nội dung trang có chứa từ khóa này hay không.
+                </template>
+              </UFormField>
+              <UFormField
+                v-if="formState.type === 'heartbeat'"
+                label="Khoảng thời gian dự kiến (giây)"
+                name="expectedInterval"
+                required
+              >
+                <UInput
+                  v-model.number="formState.expectedInterval"
+                  type="number"
+                  :min="60"
+                  placeholder="86400"
+                  class="w-full"
+                />
+                <template #help>
+                  Khoảng thời gian dự kiến giữa các lần ping (ví dụ: 86400 = 24 giờ).
+                </template>
+              </UFormField>
+              <UFormField
+                v-if="formState.type === 'heartbeat'"
+                label="Thời gian ân hạn (giây)"
+                name="gracePeriod"
+              >
+                <UInput
+                  v-model.number="formState.gracePeriod"
+                  type="number"
+                  :min="0"
+                  placeholder="300"
+                  class="w-full"
+                />
+                <template #help>
+                  Thời gian ân hạn sau khoảng dự kiến trước khi gửi cảnh báo (mặc định: 300 giây = 5 phút).
+                </template>
               </UFormField>
               <div class="grid grid-cols-2 gap-4">
                 <UFormField
+                  v-if="formState.type === 'http'"
                   label="Method"
                   name="method"
                 >
@@ -57,6 +124,7 @@
                 <UFormField
                   label="Tần suất"
                   name="frequency"
+                  :class="formState.type === 'http' ? '' : 'col-span-2'"
                 >
                   <USelectMenu
                     v-model="formState.frequency"
@@ -69,7 +137,7 @@
             </div>
           </template>
 
-          <template #advanced="{ item }">
+          <template #advanced>
             <div class="space-y-4 pt-4">
               <UFormField
                 label="HTTP Headers"
@@ -136,7 +204,7 @@
             </div>
           </template>
 
-          <template #alerts="{ item }">
+          <template #alerts>
             <div class="space-y-4 pt-4">
               <UFormField
                 label="Ngưỡng độ trễ (Latency)"
@@ -259,6 +327,7 @@ import type { FormSubmitEvent } from '#ui/types'
 
 const props = defineProps<{
   modelValue: boolean // v-model:open
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   monitor: any | null // Monitor data để chỉnh sửa
 }>()
 
@@ -292,6 +361,12 @@ const formTabs = [
 
 // Các tùy chọn select
 const methodOptions = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
+const typeOptions = [
+  { label: 'HTTP', value: 'http' },
+  { label: 'Keyword', value: 'keyword' },
+  { label: 'Ping', value: 'ping' },
+  { label: 'Heartbeat', value: 'heartbeat' }
+]
 const frequencyOptions = [
   { label: 'Mỗi 1 phút', value: 60 },
   { label: 'Mỗi 5 phút', value: 300 },
@@ -305,12 +380,16 @@ const bodyTypeOptions = [
   { key: 'raw', label: 'Raw Text (text/plain)' }
 ]
 
-// (Nâng cấp) Zod Schema (Thêm alertConfig)
+// (Nâng cấp) Zod Schema (Thêm alertConfig và type, keyword, heartbeat)
 const formSchema = z.object({
   name: z.string().min(1, 'Tên không được để trống'),
-  endpoint: z.string().url('URL không hợp lệ'),
+  type: z.enum(['http', 'keyword', 'ping', 'heartbeat']).default('http'),
+  endpoint: z.string().min(1, 'Endpoint không được để trống'),
   method: z.enum(methodOptions as [string, ...string[]]).default('GET'),
   frequency: z.number().default(60),
+  keyword: z.string().nullable().default(null),
+  expectedInterval: z.number().min(60).nullable().default(null),
+  gracePeriod: z.number().min(0).nullable().default(300),
 
   httpConfig: z.object({
     headers: z.array(z.object({ key: z.string().min(1), value: z.string() })).default([]),
@@ -332,9 +411,13 @@ type Schema = z.output<typeof formSchema>
 // (Nâng cấp) State mặc định cho form
 const defaultFormState: Schema = {
   name: '',
+  type: 'http',
   endpoint: '',
   method: 'GET',
   frequency: 60,
+  keyword: null,
+  expectedInterval: null,
+  gracePeriod: 300,
   httpConfig: { headers: [], body: null, bodyType: 'none' },
   alertConfig: { latencyThreshold: null, responseBodyCheck: null, errorRateThreshold: null, channels: [] }
 }
@@ -345,9 +428,13 @@ watch(() => props.monitor, (newMonitor) => {
   if (isOpen.value && newMonitor) {
     // Chế độ Edit
     formState.name = newMonitor.name
+    formState.type = newMonitor.type || 'http'
     formState.endpoint = newMonitor.endpoint
     formState.method = newMonitor.method
     formState.frequency = newMonitor.frequency
+    formState.keyword = newMonitor.keyword || null
+    formState.expectedInterval = newMonitor.expectedInterval || null
+    formState.gracePeriod = newMonitor.gracePeriod || 300
     formState.httpConfig = JSON.parse(JSON.stringify(newMonitor.httpConfig || defaultFormState.httpConfig))
     // (MỚI) Điền dữ liệu alertConfig
     formState.alertConfig = JSON.parse(JSON.stringify(newMonitor.alertConfig || defaultFormState.alertConfig))
@@ -358,11 +445,19 @@ watch(() => props.monitor, (newMonitor) => {
 })
 
 // === Helper cho Form ===
-function addHeader() { formState.httpConfig.headers.push({ key: '', value: '' }) }
-function removeHeader(index: number) { formState.httpConfig.headers.splice(index, 1) }
+function addHeader() {
+  formState.httpConfig.headers.push({ key: '', value: '' })
+}
+function removeHeader(index: number) {
+  formState.httpConfig.headers.splice(index, 1)
+}
 // (MỚI)
-function addChannel() { formState.alertConfig.channels.push({ url: '' }) }
-function removeChannel(index: number) { formState.alertConfig.channels.splice(index, 1) }
+function addChannel() {
+  formState.alertConfig.channels.push({ url: '' })
+}
+function removeChannel(index: number) {
+  formState.alertConfig.channels.splice(index, 1)
+}
 
 // === Hàm Submit Form (Xử lý cả Create và Edit) ===
 async function onFormSubmit(event: FormSubmitEvent<Schema>) {
@@ -386,6 +481,7 @@ async function onFormSubmit(event: FormSubmitEvent<Schema>) {
 
     isOpen.value = false // Đóng modal
     emit('saved') // Báo cho trang index.vue biết để 'refresh'
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error('Lỗi khi submit form:', err)
     toast.add({ title: 'Lỗi', description: err.data?.message || 'Thao tác thất bại.', color: 'error' })

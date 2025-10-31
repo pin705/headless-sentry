@@ -1,5 +1,7 @@
 import { defineCronHandler } from '#nuxt/cron'
 import { canSendAlert, sendAlerts, updateLastAlertedAt } from '~~/server/utils/alerts'
+import { isInMaintenanceWindow } from '~~/server/utils/maintenanceWindow'
+import ping from 'ping'
 
 export default defineCronHandler(
   () => '*/1 * * * *', // Chạy mỗi phút
@@ -8,7 +10,7 @@ export default defineCronHandler(
 
     // Lấy monitors đang active và các trường cần thiết
     const monitorsToRun = await Monitor.find({ status: 'ACTIVE' })
-      .select('endpoint method httpConfig projectId alertConfig name lastAlertedAt') // Đã bao gồm projectId
+      .select('endpoint method httpConfig projectId alertConfig name type keyword') // Thêm type và keyword
       .lean()
 
     if (monitorsToRun.length === 0) {
@@ -16,14 +18,56 @@ export default defineCronHandler(
       return
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const alertsToSend: Array<{ monitor: any, type: string, details: string }> = []
     const monitorsToUpdateLastAlerted: string[] = []
 
-    const checkPromises = monitorsToRun.map((monitor) => {
+    const checkPromises = monitorsToRun.map(async (monitor) => {
       const startTime = Date.now()
+      const monitorType = monitor.type || 'http' // Default to http for backward compatibility
 
+      // Handle different monitor types
+      if (monitorType === 'ping') {
+        // Ping check
+        try {
+          const hostname = new URL(monitor.endpoint).hostname
+          const res = await ping.promise.probe(hostname, {
+            timeout: 10
+          })
+          const latency = Math.round(res.time === 'unknown' ? 0 : parseFloat(res.time))
+          const isUp = res.alive
+
+          if (monitor.alertConfig && canSendAlert(monitor.alertConfig.lastAlertedAt)) {
+            if (!isUp) {
+              alertsToSend.push({ monitor, type: 'Downtime', details: `Không thể ping đến host ${hostname}` })
+            }
+          }
+
+          return {
+            status: 'fulfilled',
+            value: { monitor, latency, statusCode: isUp ? 200 : 599, isUp, errorMessage: isUp ? null : `Ping failed to ${hostname}` }
+          }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+          const latency = Date.now() - startTime
+          const errorMessage = error.message.substring(0, 500)
+
+          if (monitor.alertConfig && canSendAlert(monitor.alertConfig.lastAlertedAt)) {
+            alertsToSend.push({ monitor, type: 'Downtime', details: `Lỗi ping: ${errorMessage}` })
+          }
+
+          return {
+            status: 'rejected',
+            value: { monitor, latency, statusCode: 599, isUp: false, errorMessage }
+          }
+        }
+      }
+
+      // HTTP and Keyword checks (both use fetch)
       // --- KHỞI TẠO VÀ ĐIỀN fetchOptions ---
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fetchOptions: any = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         method: monitor.method as any,
         timeout: 15000, // 15 giây timeout
         ignoreResponseError: true, // Rất quan trọng!
@@ -55,7 +99,7 @@ export default defineCronHandler(
         .then((response) => {
           let errorMessage: string | null = null
           let responseBodyString: string | null = null
-          const isUp = response.ok
+          let isUp = response.ok
           const latency = Date.now() - startTime
           const statusCode = response.status
 
@@ -64,16 +108,25 @@ export default defineCronHandler(
             responseBodyString = typeof response._data === 'object' ? JSON.stringify(response._data) : String(response._data)
           } catch { /* Bỏ qua nếu không đọc được body */ }
 
-          // Gán errorMessage nếu !isUp
-          if (!isUp) {
+          // Keyword check logic
+          if (monitorType === 'keyword' && monitor.keyword) {
+            const keywordFound = responseBodyString ? responseBodyString.includes(monitor.keyword) : false
+            if (!keywordFound) {
+              isUp = false
+              errorMessage = `Từ khóa "${monitor.keyword}" không được tìm thấy trong response`
+            }
+          }
+
+          // Gán errorMessage nếu !isUp (cho HTTP)
+          if (!isUp && !errorMessage) {
             errorMessage = responseBodyString || response.statusText || 'Lỗi HTTP không xác định'
           }
 
           // === KIỂM TRA ĐIỀU KIỆN CẢNH BÁO ===
           const alertConfig = monitor.alertConfig
 
-          if (alertConfig && canSendAlert(monitor.lastAlertedAt)) {
-            if (!isUp) { // Downtime (HTTP)
+          if (alertConfig && canSendAlert(monitor.alertConfig.lastAlertedAt)) {
+            if (!isUp) { // Downtime (HTTP or Keyword failed)
               alertsToSend.push({ monitor, type: 'Downtime', details: `Dịch vụ không hoạt động (Status ${statusCode}). Lỗi: ${errorMessage?.substring(0, 100) || 'N/A'}` })
             } else if (alertConfig.latencyThreshold != null && latency > alertConfig.latencyThreshold) { // Latency (Kiểm tra != null)
               alertsToSend.push({ monitor, type: 'Latency Cao', details: `Độ trễ ${latency}ms vượt ngưỡng ${alertConfig.latencyThreshold}ms.` })
@@ -96,7 +149,7 @@ export default defineCronHandler(
           // === KIỂM TRA CẢNH BÁO DOWNTIME (Do Lỗi Network) ===
           const alertConfig = monitor.alertConfig
 
-          if (alertConfig && canSendAlert(monitor.lastAlertedAt)) {
+          if (alertConfig && canSendAlert(monitor.alertConfig.lastAlertedAt)) {
             alertsToSend.push({ monitor, type: 'Downtime', details: `Không thể kết nối dịch vụ (Lỗi Network). ${errorMessage}` })
           }
           // =========================================================
@@ -111,10 +164,12 @@ export default defineCronHandler(
 
     // --- Chạy kiểm tra và Ghi Kết quả ---
     const results = await Promise.allSettled(checkPromises)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const resultsToInsert: any[] = []
     const timestamp = new Date()
 
     results.forEach((result) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let checkResultData: any
       if (result.status === 'fulfilled') {
         checkResultData = result.value.value
@@ -168,10 +223,23 @@ export default defineCronHandler(
     }
     console.log(`[Cron] Hoàn thành kiểm tra ${monitorsToRun.length} monitors. Đã ghi ${resultsToInsert.length} kết quả.`)
 
-    // --- GỬI CÁC CẢNH BÁO ---
+    // --- GỬI CÁC CẢNH BÁO (Kiểm tra Maintenance Window) ---
     if (alertsToSend.length > 0) {
-      await sendAlerts(alertsToSend)
-      await updateLastAlertedAt(monitorsToUpdateLastAlerted)
+      // Lọc alerts: không gửi nếu project đang trong maintenance window
+      const alertsToSendFiltered = []
+      for (const alert of alertsToSend) {
+        const inMaintenance = await isInMaintenanceWindow(alert.monitor.projectId)
+        if (!inMaintenance) {
+          alertsToSendFiltered.push(alert)
+        } else {
+          console.log(`[Cron] Bỏ qua cảnh báo cho monitor "${alert.monitor.name}" vì project đang trong maintenance window.`)
+        }
+      }
+
+      if (alertsToSendFiltered.length > 0) {
+        await sendAlerts(alertsToSendFiltered)
+        await updateLastAlertedAt(monitorsToUpdateLastAlerted)
+      }
     }
   }
 )
