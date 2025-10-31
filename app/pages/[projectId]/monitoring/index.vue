@@ -416,23 +416,6 @@ async function confirmDelete() {
   }
 }
 
-function getMonitorTypeLabel(type: string): string {
-  const labels: Record<string, string> = {
-    http: 'HTTP',
-    keyword: 'Keyword',
-    ping: 'Ping',
-    heartbeat: 'Heartbeat'
-  }
-  return labels[type] || type
-}
-
-function getMonitorTypeBadgeColor(type: string): string {
-  const colors: Record<string, string> = {
-    http: 'blue',
-    keyword: 'purple',
-    ping: 'green',
-    heartbeat: 'red'
-  }
-  return colors[type] || 'neutral'
-}
+// Import shared monitor type utilities
+const { getMonitorTypeLabel, getMonitorTypeBadgeColor } = await import('~/utils/monitorTypes')
 </script>

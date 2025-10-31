@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   const date24hAgo = subHours(now, 24) // Mốc 24 giờ trước
 
   try {
-    // === 1. Lấy trạng thái MỚI NHẤT của TẤT CẢ monitors (Giữ nguyên) ===
+    // === 1. Lấy trạng thái MỚI NHẤT của TẤT CẢ monitors và type ===
     const latestStatesPromise = Monitor.aggregate([
       { $match: { projectId: projectIdObjectId } },
       { $lookup: {
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
         ], as: 'latestResult'
       } },
       { $unwind: { path: '$latestResult', preserveNullAndEmptyArrays: true } },
-      { $project: { status: 1, isUp: '$latestResult.isUp' } }
+      { $project: { status: 1, type: 1, isUp: '$latestResult.isUp' } }
     ])
 
     // === 2. Lấy % Uptime và Latency trung bình trong 24h qua (Giữ nguyên) ===
@@ -87,21 +87,20 @@ export default defineEventHandler(async (event) => {
       recentAlertsPromise
     ])
 
-    // === Xử lý dữ liệu (Giữ nguyên phần đầu) ===
+    // === Xử lý dữ liệu ===
     const stats24h = stats24hArr[0] || { totalChecks: 0, totalUp: 0, avgLatency: 0 }
     const uptimePercent24h = (stats24h.totalChecks > 0) ? (stats24h.totalUp / stats24h.totalChecks) * 100 : 100
     let totalMonitors = 0, totalUp = 0, totalDown = 0, totalPaused = 0
+    
+    // Đếm monitors theo loại trong cùng một vòng lặp
+    const monitorsByType: Record<string, number> = {}
     latestStates.forEach((m) => {
       totalMonitors++
       if (m.status === 'PAUSED') totalPaused++
       else if (m.isUp === true) totalUp++
       else totalDown++
-    })
-
-    // === (MỚI) 6. Đếm monitors theo loại ===
-    const monitorsByType: Record<string, number> = {}
-    const monitors = await Monitor.find({ projectId: projectIdObjectId }).select('type').lean()
-    monitors.forEach((m) => {
+      
+      // Đếm theo type
       const type = m.type || 'http'
       monitorsByType[type] = (monitorsByType[type] || 0) + 1
     })

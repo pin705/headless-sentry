@@ -306,33 +306,6 @@ function getUptimeVariant(uptime: number): 'success' | 'warning' | 'error' {
   return 'error'
 }
 
-function getMonitorTypeIcon(type: string): string {
-  const icons: Record<string, string> = {
-    http: 'i-lucide-globe',
-    keyword: 'i-lucide-search',
-    ping: 'i-lucide-radar',
-    heartbeat: 'i-lucide-heart-pulse'
-  }
-  return icons[type] || 'i-lucide-activity'
-}
-
-function getMonitorTypeColor(type: string): string {
-  const colors: Record<string, string> = {
-    http: 'text-blue-500',
-    keyword: 'text-purple-500',
-    ping: 'text-green-500',
-    heartbeat: 'text-red-500'
-  }
-  return colors[type] || 'text-gray-500'
-}
-
-function getMonitorTypeLabel(type: string): string {
-  const labels: Record<string, string> = {
-    http: 'HTTP',
-    keyword: 'Keyword',
-    ping: 'Ping',
-    heartbeat: 'Heartbeat'
-  }
-  return labels[type] || type
-}
+// Import shared monitor type utilities
+const { getMonitorTypeIcon, getMonitorTypeColor, getMonitorTypeLabel } = await import('~/utils/monitorTypes')
 </script>
