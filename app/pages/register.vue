@@ -7,12 +7,15 @@
         <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary rounded-full blur-3xl animate-pulse" />
         <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary-600 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
-      
+
       <div class="relative z-10 w-full max-w-md">
         <div class="mb-8">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-              <UIcon name="i-lucide-activity" class="w-7 h-7 text-white" />
+              <UIcon
+                name="i-lucide-activity"
+                class="w-7 h-7 text-white"
+              />
             </div>
             <h1 class="text-4xl font-bold tracking-tight">
               Headless Sentry
@@ -26,7 +29,10 @@
         <div class="mt-12 space-y-6">
           <div class="flex gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all">
             <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-              <UIcon name="i-lucide-zap" class="w-5 h-5 text-primary" />
+              <UIcon
+                name="i-lucide-zap"
+                class="w-5 h-5 text-primary"
+              />
             </div>
             <div>
               <h3 class="font-semibold text-white mb-1">
@@ -40,7 +46,10 @@
 
           <div class="flex gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all">
             <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-              <UIcon name="i-lucide-gauge" class="w-5 h-5 text-primary" />
+              <UIcon
+                name="i-lucide-gauge"
+                class="w-5 h-5 text-primary"
+              />
             </div>
             <div>
               <h3 class="font-semibold text-white mb-1">
@@ -54,7 +63,10 @@
 
           <div class="flex gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all">
             <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-              <UIcon name="i-lucide-trending-up" class="w-5 h-5 text-primary" />
+              <UIcon
+                name="i-lucide-trending-up"
+                class="w-5 h-5 text-primary"
+              />
             </div>
             <div>
               <h3 class="font-semibold text-white mb-1">
@@ -73,8 +85,8 @@
     <div class="flex items-center justify-center p-4 sm:p-8 bg-gray-50 dark:bg-gray-950">
       <UCard
         class="w-full max-w-md shadow-xl"
-        :ui="{ 
-          ring: 'ring-1 ring-gray-200 dark:ring-gray-800', 
+        :ui="{
+          ring: 'ring-1 ring-gray-200 dark:ring-gray-800',
           divide: 'divide-y divide-gray-100 dark:divide-gray-800',
           body: { padding: 'p-6 sm:p-8' },
           header: { padding: 'p-6 sm:p-8' },

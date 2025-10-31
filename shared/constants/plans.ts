@@ -40,7 +40,7 @@ export const PLAN_FEATURES: Record<string, PlanDetails> = {
       { text: 'Trang Status Page', available: true },
       { text: 'Giám sát Heartbeat', available: false },
       { text: 'Tên miền tùy chỉnh (Status Page)', available: false },
-      { text: 'Kênh cảnh báo nâng cao (Slack, Webhook)', available: false },
+      { text: 'Kênh cảnh báo nâng cao (Slack, Webhook)', available: false }
     ]
   },
   pro: {
@@ -63,7 +63,7 @@ export const PLAN_FEATURES: Record<string, PlanDetails> = {
       { text: 'Trang Status Page', available: true },
       { text: 'Giám sát Heartbeat', available: true },
       { text: 'Tên miền tùy chỉnh (Status Page)', available: true },
-      { text: 'Kênh cảnh báo nâng cao (Slack, Webhook)', available: true },
+      { text: 'Kênh cảnh báo nâng cao (Slack, Webhook)', available: true }
     ]
   }
 }
@@ -80,7 +80,7 @@ export const PLAN_LIMITS = {
     hasStatusPage: true,
     hasHeartbeat: false,
     hasCustomDomain: false,
-    hasAdvancedAlerts: false,
+    hasAdvancedAlerts: false
   },
   pro: {
     maxProjects: 10,
@@ -92,7 +92,7 @@ export const PLAN_LIMITS = {
     hasStatusPage: true,
     hasHeartbeat: true,
     hasCustomDomain: true,
-    hasAdvancedAlerts: true,
+    hasAdvancedAlerts: true
   }
 }
 

@@ -1,19 +1,20 @@
 // Webhook handler for Sepay (Vietnam market)
 // Listens for bank account balance changes and processes recharge requests
+// Models (User, Transaction) are auto-imported by nuxt-mongoose
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  
+
   // Verify webhook signature or admin access
   const session = await getUserSession(event)
   const email = session.user?.email
-  
+
   // For now, only admin can trigger this endpoint manually
   // In production, you would verify Sepay webhook signature
   if (email !== process.env.ADMIN_EMAIL) {
-    return { 
-      success: false, 
-      message: 'Chỉ admin mới có quyền nạp tiền hoặc webhook không hợp lệ' 
+    return {
+      success: false,
+      message: 'Chỉ admin mới có quyền nạp tiền hoặc webhook không hợp lệ'
     }
   }
 
@@ -29,7 +30,7 @@ export default defineEventHandler(async (event) => {
   try {
     // Find user by email
     const user = await User.findOne({ email: userEmail })
-    
+
     if (!user) {
       throw createError({
         statusCode: 404,
@@ -42,16 +43,18 @@ export default defineEventHandler(async (event) => {
     user.balance = previousBalance + amount
     await user.save()
 
-    // TODO: Create transaction record for audit trail
-    // await Transaction.create({
-    //   userId: user._id,
-    //   amount,
-    //   method: method || 'sepay',
-    //   note: note || 'Nạp tiền qua Sepay',
-    //   previousBalance,
-    //   newBalance: user.balance,
-    //   status: 'completed'
-    // })
+    // Create transaction record for audit trail
+    await Transaction.create({
+      userId: user._id,
+      amount,
+      type: 'deposit',
+      method: method || 'sepay',
+      status: 'completed',
+      previousBalance,
+      newBalance: user.balance,
+      note: note || 'Nạp tiền qua Sepay',
+      metadata: { adminEmail: email }
+    })
 
     return {
       success: true,

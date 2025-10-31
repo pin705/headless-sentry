@@ -14,7 +14,6 @@ export default defineEventHandler(async (event) => {
   const projectIdObjectId = validateObjectId(projectId, 'Project ID')
 
   try {
-
     // Tìm người dùng và chỉ lấy trường statusPage
     const project = await Project.findById(projectIdObjectId)
       .select('statusPage') // Chỉ lấy field statusPage

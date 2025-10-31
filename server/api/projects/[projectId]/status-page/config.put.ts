@@ -13,7 +13,7 @@ const configSchema = z.object({
     .optional()
     .nullable(),
   title: z.string().min(1, 'Tiêu đề không được trống').default('Trạng thái Dịch vụ'),
-  logoUrl: z.string().url('URL logo không hợp lệ').nullable().default(null),
+  logoUrl: z.string().url('URL logo không hợp lệ').nullable().default(null)
 
   // (MỚI) Validation cho Custom Domain
   // customDomain: z.string()
